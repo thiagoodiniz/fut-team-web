@@ -40,6 +40,7 @@ export function LoginPage() {
       message.success('Login feito!')
 
       navigate('/app/home', { replace: true })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       message.error(err?.response?.data?.error ?? 'Erro ao fazer login')
     } finally {

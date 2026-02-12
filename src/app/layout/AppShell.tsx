@@ -8,6 +8,8 @@ import {
   SettingOutlined,
 } from '@ant-design/icons'
 
+import { PostHogPageviewTracker } from '../../components/PostHogPageviewTracker'
+
 import { AppHeader } from './AppHeader'
 import { useAppHeader } from '../hooks/useAppHeader'
 import { SeasonProvider } from '../contexts/SeasonContext'
@@ -47,6 +49,7 @@ export function AppShell() {
     <TeamProvider>
       <ThemeProvider>
         <SeasonProvider>
+          <PostHogPageviewTracker />
           <AppShellInner
             title={title}
             showBack={showBack}

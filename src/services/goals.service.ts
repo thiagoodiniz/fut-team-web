@@ -5,6 +5,7 @@ export type GoalDTO = {
   matchId: string
   playerId: string
   minute: number | null
+  ownGoal: boolean
   createdAt: string
   player: {
     id: string
@@ -18,13 +19,13 @@ export async function listMatchGoals(matchId: string) {
   return res.data.goals
 }
 
-export async function createGoal(
+export async function createGoals(
   matchId: string,
-  data: { playerId: string; minute?: number | null },
+  data: { playerId: string; goals: { minute?: number | null; ownGoal?: boolean }[] },
 ) {
   const res = await api.post(`/matches/${matchId}/goals`, {
     playerId: data.playerId,
-    minute: data.minute ?? null,
+    goals: data.goals,
   })
 
   return res.data

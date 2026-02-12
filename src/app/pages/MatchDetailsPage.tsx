@@ -1,8 +1,9 @@
 import React from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import {
   Button,
   Card,
+  Collapse,
   Divider,
   Empty,
   Space,
@@ -11,14 +12,19 @@ import {
   Typography,
   message,
   theme,
+  Input,
 } from 'antd'
-import { CalendarOutlined, EnvironmentOutlined } from '@ant-design/icons'
+import {
+  CalendarOutlined,
+  EnvironmentOutlined,
+  EditOutlined,
+} from '@ant-design/icons'
 
-import { getMatchById, type MatchDTO } from '../../services/matches.service'
+import { getMatchById, deleteMatch, type MatchDTO } from '../../services/matches.service'
 import {
   listMatchGoals,
   type GoalDTO,
-  createGoal,
+  createGoals,
   deleteGoal,
 } from '../../services/goals.service'
 import {
@@ -27,6 +33,8 @@ import {
   type PresenceDTO,
 } from '../../services/presences.service'
 import { AddGoalModal } from '../components/AddGoalModal'
+import { EditMatchModal } from '../components/EditMatchModal'
+import { useSeason } from '../contexts/SeasonContext'
 
 const { Title, Text } = Typography
 
@@ -38,29 +46,30 @@ function formatFullDate(iso: string) {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   })
-}
-
-type EditablePresence = PresenceDTO & {
-  _dirty?: boolean
 }
 
 export function MatchDetailsPage() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const { token } = theme.useToken()
+  const { isActiveSeason } = useSeason()
 
   const [loading, setLoading] = React.useState(true)
 
   const [match, setMatch] = React.useState<MatchDTO | null>(null)
   const [goals, setGoals] = React.useState<GoalDTO[]>([])
+  const [presences, setPresences] = React.useState<PresenceDTO[]>([])
+  const [presenceFilter, setPresenceFilter] = React.useState('')
 
   const [goalModalOpen, setGoalModalOpen] = React.useState(false)
+  const [editMatchModalOpen, setEditMatchModalOpen] = React.useState(false)
+
   const [creatingGoal, setCreatingGoal] = React.useState(false)
-
-  const [presences, setPresences] = React.useState<PresenceDTO[]>([])
-  const [editablePresences, setEditablePresences] = React.useState<EditablePresence[]>([])
-
-  const [savingPresences, setSavingPresences] = React.useState(false)
+  const [syncingPresences, setSyncingPresences] = React.useState(false)
+  const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
   async function load() {
     if (!id) return
@@ -76,14 +85,7 @@ export function MatchDetailsPage() {
 
       setMatch(matchData)
       setGoals(goalsData)
-
       setPresences(presencesData)
-      setEditablePresences(
-        presencesData.map((p) => ({
-          ...p,
-          _dirty: false,
-        })),
-      )
     } finally {
       setLoading(false)
     }
@@ -93,63 +95,77 @@ export function MatchDetailsPage() {
     load()
   }, [id])
 
-  function togglePresence(presenceId: string, value: boolean) {
-    setEditablePresences((prev) =>
-      prev.map((p) => {
-        if (p.id !== presenceId) return p
+  async function togglePresence(playerId: string, value: boolean) {
+    if (!id || !isActiveSeason) return
 
-        const original = presences.find((x) => x.id === presenceId)
-        const originalValue = original?.present ?? false
-
-        return {
-          ...p,
-          present: value,
-          _dirty: value !== originalValue,
-        }
-      }),
+    // Optimistic Update
+    const originalPresences = [...presences]
+    const updatedPresences = presences.map((p) =>
+      p.playerId === playerId ? { ...p, present: value } : p,
     )
-  }
+    setPresences(updatedPresences)
 
-  const hasPresenceChanges = editablePresences.some((p) => p._dirty)
-
-  const presentCount = editablePresences.filter((p) => p.present).length
-  const totalPlayers = editablePresences.length
-
-  async function onSavePresences() {
-    if (!id) return
-    if (!hasPresenceChanges) return
-
-    try {
-      setSavingPresences(true)
-
-      await updateMatchPresences(
-        id,
-        editablePresences.map((p) => ({
-          playerId: p.playerId,
-          present: p.present,
-        })),
-      )
-
-      message.success('Presenças salvas!')
-      await load()
-    } catch (err) {
-      console.error(err)
-      message.error('Erro ao salvar presenças')
-    } finally {
-      setSavingPresences(false)
+    // Clear existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
     }
+
+    // Set new timer
+    debounceTimerRef.current = setTimeout(async () => {
+      try {
+        setSyncingPresences(true)
+        // Send the full updated list
+        await updateMatchPresences(
+          id,
+          updatedPresences.map((p) => ({
+            playerId: p.playerId,
+            present: p.present,
+          })),
+        )
+        // message.success(value ? 'Presença confirmada' : 'Presença removida')
+      } catch (err) {
+        console.error(err)
+        message.error('Erro ao sincronizar presenças')
+        setPresences(originalPresences) // Revert on error
+      } finally {
+        setSyncingPresences(false)
+        debounceTimerRef.current = null
+      }
+    }, 800) // 800ms debounce
   }
 
-  function onResetPresences() {
-    setEditablePresences(
-      presences.map((p) => ({
-        ...p,
-        _dirty: false,
-      })),
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+    }
+  }, [])
+
+  const presentCount = presences.filter((p) => p.present).length
+  const totalPlayers = presences.length
+
+  const sortedPresences = [...presences].sort((a, b) => {
+    // 1. Presentes primeiro
+    if (a.present !== b.present) {
+      return a.present ? -1 : 1
+    }
+    // 2. Ordem alfabética
+    const nameA = (a.player.nickname || a.player.name).toLowerCase()
+    const nameB = (b.player.nickname || b.player.name).toLowerCase()
+    return nameA.localeCompare(nameB, 'pt-BR')
+  })
+
+  const filteredPresences = sortedPresences.filter(p => {
+    const search = presenceFilter.toLowerCase()
+    return (
+      p.player.name.toLowerCase().includes(search) ||
+      (p.player.nickname?.toLowerCase().includes(search) ?? false)
     )
-  }
+  })
 
-  const presentPlayersOptions = editablePresences
+  const presentPlayersOptions = presences
     .filter((p) => p.present)
     .map((p) => ({
       value: p.playerId,
@@ -157,22 +173,23 @@ export function MatchDetailsPage() {
     }))
     .sort((a, b) => a.label.localeCompare(b.label))
 
-  async function onCreateGoal(data: { playerId: string; minute: number | null }) {
-    if (!id) return
+  async function onCreateGoal(data: { playerId: string; goals: { minute?: number | null; ownGoal?: boolean }[] }) {
+    if (!id || !isActiveSeason) return
 
     try {
       setCreatingGoal(true)
-
-      await createGoal(id, {
+      await createGoals(id, {
         playerId: data.playerId,
-        minute: data.minute,
+        goals: data.goals,
       })
-
-      message.success('Gol adicionado!')
+      const count = data.goals.length
+      message.success(count > 1 ? `${count} gols adicionados!` : 'Gol adicionado!')
       setGoalModalOpen(false)
-
       const goalsData = await listMatchGoals(id)
       setGoals(goalsData)
+      // Refresh match to update score
+      const matchData = await getMatchById(id)
+      setMatch(matchData)
     } catch (err) {
       console.error(err)
       message.error('Erro ao adicionar gol')
@@ -202,6 +219,166 @@ export function MatchDetailsPage() {
   const opponent = match.opponent?.trim() || 'Sem adversário'
   const dateLabel = formatFullDate(match.date)
 
+  const collapseItems = [
+    {
+      key: 'presences',
+      label: (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <Text strong>Presenças</Text>
+          <Space size={8}>
+            {syncingPresences && <Text type="secondary" style={{ fontSize: 12 }}>Sincronizando...</Text>}
+            <Text type="secondary" style={{ fontSize: 13 }}>
+              {presentCount}/{totalPlayers}
+            </Text>
+          </Space>
+        </div>
+      ),
+      children: presences.length === 0 ? (
+        <Empty
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          description="Nenhuma presença registrada"
+        />
+      ) : (
+        <Space orientation="vertical" size={12} style={{ width: '100%' }}>
+          <Input.Search
+            placeholder="Filtrar por nome ou apelido"
+            allowClear
+            onChange={(e) => setPresenceFilter(e.target.value)}
+            style={{ width: '100%' }}
+          />
+
+          {filteredPresences.length === 0 ? (
+            <Empty description="Nenhum jogador encontrado" />
+          ) : (
+            <Space orientation="vertical" size={10} style={{ width: '100%' }}>
+              {filteredPresences.map((p) => (
+                <div
+                  key={p.playerId}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: 12,
+                    alignItems: 'center',
+                    padding: '10px 12px',
+                    borderRadius: 12,
+                    background: token.colorFillQuaternary,
+                    opacity: p.present ? 1 : 0.7,
+                  }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <Text strong style={{ display: 'block' }}>
+                      {p.player.nickname || p.player.name}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {p.player.name}
+                    </Text>
+                  </div>
+                  <Switch
+                    checked={p.present}
+                    disabled={!isActiveSeason}
+                    onChange={(val) => togglePresence(p.playerId, val)}
+                  />
+                </div>
+              ))}
+            </Space>
+          )}
+        </Space>
+      ),
+    },
+    {
+      key: 'goals',
+      label: (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text strong>Gols</Text>
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            {goals.length} gols
+          </Text>
+        </div>
+      ),
+      children: (
+        <Space orientation="vertical" size={12} style={{ width: '100%' }}>
+          {isActiveSeason && (
+            <Button
+              type="dashed"
+              block
+              onClick={() => setGoalModalOpen(true)}
+              disabled={presentPlayersOptions.length === 0}
+              icon={<EditOutlined />}
+            >
+              Adicionar gol
+            </Button>
+          )}
+
+          {goals.length === 0 ? (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="Nenhum gol registrado"
+            />
+          ) : (
+            <Space orientation="vertical" size={10} style={{ width: '100%' }}>
+              {goals.map((g) => (
+                <div
+                  key={g.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: 12,
+                    alignItems: 'center',
+                    padding: '10px 12px',
+                    borderRadius: 12,
+                    background: token.colorFillQuaternary,
+                  }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <Text strong style={{ display: 'block' }}>
+                      {g.player.nickname || g.player.name}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {g.player.name}
+                    </Text>
+                  </div>
+
+                  <Space size={6}>
+                    {g.ownGoal && (
+                      <Tag color="red" style={{ margin: 0, fontSize: 11 }}>Gol contra</Tag>
+                    )}
+                    <Tag style={{ margin: 0 }}>
+                      {g.minute !== null ? `${g.minute}'` : '—'}
+                    </Tag>
+
+                    {isActiveSeason && (
+                      <Button
+                        danger
+                        type="text"
+                        size="small"
+                        onClick={async () => {
+                          try {
+                            await deleteGoal(g.id)
+                            message.success('Gol removido')
+                            const goalsData = await listMatchGoals(id)
+                            setGoals(goalsData)
+                            // Refresh match for score
+                            const matchData = await getMatchById(id)
+                            setMatch(matchData)
+                          } catch (err) {
+                            console.error(err)
+                            message.error('Erro ao remover gol')
+                          }
+                        }}
+                      >
+                        Remover
+                      </Button>
+                    )}
+                  </Space>
+                </div>
+              ))}
+            </Space>
+          )}
+        </Space>
+      ),
+    },
+  ]
+
   return (
     <Space orientation="vertical" size={14} style={{ width: '100%' }}>
       {/* Card principal do jogo */}
@@ -215,10 +392,19 @@ export function MatchDetailsPage() {
               alignItems: 'flex-start',
             }}
           >
-            <div style={{ minWidth: 0 }}>
-              <Title level={4} style={{ margin: 0 }}>
-                {opponent}
-              </Title>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Title level={4} style={{ margin: 0 }}>
+                  {opponent}
+                </Title>
+                {isActiveSeason && (
+                  <Button
+                    type="text"
+                    icon={<EditOutlined />}
+                    onClick={() => setEditMatchModalOpen(true)}
+                  />
+                )}
+              </div>
 
               <Space size={10} style={{ marginTop: 6, flexWrap: 'wrap' }}>
                 <Text type="secondary">
@@ -256,166 +442,39 @@ export function MatchDetailsPage() {
         </Space>
       </Card>
 
-      {/* Presenças */}
-      <Card
-        title="Presenças"
-        extra={
-          <Space size={10}>
-            <Text type="secondary">
-              {presentCount}/{totalPlayers}
-            </Text>
+      <Collapse
+        items={collapseItems}
+        defaultActiveKey={['presences', 'goals']}
+        ghost
+        style={{ background: token.colorBgContainer, borderRadius: token.borderRadius }}
+      />
 
-            <Button
-              onClick={onResetPresences}
-              disabled={!hasPresenceChanges || savingPresences}
-            >
-              Desfazer
-            </Button>
+      <AddGoalModal
+        open={goalModalOpen}
+        loading={creatingGoal}
+        players={presentPlayersOptions}
+        maxGoals={match.ourScore}
+        currentGoalsCount={goals.filter(g => !g.ownGoal).length}
+        onCancel={() => setGoalModalOpen(false)}
+        onSubmit={onCreateGoal}
+      />
 
-            <Button
-              type="primary"
-              onClick={onSavePresences}
-              loading={savingPresences}
-              disabled={!hasPresenceChanges}
-            >
-              Salvar
-            </Button>
-          </Space>
-        }
-      >
-        {editablePresences.length === 0 ? (
-          <Empty
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description="Nenhuma presença registrada"
-          />
-        ) : (
-          <Space orientation="vertical" size={10} style={{ width: '100%' }}>
-            {editablePresences.map((p) => (
-              <div
-                key={p.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: 12,
-                  alignItems: 'center',
-                  padding: '10px 12px',
-                  borderRadius: 12,
-                  background: token.colorFillQuaternary,
-                  border: p._dirty
-                    ? `1px solid ${token.colorPrimaryBorder}`
-                    : `1px solid transparent`,
-                }}
-              >
-                <div style={{ minWidth: 0 }}>
-                  <Text strong style={{ display: 'block' }}>
-                    {p.player.nickname || p.player.name}
-                  </Text>
-
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    {p.player.name}
-                  </Text>
-                </div>
-
-                <Space size={10}>
-                  {p._dirty ? (
-                    <Tag color="processing" style={{ margin: 0 }}>
-                      Alterado
-                    </Tag>
-                  ) : null}
-
-                  <Switch
-                    checked={p.present}
-                    onChange={(val) => togglePresence(p.id, val)}
-                  />
-                </Space>
-              </div>
-            ))}
-          </Space>
-        )}
-      </Card>
-
-      {/* Gols */}
-      <Card
-        title="Gols"
-        extra={
-          <Button
-            type="primary"
-            onClick={() => setGoalModalOpen(true)}
-            disabled={presentPlayersOptions.length === 0}
-          >
-            Adicionar gol
-          </Button>
-        }
-      >
-        {goals.length === 0 ? (
-          <Empty
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description="Nenhum gol registrado"
-          />
-        ) : (
-          <Space orientation="vertical" size={10} style={{ width: '100%' }}>
-            {goals.map((g) => (
-              <div
-                key={g.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: 12,
-                  alignItems: 'center',
-                  padding: '10px 12px',
-                  borderRadius: 12,
-                  background: token.colorFillQuaternary,
-                }}
-              >
-                <div style={{ minWidth: 0 }}>
-                  <Text strong style={{ display: 'block' }}>
-                    {g.player.nickname || g.player.name}
-                  </Text>
-
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    {g.player.name}
-                  </Text>
-                </div>
-
-                <Space size={10}>
-                  <Tag style={{ margin: 0 }}>
-                    {g.minute !== null ? `${g.minute}'` : '—'}
-                  </Tag>
-
-                  <Button
-                    danger
-                    type="text"
-                    onClick={async () => {
-                      if (!id) return
-
-                      try {
-                        await deleteGoal(g.id)
-                        message.success('Gol removido')
-
-                        const goalsData = await listMatchGoals(id)
-                        setGoals(goalsData)
-                      } catch (err) {
-                        console.error(err)
-                        message.error('Erro ao remover gol')
-                      }
-                    }}
-                  >
-                    Remover
-                  </Button>
-                </Space>
-              </div>
-            ))}
-          </Space>
-        )}
-
-        <AddGoalModal
-          open={goalModalOpen}
-          loading={creatingGoal}
-          players={presentPlayersOptions}
-          onCancel={() => setGoalModalOpen(false)}
-          onSubmit={onCreateGoal}
-        />
-      </Card>
+      <EditMatchModal
+        open={editMatchModalOpen}
+        match={match}
+        onCancel={() => setEditMatchModalOpen(false)}
+        onSuccess={load}
+        onDelete={async () => {
+          try {
+            await deleteMatch(match.id)
+            message.success('Jogo removido!')
+            navigate('/app/matches')
+          } catch (err) {
+            console.error(err)
+            message.error('Erro ao remover jogo')
+          }
+        }}
+      />
     </Space>
   )
 }

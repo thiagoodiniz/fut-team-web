@@ -1,11 +1,344 @@
-import { Card } from 'antd'
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Card, Col, List, Progress, Row, Statistic, Tag, Typography, theme, Avatar, Button, Space } from 'antd'
+import {
+  TrophyOutlined,
+  FireOutlined,
+  CalendarOutlined,
+} from '@ant-design/icons'
+
+import { useSeason } from '../contexts/SeasonContext'
+import { useTeam } from '../contexts/TeamContext'
+import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
+
+const { Title, Text } = Typography
 
 export function HomePage() {
+  const navigate = useNavigate()
+  const { token } = theme.useToken()
+  const { season } = useSeason()
+  const { team } = useTeam()
+
+  const [loading, setLoading] = React.useState(true)
+  const [data, setData] = React.useState<DashboardStats | null>(null)
+
+  React.useEffect(() => {
+    async function load() {
+      try {
+        setLoading(true)
+        const stats = await getDashboardStats(season?.id)
+        setData(stats)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [season?.id])
+
+  if (loading || !data) {
+    return <Card loading />
+  }
+
+  const { summary, lastMatches, attendance } = data
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <Card title="Temporada ativa">Temporada 2026</Card>
-      <Card title="Próximo jogo">Sem jogos cadastrados</Card>
-      <Card title="Últimos jogos">Sem jogos cadastrados</Card>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, paddingBottom: 24 }}>
+      {/* Team ID */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8 }}>
+        <div
+          style={{
+            width: 64,
+            height: 64,
+            borderRadius: 16,
+            background: token.colorFillSecondary,
+            display: 'grid',
+            placeItems: 'center',
+            overflow: 'hidden',
+            border: `1px solid ${token.colorBorderSecondary}`
+          }}
+        >
+          {team?.logo ? (
+            <img src={team.logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          ) : (
+            <Title level={3} style={{ margin: 0, color: token.colorPrimary }}>{team?.name?.[0] || 'T'}</Title>
+          )}
+        </div>
+        <div>
+          <Title level={2} style={{ margin: 0 }}>{team?.name || 'Carregando...'}</Title>
+          <Text type="secondary">Temporada {season?.year}</Text>
+        </div>
+      </div>
+      {/* SECTION 1: Summary Cards */}
+      <div>
+        <Title level={4}>Resumo da Temporada</Title>
+        <Row gutter={[12, 12]}>
+          <Col xs={12} sm={6}>
+            <Card bordered={false} style={{ background: token.colorFillQuaternary }}>
+              <Statistic
+                title="Jogos"
+                value={summary.totalGames}
+                prefix={<CalendarOutlined />}
+              />
+            </Card>
+          </Col>
+          <Col xs={12} sm={6}>
+            <Card bordered={false} style={{ background: token.colorSuccessBg }}>
+              <Statistic
+                title="Vitórias"
+                value={summary.wins}
+                valueStyle={{ color: token.colorSuccessText }}
+                prefix={<TrophyOutlined />}
+              />
+            </Card>
+          </Col>
+          <Col xs={12} sm={6}>
+            <Card bordered={false} style={{ background: token.colorFillQuaternary }}>
+              <Statistic
+                title="Gols Pró"
+                value={summary.goalsFor}
+                prefix={<FireOutlined />}
+              />
+            </Card>
+          </Col>
+          <Col xs={12} sm={6}>
+            <Card bordered={false} style={{ background: token.colorFillQuaternary }}>
+              <Statistic
+                title="Aproveitamento"
+                value={summary.winRate}
+                suffix="%"
+                precision={0}
+                valueStyle={{
+                  color: summary.winRate >= 50 ? token.colorSuccessText : token.colorErrorText,
+                }}
+              />
+            </Card>
+          </Col>
+        </Row>
+      </div>
+
+      <Row gutter={[24, 24]}>
+        {/* SECTION 2: Last Matches */}
+        <Col xs={24} lg={12}>
+          <Card title="Últimos Jogos" bordered={false}>
+            <List
+              dataSource={lastMatches}
+              renderItem={(item) => {
+                const isWin = item.result === 'WIN'
+                const isLoss = item.result === 'LOSS'
+
+                // Use token colors instead of hardcoded
+                const bg = isWin
+                  ? token.colorSuccessBg
+                  : isLoss
+                    ? token.colorErrorBg
+                    : token.colorWarningBg
+
+                const border = isWin
+                  ? token.colorSuccessBorder
+                  : isLoss
+                    ? token.colorErrorBorder
+                    : token.colorWarningBorder
+
+                return (
+                  <List.Item
+                    style={{
+                      padding: '12px',
+                      marginBottom: 8,
+                      borderRadius: 8,
+                      background: bg,
+                      border: `1px solid ${border}`,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      gap: 8,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Text strong style={{ fontSize: 16 }}>
+                        {item.opponent}
+                      </Text>
+                      <Tag
+                        color={
+                          isWin
+                            ? 'success'
+                            : isLoss
+                              ? 'error'
+                              : 'warning'
+                        }
+                        style={{ fontSize: 14, fontWeight: 'bold', margin: 0 }}
+                      >
+                        {item.ourScore} x {item.theirScore}
+                      </Tag>
+                    </div>
+
+                    {item.scorers.length > 0 && (
+                      <div style={{ fontSize: 13, color: token.colorTextSecondary }}>
+                        ⚽ {item.scorers.join(', ')}
+                      </div>
+                    )}
+                  </List.Item>
+                )
+              }}
+            />
+          </Card>
+        </Col>
+
+        {/* SECTION 3: Attendance Ranking */}
+        <Col xs={24} lg={12}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {/* SECTION 3: Attendance Ranking */}
+            <Card
+              title="Frequência"
+              bordered={false}
+              extra={
+                <Button type="link" onClick={() => navigate('/app/ranking/attendance')}>
+                  Ver mais
+                </Button>
+              }
+            >
+              <List
+                dataSource={attendance.slice(0, 5)}
+                renderItem={(item, index) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      avatar={
+                        <Avatar
+                          src={item.photo ?? undefined}
+                          style={{
+                            backgroundColor:
+                              index === 0
+                                ? '#fadb14'
+                                : index === 1
+                                  ? '#d9d9d9'
+                                  : index === 2
+                                    ? '#d48806'
+                                    : token.colorPrimary,
+                          }}
+                        >
+                          {!item.photo && (item.nickname?.[0] || item.name[0])}
+                        </Avatar>
+                      }
+                      title={
+                        <Space direction="vertical" size={2}>
+                          <Text strong>{item.nickname || item.name}</Text>
+                          {item.lastMatch && (
+                            <Text type="secondary" style={{ fontSize: 11 }}>
+                              Último: {new Date(item.lastMatch.date).toLocaleDateString()}
+                            </Text>
+                          )}
+                        </Space>
+                      }
+                      description={
+                        <Progress
+                          percent={item.percentage}
+                          size="small"
+                          status="active"
+                          strokeColor={token.colorPrimary}
+                          showInfo={false}
+                        />
+                      }
+                    />
+                    <div style={{ textAlign: 'right', minWidth: 60 }}>
+                      <Text strong>{item.presentCount}</Text>
+                      <div style={{ fontSize: 12, color: token.colorTextSecondary }}>
+                        jogos
+                      </div>
+                    </div>
+                  </List.Item>
+                )}
+              />
+            </Card>
+
+            {/* SECTION 4: Top Scorers Ranking */}
+            <Card
+              title="Artilharia"
+              bordered={false}
+              extra={
+                <Button type="link" onClick={() => navigate('/app/ranking/scorers')}>
+                  Ver mais
+                </Button>
+              }
+            >
+              {data.topScorers.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: 20, color: token.colorTextSecondary }}>
+                  Nenhum gol marcado
+                </div>
+              ) : (
+                <List
+                  dataSource={data.topScorers.slice(0, 5)}
+                  renderItem={(item, index) => (
+                    <List.Item>
+                      <List.Item.Meta
+                        avatar={
+                          <Avatar
+                            src={item.photo ?? undefined}
+                            style={{
+                              backgroundColor:
+                                index === 0
+                                  ? '#fadb14'
+                                  : index === 1
+                                    ? '#d9d9d9'
+                                    : index === 2
+                                      ? '#d48806'
+                                      : token.colorPrimary,
+                            }}
+                          >
+                            {!item.photo && (item.nickname?.[0] || item.name[0])}
+                          </Avatar>
+                        }
+                        title={
+                          <Space direction="vertical" size={0}>
+                            <Text strong>{item.nickname || item.name}</Text>
+                            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                              {item.hatTricks > 0 && (
+                                <Tag color="gold" style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>
+                                  {item.hatTricks}🎩
+                                </Tag>
+                              )}
+                              {item.doubles > 0 && (
+                                <Tag color="blue" style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>
+                                  {item.doubles}⚽⚽
+                                </Tag>
+                              )}
+                              {item.maxStreak >= 2 && (
+                                <Tag color="orange" style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>
+                                  {item.maxStreak}🔥
+                                </Tag>
+                              )}
+                            </div>
+                          </Space>
+                        }
+                        description={
+                          item.lastGoal && (
+                            <Text type="secondary" style={{ fontSize: 11 }}>
+                              Último: {new Date(item.lastGoal.date).toLocaleDateString()}
+                            </Text>
+                          )
+                        }
+                      />
+                      <div style={{ textAlign: 'right', minWidth: 60 }}>
+                        <Text strong style={{ fontSize: 16 }}>{item.goals}</Text>
+                        <div style={{ fontSize: 12, color: token.colorTextSecondary }}>
+                          gols
+                        </div>
+                      </div>
+                    </List.Item>
+                  )}
+                />
+              )}
+            </Card>
+          </div>
+        </Col>
+      </Row>
     </div>
   )
 }

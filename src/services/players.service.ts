@@ -7,13 +7,15 @@ export interface PlayerDTO {
   nickname?: string | null
   position?: string | null
   number?: number | null
-  photo?: string
+  photo?: string | null
   active: boolean
 }
 
 // Listar todos os jogadores do time
-export async function listPlayers(): Promise<PlayerDTO[]> {
-  const response = await api.get<{ players: PlayerDTO[] }>('/players')
+export async function listPlayers(seasonId?: string): Promise<PlayerDTO[]> {
+  const response = await api.get<{ players: PlayerDTO[] }>('/players', {
+    params: { seasonId },
+  })
   return response.data.players
 }
 
@@ -23,6 +25,7 @@ export async function createPlayer(data: {
   nickname?: string
   position?: string
   number?: number
+  photo?: string | null
 }): Promise<PlayerDTO> {
   const response = await api.post<{ player: PlayerDTO }>('/players', data)
   return response.data.player
@@ -36,6 +39,7 @@ export async function updatePlayer(
     nickname?: string
     position?: string
     number?: number
+    photo?: string | null
     active?: boolean
   },
 ): Promise<PlayerDTO> {
@@ -46,4 +50,18 @@ export async function updatePlayer(
 // Deletar jogador (soft delete)
 export async function deletePlayer(playerId: string): Promise<void> {
   await api.delete(`/players/${playerId}`)
+}
+
+// Stats do jogador na temporada
+export type PlayerStats = {
+  presences: number
+  totalMatches: number
+  goals: number
+}
+
+export async function getPlayerStats(playerId: string, seasonId?: string): Promise<PlayerStats> {
+  const response = await api.get<{ stats: PlayerStats }>(`/players/${playerId}/stats`, {
+    params: { seasonId },
+  })
+  return response.data.stats
 }

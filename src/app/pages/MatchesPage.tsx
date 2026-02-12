@@ -1,8 +1,13 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, Empty, List, Space, Tag, Typography, theme } from 'antd'
-import { CalendarOutlined, EnvironmentOutlined } from '@ant-design/icons'
+import { Card, Empty, List, Space, Tag, Typography, theme, FloatButton, Input } from 'antd'
+import {
+  CalendarOutlined,
+  EnvironmentOutlined,
+  PlusOutlined,
+} from '@ant-design/icons'
 import { listMatches, type MatchDTO } from '../../services/matches.service'
+import { CreateMatchModal } from '../components/CreateMatchModal'
 
 const { Text, Title } = Typography
 
@@ -16,17 +21,24 @@ function formatMatchDate(iso: string) {
   })
 }
 
+import { useSeason } from '../contexts/SeasonContext'
+
 export function MatchesPage() {
   const navigate = useNavigate()
   const { token } = theme.useToken()
+  const { season, isActiveSeason } = useSeason()
 
-  const [loading, setLoading] = React.useState(true)
+  const [loading, setLoading] = React.useState(false)
   const [matches, setMatches] = React.useState<MatchDTO[]>([])
+  const [filter, setFilter] = React.useState('')
+  const [createModalOpen, setCreateModalOpen] = React.useState(false)
 
   async function load() {
+    if (!season) return
+
     try {
       setLoading(true)
-      const data = await listMatches()
+      const data = await listMatches(season.id)
       setMatches(data)
     } finally {
       setLoading(false)
@@ -35,13 +47,82 @@ export function MatchesPage() {
 
   React.useEffect(() => {
     load()
-  }, [])
+  }, [season])
+
+  const filteredMatches = matches.filter(match => {
+    const search = filter.toLowerCase()
+    return (
+      match.opponent?.toLowerCase().includes(search) ||
+      match.location?.toLowerCase().includes(search)
+    )
+  })
+
+  // Calculate summary stats based on ALL matches in the season (or filtered? user said "quantidade de jogos..." usually refers to the season context)
+  // I'll calculate based on the current list of matches (season context)
+  const stats = React.useMemo(() => {
+    return matches.reduce((acc, m) => {
+      acc.total++
+      acc.gf += m.ourScore
+      acc.ga += m.theirScore
+
+      if (m.ourScore > m.theirScore) acc.w++
+      else if (m.ourScore === m.theirScore) acc.d++
+      else acc.l++
+
+      return acc
+    }, { total: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0 })
+  }, [matches])
+
+  function getResultColor(our: number, their: number) {
+    if (our > their) return 'success'
+    if (our < their) return 'error'
+    return 'warning'
+  }
 
   return (
     <Space direction="vertical" size={14} style={{ width: '100%' }}>
-      <Title level={4} style={{ margin: 0 }}>
-        Jogos
-      </Title>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Title level={4} style={{ margin: 0 }}>
+          Jogos
+        </Title>
+      </div>
+
+      {/* Summary Stats Bar */}
+      <Card size="small" styles={{ body: { padding: '12px 16px' } }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px 8px' }}>
+          <div style={{ textAlign: 'center' }}>
+            <Text type="secondary" style={{ fontSize: 11, display: 'block', textTransform: 'uppercase' }}>Jogos</Text>
+            <Text strong style={{ fontSize: 18 }}>{stats.total}</Text>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <Text type="secondary" style={{ fontSize: 11, display: 'block', textTransform: 'uppercase' }}>Vitórias</Text>
+            <Text strong style={{ fontSize: 18, color: token.colorSuccess }}>{stats.w}</Text>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <Text type="secondary" style={{ fontSize: 11, display: 'block', textTransform: 'uppercase' }}>Empates</Text>
+            <Text strong style={{ fontSize: 18, color: token.colorWarning }}>{stats.d}</Text>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <Text type="secondary" style={{ fontSize: 11, display: 'block', textTransform: 'uppercase' }}>Derrotas</Text>
+            <Text strong style={{ fontSize: 18, color: token.colorError }}>{stats.l}</Text>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <Text type="secondary" style={{ fontSize: 11, display: 'block', textTransform: 'uppercase' }}>Gols Pró</Text>
+            <Text strong style={{ fontSize: 18 }}>{stats.gf}</Text>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <Text type="secondary" style={{ fontSize: 11, display: 'block', textTransform: 'uppercase' }}>Gols Sofr.</Text>
+            <Text strong style={{ fontSize: 18 }}>{stats.ga}</Text>
+          </div>
+        </div>
+      </Card>
+
+      <Input.Search
+        placeholder="Filtrar por nome ou local"
+        allowClear
+        onChange={(e) => setFilter(e.target.value)}
+        style={{ width: '100%' }}
+      />
 
       <Card
         styles={{
@@ -50,7 +131,7 @@ export function MatchesPage() {
       >
         <List
           loading={loading}
-          dataSource={matches}
+          dataSource={filteredMatches}
           locale={{
             emptyText: (
               <Empty
@@ -62,6 +143,7 @@ export function MatchesPage() {
           renderItem={(match) => {
             const opponent = match.opponent?.trim() || 'Sem adversário'
             const dateLabel = formatMatchDate(match.date)
+            const resultColor = getResultColor(match.ourScore, match.theirScore)
 
             return (
               <List.Item
@@ -107,13 +189,13 @@ export function MatchesPage() {
 
                     <div style={{ flexShrink: 0 }}>
                       <Tag
+                        color={resultColor}
                         style={{
                           margin: 0,
                           fontWeight: 700,
                           fontSize: 13,
                           padding: '2px 10px',
                           borderRadius: 999,
-                          borderColor: token.colorBorderSecondary,
                         }}
                       >
                         {match.ourScore} x {match.theirScore}
@@ -126,6 +208,24 @@ export function MatchesPage() {
           }}
         />
       </Card>
+
+      {isActiveSeason && (
+        <FloatButton
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => setCreateModalOpen(true)}
+          style={{
+            bottom: 88,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          }}
+        />
+      )}
+
+      <CreateMatchModal
+        open={createModalOpen}
+        onCancel={() => setCreateModalOpen(false)}
+        onSuccess={load}
+      />
     </Space>
   )
 }

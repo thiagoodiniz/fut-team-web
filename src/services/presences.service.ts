@@ -9,11 +9,11 @@ export type PlayerDTO = {
 }
 
 export type PresenceDTO = {
-  id: string
+  id?: string
   matchId: string
   playerId: string
   present: boolean
-  createdAt: string
+  createdAt?: string
   player: PlayerDTO
 }
 

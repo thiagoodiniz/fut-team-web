@@ -12,12 +12,15 @@ export function useAppHeader() {
 function getHeaderTitle(pathname: string) {
   if (pathname.startsWith('/app/matches/')) return 'Detalhes do jogo'
   if (pathname.startsWith('/app/matches')) return 'Jogos'
-  if (pathname.startsWith('/app/players')) return 'Players'
+  if (pathname.startsWith('/app/players')) return 'Jogadores'
   if (pathname.startsWith('/app/seasons')) return 'Temporadas'
+  if (pathname.startsWith('/app/ranking/scorers')) return 'Artilharia Completa'
+  if (pathname.startsWith('/app/ranking/attendance')) return 'Presença Completa'
   return 'Home'
 }
 
 function shouldShowBack(pathname: string) {
   if (pathname.startsWith('/app/matches/')) return true
+  if (pathname.startsWith('/app/ranking/')) return true
   return false
 }

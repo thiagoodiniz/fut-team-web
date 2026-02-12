@@ -1,7 +1,10 @@
 import { ArrowLeftOutlined, LogoutOutlined, MoreOutlined } from '@ant-design/icons'
-import { Button, Dropdown, Layout, theme, Typography } from 'antd'
+import { Button, Dropdown, Layout, theme, Typography, Select } from 'antd'
 import type { MenuProps } from 'antd'
 import { useNavigate } from 'react-router-dom'
+
+import { useSeason } from '../contexts/SeasonContext'
+import { useTeam } from '../contexts/TeamContext'
 
 const { Header } = Layout
 const { Title } = Typography
@@ -14,6 +17,8 @@ type AppHeaderProps = {
 export function AppHeader({ title, showBack = false }: AppHeaderProps) {
   const navigate = useNavigate()
   const { token } = theme.useToken()
+  const { season, seasons, setSeasonId } = useSeason()
+  const { team } = useTeam()
 
   function handleLogout() {
     localStorage.removeItem('token')
@@ -66,17 +71,24 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
         ) : (
           <div
             style={{
-              width: 40,
-              height: 40,
-              borderRadius: 12,
-              background: token.colorPrimaryBg,
-              display: 'grid',
-              placeItems: 'center',
+              width: 38,
+              height: 38,
+              borderRadius: 10,
+              background: token.colorFillSecondary,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               fontWeight: 900,
               color: token.colorPrimary,
+              overflow: 'hidden',
+              boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.05)',
             }}
           >
-            FT
+            {team?.logo ? (
+              <img src={team.logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 2 }} />
+            ) : (
+              <span style={{ fontSize: 16 }}>FT</span>
+            )}
           </div>
         )}
 
@@ -94,18 +106,32 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
       </div>
 
       {/* RIGHT */}
-      <Dropdown menu={{ items }} trigger={['click']} placement="bottomRight">
-        <Button
-          type="text"
-          icon={<MoreOutlined />}
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
-            color: token.colorTextSecondary,
-          }}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Select
+          value={season?.id}
+          onChange={setSeasonId}
+          options={seasons.map((s) => ({
+            label: s.year.toString(),
+            value: s.id,
+          }))}
+          size="small"
+          style={{ width: 80 }}
+          variant="filled"
         />
-      </Dropdown>
+
+        <Dropdown menu={{ items }} trigger={['click']} placement="bottomRight">
+          <Button
+            type="text"
+            icon={<MoreOutlined />}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              color: token.colorTextSecondary,
+            }}
+          />
+        </Dropdown>
+      </div>
     </Header>
   )
 }

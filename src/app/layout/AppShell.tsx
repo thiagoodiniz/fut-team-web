@@ -5,28 +5,29 @@ import {
   HomeOutlined,
   CalendarOutlined,
   TeamOutlined,
-  TrophyOutlined,
+  SettingOutlined,
 } from '@ant-design/icons'
 
 import { AppHeader } from './AppHeader'
 import { useAppHeader } from '../hooks/useAppHeader'
+import { SeasonProvider } from '../contexts/SeasonContext'
+import { TeamProvider } from '../contexts/TeamContext'
+import { ThemeProvider } from '../../theme/ThemeProvider'
 
 const { Content } = Layout
 
-type TabKey = 'home' | 'matches' | 'players' | 'seasons'
+type TabKey = 'home' | 'matches' | 'players' | 'team'
 
 function getActiveTab(pathname: string): TabKey {
   if (pathname.startsWith('/app/matches')) return 'matches'
   if (pathname.startsWith('/app/players')) return 'players'
-  if (pathname.startsWith('/app/seasons')) return 'seasons'
+  if (pathname.startsWith('/app/team')) return 'team'
   return 'home'
 }
 
 export function AppShell() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { token } = theme.useToken()
-
   const { title, showBack } = useAppHeader()
 
   const activeTab = getActiveTab(location.pathname)
@@ -34,6 +35,35 @@ export function AppShell() {
   function onTabClick(key: TabKey) {
     navigate(`/app/${key}`)
   }
+
+  return (
+    <TeamProvider>
+      <ThemeProvider>
+        <SeasonProvider>
+          <AppShellInner
+            title={title}
+            showBack={showBack}
+            activeTab={activeTab}
+            onTabClick={onTabClick}
+          />
+        </SeasonProvider>
+      </ThemeProvider>
+    </TeamProvider>
+  )
+}
+
+function AppShellInner({
+  title,
+  showBack,
+  activeTab,
+  onTabClick
+}: {
+  title: string,
+  showBack: boolean,
+  activeTab: TabKey,
+  onTabClick: (key: TabKey) => void
+}) {
+  const { token } = theme.useToken()
 
   return (
     <Layout style={{ minHeight: '100dvh', background: token.colorBgLayout }}>
@@ -96,16 +126,16 @@ function BottomTabs({
       <TabButton
         active={activeTab === 'players'}
         icon={<TeamOutlined style={{ fontSize: 20 }} />}
-        label="Players"
+        label="Jogadores"
         onClick={() => onTabClick('players')}
         token={token}
       />
 
       <TabButton
-        active={activeTab === 'seasons'}
-        icon={<TrophyOutlined style={{ fontSize: 20 }} />}
-        label="Temporada"
-        onClick={() => onTabClick('seasons')}
+        active={activeTab === 'team'}
+        icon={<SettingOutlined style={{ fontSize: 20 }} />}
+        label="Meu time"
+        onClick={() => onTabClick('team')}
         token={token}
       />
     </nav>

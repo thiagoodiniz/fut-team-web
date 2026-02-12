@@ -13,6 +13,7 @@ export interface DashboardStats {
     lastMatches: {
         id: string
         date: string
+        location: string | null
         opponent: string
         ourScore: number
         theirScore: number

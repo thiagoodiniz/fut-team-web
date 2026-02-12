@@ -5,6 +5,7 @@ import {
   TrophyOutlined,
   FireOutlined,
   CalendarOutlined,
+  EnvironmentOutlined,
 } from '@ant-design/icons'
 
 import { useSeason } from '../contexts/SeasonContext'
@@ -179,6 +180,17 @@ export function HomePage() {
                         {item.ourScore} x {item.theirScore}
                       </Tag>
                     </div>
+
+                    <Space size={10} style={{ marginTop: 0 }}>
+                      <Text type="secondary" style={{ fontSize: 12 }}>
+                        <CalendarOutlined /> {new Date(item.date).toLocaleDateString()}
+                      </Text>
+                      {item.location && (
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          <EnvironmentOutlined /> {item.location}
+                        </Text>
+                      )}
+                    </Space>
 
                     {item.scorers.length > 0 && (
                       <div style={{ fontSize: 13, color: token.colorTextSecondary }}>

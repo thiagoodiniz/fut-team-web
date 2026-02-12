@@ -51,7 +51,11 @@ export function MatchesPage() {
     load()
   }, [season])
 
-  const filteredMatches = matches.filter(match => {
+  const sortedMatches = React.useMemo(() => {
+    return [...matches].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  }, [matches])
+
+  const filteredMatches = sortedMatches.filter(match => {
     const search = filter.toLowerCase()
     return (
       match.opponent?.toLowerCase().includes(search) ||
@@ -59,8 +63,27 @@ export function MatchesPage() {
     )
   })
 
-  // Calculate summary stats based on ALL matches in the season (or filtered? user said "quantidade de jogos..." usually refers to the season context)
-  // I'll calculate based on the current list of matches (season context)
+  // Group matches by month
+  const groupedMatches = React.useMemo(() => {
+    const groups: { monthYear: string; data: MatchDTO[] }[] = []
+
+    filteredMatches.forEach(match => {
+      const date = new Date(match.date)
+      const label = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+      const monthYear = label.charAt(0).toUpperCase() + label.slice(1)
+
+      const existingGroup = groups.find(g => g.monthYear === monthYear)
+      if (existingGroup) {
+        existingGroup.data.push(match)
+      } else {
+        groups.push({ monthYear, data: [match] })
+      }
+    })
+
+    return groups
+  }, [filteredMatches])
+
+  // Calculate summary stats based on ALL matches in the season
   const stats = React.useMemo(() => {
     return matches.reduce((acc, m) => {
       acc.total++
@@ -126,90 +149,117 @@ export function MatchesPage() {
         style={{ width: '100%' }}
       />
 
-      <Card
-        styles={{
-          body: { padding: 0 },
-        }}
-      >
-        <List
-          loading={loading}
-          dataSource={filteredMatches}
-          locale={{
-            emptyText: (
-              <Empty
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                description="Nenhum jogo cadastrado ainda"
-              />
-            ),
-          }}
-          renderItem={(match) => {
-            const opponent = match.opponent?.trim() || 'Sem adversário'
-            const dateLabel = formatMatchDate(match.date)
-            const resultColor = getResultColor(match.ourScore, match.theirScore)
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        {loading ? (
+          <Card loading />
+        ) : groupedMatches.length === 0 ? (
+          <Card>
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="Nenhum jogo cadastrado ainda"
+            />
+          </Card>
+        ) : (
+          groupedMatches.map((group) => (
+            <div key={group.monthYear}>
+              <div style={{
+                marginBottom: 12,
+                padding: '0 4px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8
+              }}>
+                <div style={{
+                  width: 4,
+                  height: 16,
+                  backgroundColor: token.colorPrimary,
+                  borderRadius: 2
+                }} />
+                <Text strong style={{
+                  fontSize: 14,
+                  color: token.colorTextSecondary,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  {group.monthYear}
+                </Text>
+              </div>
 
-            return (
-              <List.Item
-                style={{
-                  padding: 14,
-                  cursor: 'pointer',
-                }}
-                onClick={() => navigate(`/app/matches/${match.id}`)}
-              >
-                <div style={{ width: '100%' }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      gap: 12,
-                      alignItems: 'flex-start',
-                    }}
-                  >
-                    <div style={{ minWidth: 0 }}>
-                      <Text
-                        strong
+              <Card styles={{ body: { padding: 0 } }}>
+                <List
+                  dataSource={group.data}
+                  renderItem={(match) => {
+                    const opponent = match.opponent?.trim() || 'Sem adversário'
+                    const dateLabel = formatMatchDate(match.date)
+                    const resultColor = getResultColor(match.ourScore, match.theirScore)
+
+                    return (
+                      <List.Item
                         style={{
-                          display: 'block',
-                          fontSize: 15,
-                          lineHeight: 1.2,
+                          padding: 14,
+                          cursor: 'pointer',
                         }}
+                        onClick={() => navigate(`/app/matches/${match.id}`)}
                       >
-                        {opponent}
-                      </Text>
+                        <div style={{ width: '100%' }}>
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              gap: 12,
+                              alignItems: 'flex-start',
+                            }}
+                          >
+                            <div style={{ minWidth: 0 }}>
+                              <Text
+                                strong
+                                style={{
+                                  display: 'block',
+                                  fontSize: 15,
+                                  lineHeight: 1.2,
+                                }}
+                              >
+                                {opponent}
+                              </Text>
 
-                      <Space size={10} style={{ marginTop: 6 }}>
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                          <CalendarOutlined /> {dateLabel}
-                        </Text>
+                              <Space size={10} style={{ marginTop: 6 }}>
+                                <Text type="secondary" style={{ fontSize: 12 }}>
+                                  <CalendarOutlined /> {dateLabel}
+                                </Text>
 
-                        {match.location ? (
-                          <Text type="secondary" style={{ fontSize: 12 }}>
-                            <EnvironmentOutlined /> {match.location}
-                          </Text>
-                        ) : null}
-                      </Space>
-                    </div>
+                                {match.location ? (
+                                  <Text type="secondary" style={{ fontSize: 12 }}>
+                                    <EnvironmentOutlined /> {match.location}
+                                  </Text>
+                                ) : null}
+                              </Space>
+                            </div>
 
-                    <div style={{ flexShrink: 0 }}>
-                      <Tag
-                        color={resultColor}
-                        style={{
-                          margin: 0,
-                          fontWeight: 700,
-                          fontSize: 13,
-                          padding: '2px 10px',
-                          borderRadius: 999,
-                        }}
-                      >
-                        {match.ourScore} x {match.theirScore}
-                      </Tag>
-                    </div>
-                  </div>
-                </div>
-              </List.Item>
-            )
-          }}
-        />
-      </Card>
+                            <div style={{ flexShrink: 0 }}>
+                              <Tag
+                                color={resultColor}
+                                style={{
+                                  margin: 0,
+                                  fontWeight: 700,
+                                  fontSize: 13,
+                                  padding: '2px 10px',
+                                  borderRadius: 999,
+                                }}
+                              >
+                                {match.ourScore} x {match.theirScore}
+                              </Tag>
+                            </div>
+                          </div>
+                        </div>
+                      </List.Item>
+                    )
+                  }}
+                />
+              </Card>
+            </div>
+          ))
+        )}
+      </div>
 
       {isActiveSeason && isAdmin && (
         <FloatButton

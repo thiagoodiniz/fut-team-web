@@ -38,7 +38,7 @@ if (SENTRY_DSN) {
   })
 }
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_API_URL
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
 // Auto-purge old storage structure (V2)
 const STORAGE_VERSION = '2'

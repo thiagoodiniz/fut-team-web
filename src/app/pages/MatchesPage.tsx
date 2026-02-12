@@ -22,11 +22,13 @@ function formatMatchDate(iso: string) {
 }
 
 import { useSeason } from '../contexts/SeasonContext'
+import { useTeam } from '../contexts/TeamContext'
 
 export function MatchesPage() {
   const navigate = useNavigate()
   const { token } = theme.useToken()
   const { season, isActiveSeason } = useSeason()
+  const { isAdmin } = useTeam()
 
   const [loading, setLoading] = React.useState(false)
   const [matches, setMatches] = React.useState<MatchDTO[]>([])
@@ -209,7 +211,7 @@ export function MatchesPage() {
         />
       </Card>
 
-      {isActiveSeason && (
+      {isActiveSeason && isAdmin && (
         <FloatButton
           type="primary"
           icon={<PlusOutlined />}

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Card, Form, Input, Button, Upload, message, Space, Typography, theme, ColorPicker } from 'antd'
-import { CameraOutlined, DeleteOutlined, SaveOutlined } from '@ant-design/icons'
+import { CameraOutlined, DeleteOutlined, SaveOutlined, UserOutlined } from '@ant-design/icons'
 import { updateMyTeam } from '../../services/teams.service'
 import { useTeam } from '../contexts/TeamContext'
+import { useNavigate } from 'react-router-dom'
 
 const { Title, Text } = Typography
 
@@ -50,11 +51,12 @@ function compressImage(file: File): Promise<string> {
 }
 
 export function TeamPage() {
-    const { team, refreshTeam, loading: teamLoading } = useTeam()
+    const { team, refreshTeam, loading: teamLoading, isAdmin } = useTeam()
     const { token } = theme.useToken()
     const [form] = Form.useForm()
     const [saving, setSaving] = useState(false)
     const [logoBase64, setLogoBase64] = useState<string | null>(null)
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (team) {
@@ -101,14 +103,25 @@ export function TeamPage() {
     }
 
     return (
-        <Space direction="vertical" size={16} style={{ width: '100%' }}>
-            <Title level={4} style={{ margin: 0 }}>Meu time</Title>
+        <Space direction="vertical" size={24} style={{ width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Title level={4} style={{ margin: 0 }}>Meu time</Title>
+                {isAdmin && (
+                    <Button
+                        icon={<UserOutlined />}
+                        onClick={() => navigate('/app/team/members')}
+                    >
+                        Gerenciar Membros
+                    </Button>
+                )}
+            </div>
 
-            <Card>
+            <Card style={{ borderRadius: 16 }}>
                 <Form
                     form={form}
                     layout="vertical"
                     onFinish={handleSubmit}
+                    disabled={!isAdmin}
                     initialValues={{
                         name: team?.name,
                         primaryColor: team?.primaryColor || '#16a34a',
@@ -152,27 +165,29 @@ export function TeamPage() {
                             )}
                         </div>
 
-                        <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 8 }}>
-                            <Upload
-                                beforeUpload={handleLogoChange}
-                                showUploadList={false}
-                                accept="image/*"
-                            >
-                                <Button size="small" icon={<CameraOutlined />}>
-                                    {logoBase64 ? 'Trocar Escudo' : 'Adicionar Escudo'}
-                                </Button>
-                            </Upload>
-                            {logoBase64 && (
-                                <Button
-                                    size="small"
-                                    danger
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => setLogoBase64(null)}
+                        {isAdmin && (
+                            <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 8 }}>
+                                <Upload
+                                    beforeUpload={handleLogoChange}
+                                    showUploadList={false}
+                                    accept="image/*"
                                 >
-                                    Remover
-                                </Button>
-                            )}
-                        </div>
+                                    <Button size="small" icon={<CameraOutlined />}>
+                                        {logoBase64 ? 'Trocar Escudo' : 'Adicionar Escudo'}
+                                    </Button>
+                                </Upload>
+                                {logoBase64 && (
+                                    <Button
+                                        size="small"
+                                        danger
+                                        icon={<DeleteOutlined />}
+                                        onClick={() => setLogoBase64(null)}
+                                    >
+                                        Remover
+                                    </Button>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <Form.Item
@@ -199,17 +214,19 @@ export function TeamPage() {
                         </Text>
                     </div>
 
-                    <Button
-                        type="primary"
-                        htmlType="submit"
-                        icon={<SaveOutlined />}
-                        loading={saving}
-                        size="large"
-                        block
-                        style={{ marginTop: 24 }}
-                    >
-                        Salvar Alterações
-                    </Button>
+                    {isAdmin && (
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            icon={<SaveOutlined />}
+                            loading={saving}
+                            size="large"
+                            block
+                            style={{ marginTop: 24 }}
+                        >
+                            Salvar Alterações
+                        </Button>
+                    )}
                 </Form>
             </Card>
         </Space>

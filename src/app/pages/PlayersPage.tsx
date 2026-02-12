@@ -23,12 +23,14 @@ import {
 } from '../../services/players.service'
 import { AddPlayerModal } from '../components/AddPlayerModal'
 import { useSeason } from '../contexts/SeasonContext'
+import { useTeam } from '../contexts/TeamContext'
 
 const { Text } = Typography
 const { Search } = Input
 
 export function PlayersPage() {
   const { season, isActiveSeason } = useSeason()
+  const { isAdmin } = useTeam()
   const { token } = theme.useToken()
   const [players, setPlayers] = React.useState<PlayerDTO[]>([])
   const [loading, setLoading] = React.useState(false)
@@ -149,7 +151,7 @@ export function PlayersPage() {
               style={{
                 borderRadius: 12,
                 background: player.active ? undefined : '#f5f5f5',
-                cursor: isActiveSeason ? 'pointer' : 'default',
+                cursor: (isActiveSeason && isAdmin) ? 'pointer' : 'default',
               }}
               styles={{
                 body: {
@@ -159,7 +161,7 @@ export function PlayersPage() {
                 },
               }}
               onClick={() => {
-                if (!isActiveSeason) return
+                if (!isActiveSeason || !isAdmin) return
                 setEditingPlayer(player)
                 setModalOpen(true)
               }}
@@ -181,7 +183,7 @@ export function PlayersPage() {
               </div>
 
               <Space size={10}>
-                {isActiveSeason && (
+                {isActiveSeason && isAdmin && (
                   <>
                     <span onClick={(e) => e.stopPropagation()}>
                       <Switch
@@ -209,7 +211,7 @@ export function PlayersPage() {
       )}
 
       {/* Botão flutuante */}
-      {isActiveSeason && (
+      {isActiveSeason && isAdmin && (
         <FloatButton
           type="primary"
           icon={<PlusOutlined />}

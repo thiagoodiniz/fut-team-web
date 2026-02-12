@@ -35,6 +35,7 @@ import {
 import { AddGoalModal } from '../components/AddGoalModal'
 import { EditMatchModal } from '../components/EditMatchModal'
 import { useSeason } from '../contexts/SeasonContext'
+import { useTeam } from '../contexts/TeamContext'
 
 const { Title, Text } = Typography
 
@@ -56,6 +57,7 @@ export function MatchDetailsPage() {
   const navigate = useNavigate()
   const { token } = theme.useToken()
   const { isActiveSeason } = useSeason()
+  const { isAdmin } = useTeam()
 
   const [loading, setLoading] = React.useState(true)
 
@@ -96,7 +98,7 @@ export function MatchDetailsPage() {
   }, [id])
 
   async function togglePresence(playerId: string, value: boolean) {
-    if (!id || !isActiveSeason) return
+    if (!id || !isActiveSeason || !isAdmin) return
 
     // Optimistic Update
     const originalPresences = [...presences]
@@ -174,7 +176,7 @@ export function MatchDetailsPage() {
     .sort((a, b) => a.label.localeCompare(b.label))
 
   async function onCreateGoal(data: { playerId: string; goals: { minute?: number | null; ownGoal?: boolean }[] }) {
-    if (!id || !isActiveSeason) return
+    if (!id || !isActiveSeason || !isAdmin) return
 
     try {
       setCreatingGoal(true)
@@ -275,7 +277,7 @@ export function MatchDetailsPage() {
                   </div>
                   <Switch
                     checked={p.present}
-                    disabled={!isActiveSeason}
+                    disabled={!isActiveSeason || !isAdmin}
                     onChange={(val) => togglePresence(p.playerId, val)}
                   />
                 </div>
@@ -297,7 +299,7 @@ export function MatchDetailsPage() {
       ),
       children: (
         <Space orientation="vertical" size={12} style={{ width: '100%' }}>
-          {isActiveSeason && (
+          {isActiveSeason && isAdmin && (
             <Button
               type="dashed"
               block
@@ -346,7 +348,7 @@ export function MatchDetailsPage() {
                       {g.minute !== null ? `${g.minute}'` : '—'}
                     </Tag>
 
-                    {isActiveSeason && (
+                    {isActiveSeason && isAdmin && (
                       <Button
                         danger
                         type="text"
@@ -397,7 +399,7 @@ export function MatchDetailsPage() {
                 <Title level={4} style={{ margin: 0 }}>
                   {opponent}
                 </Title>
-                {isActiveSeason && (
+                {isActiveSeason && isAdmin && (
                   <Button
                     type="text"
                     icon={<EditOutlined />}

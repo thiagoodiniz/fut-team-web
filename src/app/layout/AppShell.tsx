@@ -1,6 +1,6 @@
 import React from 'react'
 import { Layout, theme } from 'antd'
-import { Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { Outlet, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import {
   HomeOutlined,
   CalendarOutlined,
@@ -31,6 +31,13 @@ export function AppShell() {
   const { title, showBack } = useAppHeader()
 
   const activeTab = getActiveTab(location.pathname)
+
+  const authData = localStorage.getItem('auth')
+  const auth = authData ? JSON.parse(authData) : null
+
+  if (!auth?.teamId) {
+    return <Navigate to="/onboarding" replace />
+  }
 
   function onTabClick(key: TabKey) {
     navigate(`/app/${key}`)

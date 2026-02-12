@@ -8,10 +8,16 @@ import { router } from './router'
 import 'antd/dist/reset.css'
 import './styles/global.css'
 
+import { GoogleOAuthProvider } from '@react-oauth/google'
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_API_URL
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ConfigProvider locale={ptBR}>
-      <RouterProvider router={router} />
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+        <RouterProvider router={router} />
+      </GoogleOAuthProvider>
     </ConfigProvider>
   </React.StrictMode>,
 )

@@ -16,11 +16,13 @@ function getHeaderTitle(pathname: string) {
   if (pathname.startsWith('/app/seasons')) return 'Temporadas'
   if (pathname.startsWith('/app/ranking/scorers')) return 'Artilharia Completa'
   if (pathname.startsWith('/app/ranking/attendance')) return 'Presença Completa'
+  if (pathname.startsWith('/app/team/members')) return 'Gerenciar Membros'
   return 'Home'
 }
 
 function shouldShowBack(pathname: string) {
   if (pathname.startsWith('/app/matches/')) return true
   if (pathname.startsWith('/app/ranking/')) return true
+  if (pathname.startsWith('/app/team/members')) return true
   return false
 }

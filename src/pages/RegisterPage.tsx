@@ -2,6 +2,7 @@ import { Button, Card, Form, Input, Space, Typography, message, Divider, theme }
 import { useState } from 'react'
 import { useNavigate, Navigate, Link } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
+import posthog from 'posthog-js'
 import { api } from '../services/api'
 
 const { Title, Text } = Typography
@@ -44,6 +45,11 @@ export function RegisterPage() {
             email: data.user.email,
             role: data.team?.role,
         }))
+
+        posthog.identify(data.user.id, {
+            name: data.user.name,
+            email: data.user.email,
+        })
 
         if (data.onboarding || !data.team) {
             navigate('/onboarding', { replace: true, state: { pendingRequest: data.pendingRequest } })

@@ -3,6 +3,7 @@ import { MailOutlined, LockOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
+import posthog from 'posthog-js'
 import { api } from '../services/api'
 
 const { Title, Text } = Typography
@@ -45,6 +46,11 @@ export function LoginPage() {
       email: data.user.email,
       role: data.team?.role,
     }))
+
+    posthog.identify(data.user.id, {
+      name: data.user.name,
+      email: data.user.email,
+    })
 
     if (data.onboarding || !data.team) {
       navigate('/onboarding', { replace: true, state: { pendingRequest: data.pendingRequest } })

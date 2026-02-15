@@ -2,6 +2,8 @@
 
 Frontend application for the FutTeam management system. Built with React, Vite, and Ant Design.
 
+ **Live Demo:** https://fut-team-web.netlify.app/
+
 ## Features
 
 - **Intuitive Dashboard**: View team performance, top scorers, and upcoming matches at a glance.

@@ -118,9 +118,9 @@ export function ScorersTotalPage() {
                                             <b>{item.penaltyGoals}</b> de penalti
                                         </Tag>
                                     )}
-                                    {item.maxStreak >= 2 && (
+                                    {item.currentStreak >= 2 && (
                                         <Tag color="orange" icon={<FireOutlined />}>
-                                            Série: <b>{item.maxStreak}</b> jogos
+                                            Série: <b>{item.currentStreak}</b> jogos
                                         </Tag>
                                     )}
                                     {item.lastGoal && (
@@ -137,4 +137,5 @@ export function ScorersTotalPage() {
         </Space>
     )
 }
+
 

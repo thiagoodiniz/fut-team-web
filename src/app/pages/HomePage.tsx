@@ -341,9 +341,9 @@ export function HomePage() {
                                   {item.penaltyGoals}
                                 </Tag>
                               )}
-                              {item.maxStreak >= 2 && (
+                              {item.currentStreak >= 2 && (
                                 <Tag color="orange" icon={<FireOutlined />} style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>
-                                  {item.maxStreak}
+                                  {item.currentStreak}
                                 </Tag>
                               )}
                             </div>
@@ -374,3 +374,4 @@ export function HomePage() {
     </div>
   )
 }
+

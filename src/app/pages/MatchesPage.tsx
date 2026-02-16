@@ -5,6 +5,7 @@ import {
   CalendarOutlined,
   EnvironmentOutlined,
   PlusOutlined,
+  RightOutlined,
 } from '@ant-design/icons'
 import { listMatches, type MatchDTO } from '../../services/matches.service'
 import { CreateMatchModal } from '../components/CreateMatchModal'
@@ -148,6 +149,9 @@ export function MatchesPage() {
         onChange={(e) => setFilter(e.target.value)}
         style={{ width: '100%' }}
       />
+      <Text type="secondary" style={{ fontSize: 12 }}>
+        Toque em um jogo para ver detalhes, presencas e gols.
+      </Text>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
         {loading ? (
@@ -198,6 +202,7 @@ export function MatchesPage() {
                         style={{
                           padding: 14,
                           cursor: 'pointer',
+                          transition: 'background-color 0.2s ease',
                         }}
                         onClick={() => navigate(`/app/matches/${match.id}`)}
                       >
@@ -236,18 +241,23 @@ export function MatchesPage() {
                             </div>
 
                             <div style={{ flexShrink: 0 }}>
-                              <Tag
-                                color={resultColor}
-                                style={{
-                                  margin: 0,
-                                  fontWeight: 700,
-                                  fontSize: 13,
-                                  padding: '2px 10px',
-                                  borderRadius: 999,
-                                }}
-                              >
-                                {match.ourScore} x {match.theirScore}
-                              </Tag>
+                              <Space size={10}>
+                                <Tag
+                                  color={resultColor}
+                                  style={{
+                                    margin: 0,
+                                    fontWeight: 700,
+                                    fontSize: 13,
+                                    padding: '2px 10px',
+                                    borderRadius: 999,
+                                  }}
+                                >
+                                  {match.ourScore} x {match.theirScore}
+                                </Tag>
+                                <Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>
+                                  Ver detalhes <RightOutlined />
+                                </Text>
+                              </Space>
                             </div>
                           </div>
                         </div>

@@ -13,11 +13,13 @@ import {
   message,
   theme,
   Input,
+  Avatar,
 } from 'antd'
 import {
   CalendarOutlined,
   EnvironmentOutlined,
   EditOutlined,
+  AimOutlined,
 } from '@ant-design/icons'
 
 import { getMatchById, deleteMatch, type MatchDTO } from '../../services/matches.service'
@@ -149,11 +151,7 @@ export function MatchDetailsPage() {
   const totalPlayers = presences.length
 
   const sortedPresences = [...presences].sort((a, b) => {
-    // 1. Presentes primeiro
-    if (a.present !== b.present) {
-      return a.present ? -1 : 1
-    }
-    // 2. Ordem alfabética
+    // Ordem alfabetica
     const nameA = (a.player.nickname || a.player.name).toLowerCase()
     const nameB = (b.player.nickname || b.player.name).toLowerCase()
     return nameA.localeCompare(nameB, 'pt-BR')
@@ -259,6 +257,10 @@ export function MatchDetailsPage() {
               {filteredPresences.map((p) => (
                 <div
                   key={p.playerId}
+                  onClick={() => {
+                    if (!isActiveSeason || !isAdmin) return
+                    togglePresence(p.playerId, !p.present)
+                  }}
                   style={{
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -268,19 +270,26 @@ export function MatchDetailsPage() {
                     borderRadius: 12,
                     background: token.colorFillQuaternary,
                     opacity: p.present ? 1 : 0.7,
+                    cursor: isActiveSeason && isAdmin ? 'pointer' : 'default',
                   }}
                 >
-                  <div style={{ minWidth: 0 }}>
-                    <Text strong style={{ display: 'block' }}>
-                      {p.player.nickname || p.player.name}
-                    </Text>
-                    <Text type="secondary" style={{ fontSize: 12 }}>
-                      {p.player.name}
-                    </Text>
+                  <div style={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <Avatar size={34} src={p.player.photo ?? undefined}>
+                      {(p.player.nickname || p.player.name)?.[0]}
+                    </Avatar>
+                    <div style={{ minWidth: 0 }}>
+                      <Text strong style={{ display: 'block' }}>
+                        {p.player.nickname || p.player.name}
+                      </Text>
+                      <Text type="secondary" style={{ fontSize: 12 }}>
+                        {p.player.name}
+                      </Text>
+                    </div>
                   </div>
                   <Switch
                     checked={p.present}
                     disabled={!isActiveSeason || !isAdmin}
+                    onClick={(_, event) => event.stopPropagation()}
                     onChange={(val) => togglePresence(p.playerId, val)}
                   />
                 </div>
@@ -348,10 +357,10 @@ export function MatchDetailsPage() {
                       <Tag color="red" style={{ margin: 0, fontSize: 11 }}>Gol contra</Tag>
                     )}
                     {!g.ownGoal && g.freeKick && (
-                      <Tag color="blue" style={{ margin: 0, fontSize: 11 }}>Falta</Tag>
+                      <Tag color="blue" icon={<AimOutlined />} style={{ margin: 0, fontSize: 11 }}>Falta</Tag>
                     )}
                     {!g.ownGoal && g.penalty && (
-                      <Tag color="purple" style={{ margin: 0, fontSize: 11 }}>Penalti</Tag>
+                      <Tag color="purple" icon={<span>{'\u{1F945}'}</span>} style={{ margin: 0, fontSize: 11 }}>Penalti</Tag>
                     )}
                     <Tag style={{ margin: 0 }}>
                       {g.minute !== null ? `${g.minute}'` : '—'}

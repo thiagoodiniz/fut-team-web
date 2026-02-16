@@ -5,6 +5,7 @@ import { useNavigate, Navigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import posthog from 'posthog-js'
 import { api } from '../services/api'
+import { applyAnalyticsPreferenceByEmail } from '../services/analytics.service'
 
 const { Title, Text } = Typography
 
@@ -47,10 +48,13 @@ export function LoginPage() {
       role: data.team?.role,
     }))
 
-    posthog.identify(data.user.id, {
-      name: data.user.name,
-      email: data.user.email,
-    })
+    const isBlocked = applyAnalyticsPreferenceByEmail(data.user.email)
+    if (!isBlocked) {
+      posthog.identify(data.user.id, {
+        name: data.user.name,
+        email: data.user.email,
+      })
+    }
 
     if (data.onboarding || !data.team) {
       navigate('/onboarding', { replace: true, state: { pendingRequest: data.pendingRequest } })

@@ -5,6 +5,7 @@ import { ConfigProvider, Modal, Spin, Typography } from 'antd'
 import ptBR from 'antd/locale/pt_BR'
 import { router } from './router'
 import { api } from './services/api'
+import { applyAnalyticsPreferenceFromStorage } from './services/analytics.service'
 
 import 'antd/dist/reset.css'
 import './styles/global.css'
@@ -26,6 +27,7 @@ if (POSTHOG_KEY) {
     person_profiles: 'identified_only',
     capture_pageview: false, // We will track manually or via router
   })
+  applyAnalyticsPreferenceFromStorage()
 }
 
 if (SENTRY_DSN) {

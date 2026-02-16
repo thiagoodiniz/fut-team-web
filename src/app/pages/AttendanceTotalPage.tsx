@@ -1,5 +1,6 @@
 import React from 'react'
-import { Card, List, Avatar, Typography, Space, Progress, Empty } from 'antd'
+import { useNavigate } from 'react-router-dom'
+import { Button, Card, List, Avatar, Typography, Space, Progress, Empty } from 'antd'
 import { CalendarOutlined } from '@ant-design/icons'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
 import { useSeason } from '../contexts/SeasonContext'
@@ -7,6 +8,7 @@ import { useSeason } from '../contexts/SeasonContext'
 const { Text } = Typography
 
 export function AttendanceTotalPage() {
+    const navigate = useNavigate()
     const { season } = useSeason()
     const [loading, setLoading] = React.useState(true)
     const [stats, setStats] = React.useState<DashboardStats | null>(null)
@@ -45,7 +47,11 @@ export function AttendanceTotalPage() {
                                     </Avatar>
 
                                     <div style={{ flex: 1, minWidth: 0 }}>
-                                        <Text strong style={{ fontSize: 15, display: 'block' }}>
+                                        <Text
+                                            strong
+                                            style={{ fontSize: 15, display: 'block', cursor: 'pointer' }}
+                                            onClick={() => navigate(`/app/ranking/attendance/${item.id}/matches`)}
+                                        >
                                             {item.nickname || item.name}
                                         </Text>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -83,6 +89,16 @@ export function AttendanceTotalPage() {
                                         </Text>
                                     </div>
                                 )}
+
+                                <div style={{ marginTop: 10 }}>
+                                    <Button
+                                        type="link"
+                                        style={{ padding: 0, height: 'auto' }}
+                                        onClick={() => navigate(`/app/ranking/attendance/${item.id}/matches`)}
+                                    >
+                                        Ver todos os jogos
+                                    </Button>
+                                </div>
                             </div>
                         </List.Item>
                     )}

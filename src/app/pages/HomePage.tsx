@@ -6,6 +6,7 @@ import {
   FireOutlined,
   CalendarOutlined,
   EnvironmentOutlined,
+  AimOutlined,
 } from '@ant-design/icons'
 
 import { useSeason } from '../contexts/SeasonContext'
@@ -13,6 +14,15 @@ import { useTeam } from '../contexts/TeamContext'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
 
 const { Title, Text } = Typography
+
+function DoubleBallIcon() {
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 1, fontSize: 12, lineHeight: 1 }}>
+      <span>{'\u26BD'}</span>
+      <span>{'\u26BD'}</span>
+    </span>
+  )
+}
 
 export function HomePage() {
   const navigate = useNavigate()
@@ -312,18 +322,28 @@ export function HomePage() {
                             <Text strong>{item.nickname || item.name}</Text>
                             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                               {item.hatTricks > 0 && (
-                                <Tag color="gold" style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>
-                                  {item.hatTricks}🎩
+                                <Tag color="gold" icon={<span style={{ fontSize: 12 }}>{'\u{1F3A9}'}</span>} style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>
+                                  {item.hatTricks}
                                 </Tag>
                               )}
                               {item.doubles > 0 && (
-                                <Tag color="blue" style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>
-                                  {item.doubles}⚽⚽
+                                <Tag color="blue" icon={<DoubleBallIcon />} style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>
+                                  {item.doubles}
+                                </Tag>
+                              )}
+                              {item.freeKickGoals > 0 && (
+                                <Tag color="cyan" icon={<AimOutlined />} style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>
+                                  {item.freeKickGoals}
+                                </Tag>
+                              )}
+                              {item.penaltyGoals > 0 && (
+                                <Tag color="magenta" icon={<span style={{ fontSize: 12 }}>{'\u{1F945}'}</span>} style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>
+                                  {item.penaltyGoals}
                                 </Tag>
                               )}
                               {item.maxStreak >= 2 && (
-                                <Tag color="orange" style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>
-                                  {item.maxStreak}🔥
+                                <Tag color="orange" icon={<FireOutlined />} style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>
+                                  {item.maxStreak}
                                 </Tag>
                               )}
                             </div>

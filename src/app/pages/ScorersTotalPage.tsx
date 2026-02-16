@@ -1,10 +1,23 @@
 import React from 'react'
 import { Card, List, Avatar, Typography, Space, Tag, Empty } from 'antd'
-import { TrophyOutlined, CalendarOutlined, FireOutlined } from '@ant-design/icons'
+import {
+    CalendarOutlined,
+    FireOutlined,
+    AimOutlined,
+} from '@ant-design/icons'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
 import { useSeason } from '../contexts/SeasonContext'
 
 const { Text } = Typography
+
+function DoubleBallIcon() {
+    return (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 1, fontSize: 12, lineHeight: 1 }}>
+            <span>⚽</span>
+            <span>⚽</span>
+        </span>
+    )
+}
 
 export function ScorersTotalPage() {
     const { season } = useSeason()
@@ -86,13 +99,23 @@ export function ScorersTotalPage() {
                                     borderTop: '1px solid #f0f0f0'
                                 }}>
                                     {item.hatTricks > 0 && (
-                                        <Tag color="gold" icon={<TrophyOutlined />}>
+                                        <Tag color="gold" icon={<span style={{ fontSize: 14 }}>🎩</span>}>
                                             <b>{item.hatTricks}</b> Hat-tricks
                                         </Tag>
                                     )}
                                     {item.doubles > 0 && (
-                                        <Tag color="blue">
+                                        <Tag color="blue" icon={<DoubleBallIcon />}>
                                             <b>{item.doubles}</b> Dobletes
+                                        </Tag>
+                                    )}
+                                    {item.freeKickGoals > 0 && (
+                                        <Tag color="cyan" icon={<AimOutlined />}>
+                                            <b>{item.freeKickGoals}</b> de falta
+                                        </Tag>
+                                    )}
+                                    {item.penaltyGoals > 0 && (
+                                        <Tag color="magenta" icon={<span style={{ fontSize: 14 }}>🥅</span>}>
+                                            <b>{item.penaltyGoals}</b> de penalti
                                         </Tag>
                                     )}
                                     {item.maxStreak >= 2 && (
@@ -114,3 +137,4 @@ export function ScorersTotalPage() {
         </Space>
     )
 }
+

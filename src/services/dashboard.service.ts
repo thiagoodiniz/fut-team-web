@@ -38,6 +38,8 @@ export interface DashboardStats {
         nickname: string | null
         photo: string | null
         goals: number
+        freeKickGoals: number
+        penaltyGoals: number
         hatTricks: number
         doubles: number
         maxStreak: number

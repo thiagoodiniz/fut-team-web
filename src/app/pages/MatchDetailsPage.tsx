@@ -175,7 +175,10 @@ export function MatchDetailsPage() {
     }))
     .sort((a, b) => a.label.localeCompare(b.label))
 
-  async function onCreateGoal(data: { playerId: string; goals: { minute?: number | null; ownGoal?: boolean }[] }) {
+  async function onCreateGoal(data: {
+    playerId?: string
+    goals: { minute?: number | null; ownGoal?: boolean; freeKick?: boolean; penalty?: boolean }[]
+  }) {
     if (!id || !isActiveSeason || !isAdmin) return
 
     try {
@@ -333,16 +336,22 @@ export function MatchDetailsPage() {
                 >
                   <div style={{ minWidth: 0 }}>
                     <Text strong style={{ display: 'block' }}>
-                      {g.player.nickname || g.player.name}
+                      {g.ownGoal ? 'Gol contra' : (g.player?.nickname || g.player?.name || 'Sem jogador')}
                     </Text>
                     <Text type="secondary" style={{ fontSize: 12 }}>
-                      {g.player.name}
+                      {g.ownGoal ? 'Adversario' : (g.player?.name || 'Sem jogador')}
                     </Text>
                   </div>
 
                   <Space size={6}>
                     {g.ownGoal && (
                       <Tag color="red" style={{ margin: 0, fontSize: 11 }}>Gol contra</Tag>
+                    )}
+                    {!g.ownGoal && g.freeKick && (
+                      <Tag color="blue" style={{ margin: 0, fontSize: 11 }}>Falta</Tag>
+                    )}
+                    {!g.ownGoal && g.penalty && (
+                      <Tag color="purple" style={{ margin: 0, fontSize: 11 }}>Penalti</Tag>
                     )}
                     <Tag style={{ margin: 0 }}>
                       {g.minute !== null ? `${g.minute}'` : '—'}
@@ -480,3 +489,4 @@ export function MatchDetailsPage() {
     </Space>
   )
 }
+

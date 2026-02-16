@@ -3,15 +3,17 @@ import { api } from './api'
 export type GoalDTO = {
   id: string
   matchId: string
-  playerId: string
+  playerId: string | null
   minute: number | null
   ownGoal: boolean
+  freeKick: boolean
+  penalty: boolean
   createdAt: string
   player: {
     id: string
     name: string
     nickname: string | null
-  }
+  } | null
 }
 
 export async function listMatchGoals(matchId: string) {
@@ -21,7 +23,10 @@ export async function listMatchGoals(matchId: string) {
 
 export async function createGoals(
   matchId: string,
-  data: { playerId: string; goals: { minute?: number | null; ownGoal?: boolean }[] },
+  data: {
+    playerId?: string
+    goals: { minute?: number | null; ownGoal?: boolean; freeKick?: boolean; penalty?: boolean }[]
+  },
 ) {
   const res = await api.post(`/matches/${matchId}/goals`, {
     playerId: data.playerId,

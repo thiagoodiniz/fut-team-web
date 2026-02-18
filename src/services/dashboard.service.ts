@@ -49,6 +49,12 @@ export interface DashboardStats {
             opponent: string | null
         } | null
     }[]
+    nextMatch: {
+        id: string
+        date: string
+        location: string | null
+        opponent: string | null
+    } | null
 }
 
 export async function getDashboardStats(seasonId?: string) {

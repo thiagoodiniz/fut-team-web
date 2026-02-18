@@ -81,6 +81,62 @@ export function HomePage() {
           <Text type="secondary">Temporada {season?.year}</Text>
         </div>
       </div>
+      {/* SECTION 0: Next Match */}
+      {data.nextMatch && (
+        <div style={{ marginBottom: 24 }}>
+          <Card
+            bordered={false}
+            style={{
+              background: token.colorBgContainer,
+              border: `1px solid ${token.colorBorderSecondary}`,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+            }}
+            bodyStyle={{ padding: '20px 24px' }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <Space align="center" style={{ marginBottom: 4 }}>
+                  <CalendarOutlined style={{ color: token.colorPrimary }} />
+                  <Text strong style={{ color: token.colorPrimary, textTransform: 'uppercase', fontSize: 12, letterSpacing: 0.5 }}>
+                    Próximo Jogo
+                  </Text>
+                </Space>
+
+                <Title level={3} style={{ margin: 0 }}>
+                  vs {data.nextMatch.opponent || 'Adversário não definido'}
+                </Title>
+
+                {data.nextMatch.location && (
+                  <Text type="secondary" style={{ fontSize: 14 }}>
+                    <EnvironmentOutlined /> {data.nextMatch.location}
+                  </Text>
+                )}
+              </div>
+
+              <div
+                style={{
+                  textAlign: 'center',
+                  background: token.colorFillQuaternary,
+                  padding: '8px 16px',
+                  borderRadius: 8,
+                  minWidth: 100
+                }}
+              >
+                <div style={{ fontSize: 24, fontWeight: 'bold', color: token.colorTextHeading, lineHeight: 1.2 }}>
+                  {new Date(data.nextMatch.date).getDate()}
+                </div>
+                <div style={{ fontSize: 14, textTransform: 'uppercase', color: token.colorTextSecondary }}>
+                  {new Date(data.nextMatch.date).toLocaleString('pt-BR', { month: 'short' })}
+                </div>
+                <div style={{ fontSize: 12, color: token.colorTextSecondary, marginTop: 4, fontWeight: 500 }}>
+                  {new Date(data.nextMatch.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
       {/* SECTION 1: Summary Cards */}
       <div>
         <Title level={4}>Resumo da Temporada</Title>

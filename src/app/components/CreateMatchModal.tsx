@@ -18,6 +18,7 @@ export function CreateMatchModal({
     const [form] = Form.useForm()
     const [loading, setLoading] = React.useState(false)
     const [locations, setLocations] = React.useState<string[]>([])
+    const [opponents, setOpponents] = React.useState<string[]>([])
 
     React.useEffect(() => {
         if (open && season) {
@@ -28,17 +29,37 @@ export function CreateMatchModal({
                         .filter((loc): loc is string => !!loc)
                 ))
                 setLocations(uniqueLocations)
+
+                const uniqueOpponents = Array.from(new Set(
+                    matches
+                        .map(m => m.opponent)
+                        .filter((opp): opp is string => !!opp)
+                ))
+                setOpponents(uniqueOpponents)
             }).catch(console.error)
         }
     }, [open, season])
 
     const locationOptions = locations.map(loc => ({ value: loc }))
+    const opponentOptions = opponents.map(opp => ({ value: opp }))
 
     const MatchLocationAutocomplete = () => (
         <Form.Item name="location" label="Local">
             <AutoComplete
                 options={locationOptions}
                 placeholder="Onde será o jogo?"
+                filterOption={(inputValue, option) =>
+                    option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                }
+            />
+        </Form.Item>
+    )
+
+    const MatchOpponentAutocomplete = () => (
+        <Form.Item name="opponent" label="Adversário">
+            <AutoComplete
+                options={opponentOptions}
+                placeholder="Nome do time adversário"
                 filterOption={(inputValue, option) =>
                     option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                 }
@@ -93,9 +114,7 @@ export function CreateMatchModal({
                     <Input type="datetime-local" style={{ width: '100%', fontSize: '16px' }} />
                 </Form.Item>
 
-                <Form.Item name="opponent" label="Adversário">
-                    <Input placeholder="Nome do time adversário" />
-                </Form.Item>
+                <MatchOpponentAutocomplete />
 
                 <MatchLocationAutocomplete />
 

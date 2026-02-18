@@ -91,6 +91,11 @@ export function ScorersTotalPage() {
                   <div style={{ textAlign: 'right' }}>
                     <Text strong style={{ fontSize: 20, color: '#16a34a' }}>{item.goals}</Text>
                     <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>Gols</Text>
+                    <div style={{ marginTop: 4 }}>
+                      <Text type="secondary" style={{ fontSize: 11 }}>
+                        Média: <Text strong>{item.matchesPlayed > 0 ? (item.goals / item.matchesPlayed).toFixed(2) : '0.00'}</Text>
+                      </Text>
+                    </div>
                   </div>
                 </div>
 

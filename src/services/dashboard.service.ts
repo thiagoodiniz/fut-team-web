@@ -48,6 +48,7 @@ export interface DashboardStats {
             date: string
             opponent: string | null
         } | null
+        matchesPlayed: number
     }[]
     nextMatch: {
         id: string

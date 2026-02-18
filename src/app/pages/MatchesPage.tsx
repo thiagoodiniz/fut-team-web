@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, Empty, List, Space, Tag, Typography, theme, FloatButton, Input } from 'antd'
+import { List, Typography, Input, Card, theme, FloatButton, Row, Col, Collapse, Space, Tag, Empty } from 'antd'
 import {
   CalendarOutlined,
   EnvironmentOutlined,
@@ -58,10 +58,12 @@ export function MatchesPage() {
 
   const filteredMatches = sortedMatches.filter(match => {
     const search = filter.toLowerCase()
-    return (
-      match.opponent?.toLowerCase().includes(search) ||
-      match.location?.toLowerCase().includes(search)
-    )
+    if (!search) return true
+
+    const opponent = match.opponent?.toLowerCase() || ''
+    const location = match.location?.toLowerCase() || ''
+
+    return opponent.includes(search) || location.includes(search)
   })
 
   // Group matches by month
@@ -171,23 +173,136 @@ export function MatchesPage() {
                 padding: '0 4px',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
                 gap: 8
               }}>
-                <div style={{
-                  width: 4,
-                  height: 16,
-                  backgroundColor: token.colorPrimary,
-                  borderRadius: 2
-                }} />
-                <Text strong style={{
-                  fontSize: 14,
-                  color: token.colorTextSecondary,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}>
-                  {group.monthYear}
-                </Text>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{
+                    width: 4,
+                    height: 16,
+                    backgroundColor: token.colorPrimary,
+                    borderRadius: 2
+                  }} />
+                  <Text strong style={{
+                    fontSize: 14,
+                    color: token.colorTextSecondary,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
+                    {group.monthYear}
+                  </Text>
+                </div>
               </div>
+
+              {/* MONTH SUMMARY COLLAPSE */}
+              {(() => {
+                const wins = group.data.filter(m => m.ourScore > m.theirScore).length
+                const losses = group.data.filter(m => m.ourScore < m.theirScore).length
+                const draws = group.data.filter(m => m.ourScore === m.theirScore).length
+                const goalsFor = group.data.reduce((acc, m) => acc + m.ourScore, 0)
+                const goalsAgainst = group.data.reduce((acc, m) => acc + m.theirScore, 0)
+
+                // Top Scorer
+                const scorers = new Map<string, { count: number, name: string }>()
+                group.data.forEach(m => {
+                  m.goals?.forEach(g => {
+                    if (g.player) {
+                      const current = scorers.get(g.player.name) || { count: 0, name: g.player.nickname || g.player.name }
+                      scorers.set(g.player.name, { ...current, count: current.count + 1 })
+                    }
+                  })
+                })
+                let topScorerText = '-'
+                if (scorers.size > 0) {
+                  const sorted = [...scorers.values()].sort((a, b) => b.count - a.count)
+                  const max = sorted[0].count
+                  const ties = sorted.filter(s => s.count === max)
+                  // Format: Name (X gols)
+                  const suffix = max === 1 ? 'gol' : 'gols'
+                  if (ties.length === 1) {
+                    topScorerText = `${ties[0].name} (${max} ${suffix})`
+                  } else if (ties.length === 2) {
+                    topScorerText = `${ties[0].name}, ${ties[1].name} (${max} ${suffix})`
+                  } else {
+                    topScorerText = `${ties[0].name} e +${ties.length - 1} (${max} ${suffix})`
+                  }
+                }
+
+                // Top Presence
+                const presences = new Map<string, { count: number, name: string }>()
+                group.data.forEach(m => {
+                  m.presences?.forEach(p => {
+                    if (p.player) {
+                      const current = presences.get(p.player.name) || { count: 0, name: p.player.nickname || p.player.name }
+                      presences.set(p.player.name, { ...current, count: current.count + 1 })
+                    }
+                  })
+                })
+                let topPresenceText = '-'
+                if (presences.size > 0) {
+                  const sorted = [...presences.values()].sort((a, b) => b.count - a.count)
+                  const max = sorted[0].count
+                  const ties = sorted.filter(s => s.count === max)
+                  // Format: Name (X jogos)
+                  const suffix = max === 1 ? 'jogo' : 'jogos'
+                  if (ties.length === 1) {
+                    topPresenceText = `${ties[0].name} (${max} ${suffix})`
+                  } else if (ties.length === 2) {
+                    topPresenceText = `${ties[0].name}, ${ties[1].name} (${max} ${suffix})`
+                  } else {
+                    topPresenceText = `${ties[0].name} e +${ties.length - 1} (${max} ${suffix})`
+                  }
+                }
+
+                const header = (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <Space size={4} wrap>
+                      <Tag style={{ margin: 0 }}>{group.data.length} Jogos</Tag>
+                      <Tag color="success" style={{ margin: 0 }}>{wins}V</Tag>
+                      <Tag color="error" style={{ margin: 0 }}>{losses}D</Tag>
+                      {draws > 0 && <Tag color="warning" style={{ margin: 0 }}>{draws}E</Tag>}
+                    </Space>
+                    <Text type="secondary" style={{ fontSize: 11, marginLeft: 8 }}>
+                      Ver detalhes
+                    </Text>
+                  </div>
+                )
+
+                return (
+                  <Collapse
+                    size="small"
+                    ghost
+                    style={{ marginBottom: 16, background: token.colorFillQuaternary, borderRadius: 8 }}
+                    items={[{
+                      key: '1',
+                      label: header,
+                      children: (
+                        <div style={{ padding: '0 4px 8px 4px' }}>
+                          <Row gutter={[16, 16]}>
+                            <Col span={12}>
+                              <Text type="secondary" style={{ fontSize: 10, display: 'block' }}>GOLS PRÓ</Text>
+                              <Text strong style={{ color: token.colorSuccess, fontSize: 13 }}>{goalsFor}</Text>
+                            </Col>
+                            <Col span={12}>
+                              <Text type="secondary" style={{ fontSize: 10, display: 'block' }}>GOLS SOFR.</Text>
+                              <Text strong style={{ color: token.colorError, fontSize: 13 }}>{goalsAgainst}</Text>
+                            </Col>
+                            <Col span={12}>
+                              <Text type="secondary" style={{ fontSize: 10, display: 'block', textTransform: 'uppercase' }}>ARTILHEIRO</Text>
+                              <Text strong style={{ display: 'block', lineHeight: 1.2, fontSize: 13 }}>{topScorerText}</Text>
+                            </Col>
+                            <Col span={12}>
+                              <Text type="secondary" style={{ fontSize: 10, display: 'block', textTransform: 'uppercase' }}>MAIS JOGOS</Text>
+                              <Text strong style={{ display: 'block', lineHeight: 1.2, fontSize: 13 }}>{topPresenceText}</Text>
+                            </Col>
+                          </Row>
+                        </div>
+                      )
+                    }]}
+                  />
+                )
+              })()}
 
               <Card styles={{ body: { padding: 0 } }}>
                 <List
@@ -271,23 +386,25 @@ export function MatchesPage() {
         )}
       </div>
 
-      {isActiveSeason && isAdmin && (
-        <FloatButton
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => setCreateModalOpen(true)}
-          style={{
-            bottom: 88,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-          }}
-        />
-      )}
+      {
+        isActiveSeason && isAdmin && (
+          <FloatButton
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setCreateModalOpen(true)}
+            style={{
+              bottom: 88,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            }}
+          />
+        )
+      }
 
       <CreateMatchModal
         open={createModalOpen}
         onCancel={() => setCreateModalOpen(false)}
         onSuccess={load}
       />
-    </Space>
+    </Space >
   )
 }

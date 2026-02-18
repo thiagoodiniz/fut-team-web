@@ -15,6 +15,24 @@ export type MatchDTO = {
 
   createdAt: string
   updatedAt: string
+
+  goals?: {
+    id: string
+    playerId: string
+    player?: {
+      name: string
+      nickname: string | null
+    }
+  }[]
+  presences?: {
+    id: string
+    playerId: string
+    player?: {
+      name: string
+      nickname: string | null
+      photo: string | null
+    }
+  }[]
 }
 
 export async function listMatches(seasonId?: string) {

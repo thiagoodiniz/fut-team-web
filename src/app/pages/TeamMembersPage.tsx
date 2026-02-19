@@ -106,8 +106,6 @@ export function TeamMembersPage() {
                                 <Select
                                     value={member.role}
                                     style={{ width: 130 }}
-                                    value={member.role}
-                                    style={{ width: 130 }}
                                     onChange={(val) => {
                                         posthog.capture('member_role_updated', { userId: member.userId, role: val })
                                         handleUpdateRole(member.userId, val)
@@ -122,8 +120,6 @@ export function TeamMembersPage() {
                                 />
                                 {member.userId !== currentUserId && (
                                     <Popconfirm
-                                        title="Remover membro?"
-                                        description="O usuário perderá acesso ao time imediatamente."
                                         title="Remover membro?"
                                         description="O usuário perderá acesso ao time imediatamente."
                                         onConfirm={() => {
@@ -180,8 +176,6 @@ export function TeamMembersPage() {
                             type="primary"
                             icon={<CheckOutlined />}
                             style={{ background: token.colorSuccess, borderRadius: 10, height: 40, fontWeight: 600 }}
-                            icon={<CheckOutlined />}
-                            style={{ background: token.colorSuccess, borderRadius: 10, height: 40, fontWeight: 600 }}
                             onClick={() => {
                                 posthog.capture('request_responded', { requestId: req.id, action: 'APPROVE' })
                                 handleRespondRequest(req.id, 'APPROVE')
@@ -190,9 +184,6 @@ export function TeamMembersPage() {
                             Aceitar
                         </Button>
                         <Button
-                            danger
-                            icon={<CloseOutlined />}
-                            style={{ borderRadius: 10, height: 40, fontWeight: 600 }}
                             danger
                             icon={<CloseOutlined />}
                             style={{ borderRadius: 10, height: 40, fontWeight: 600 }}

@@ -21,6 +21,16 @@ const POSTHOG_HOST =
   import.meta.env.VITE_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com'
 const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN
 
+// Auto-purge old storage structure — must run BEFORE PostHog init
+// so that localStorage.clear() doesn't wipe PostHog's persisted opt-out state
+const STORAGE_VERSION = '2'
+const currentVersion = localStorage.getItem('storage_version')
+if (currentVersion !== STORAGE_VERSION) {
+  localStorage.clear()
+  sessionStorage.clear()
+  localStorage.setItem('storage_version', STORAGE_VERSION)
+}
+
 if (POSTHOG_KEY) {
   posthog.init(POSTHOG_KEY, {
     api_host: POSTHOG_HOST,
@@ -110,14 +120,7 @@ function ApiHealthGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
-// Auto-purge old storage structure (V2)
-const STORAGE_VERSION = '2'
-const currentVersion = localStorage.getItem('storage_version')
-if (currentVersion !== STORAGE_VERSION) {
-  localStorage.clear()
-  sessionStorage.clear()
-  localStorage.setItem('storage_version', STORAGE_VERSION)
-}
+// (Storage version migration moved to top of file, before PostHog init)
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

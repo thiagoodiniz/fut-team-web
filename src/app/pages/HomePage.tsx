@@ -149,9 +149,22 @@ export function HomePage() {
         <Title level={4}>Resumo da Temporada</Title>
         <Row gutter={[12, 12]}>
           <Col xs={12} sm={6}>
-            <Card bordered={false} style={{ background: token.colorFillQuaternary }}>
+            <Card
+              bordered={false}
+              style={{ background: token.colorFillQuaternary, cursor: 'pointer' }}
+              hoverable
+              onClick={() => {
+                posthog.capture('total_games_card_clicked')
+                navigate('/app/matches')
+              }}
+            >
               <Statistic
-                title="Jogos"
+                title={
+                  <Space>
+                    Jogos
+                    <Text type="secondary" style={{ fontSize: 10 }}>Ver todos</Text>
+                  </Space>
+                }
                 value={summary.totalGames}
                 prefix={<CalendarOutlined />}
               />
@@ -168,9 +181,22 @@ export function HomePage() {
             </Card>
           </Col>
           <Col xs={12} sm={6}>
-            <Card bordered={false} style={{ background: token.colorFillQuaternary }}>
+            <Card
+              bordered={false}
+              style={{ background: token.colorFillQuaternary, cursor: 'pointer' }}
+              hoverable
+              onClick={() => {
+                posthog.capture('total_goals_card_clicked')
+                navigate('/app/ranking/scorers')
+              }}
+            >
               <Statistic
-                title="Gols Pró"
+                title={
+                  <Space>
+                    Gols Pró
+                    <Text type="secondary" style={{ fontSize: 10 }}>Ver artilharia</Text>
+                  </Space>
+                }
                 value={summary.goalsFor}
                 prefix={<FireOutlined />}
               />

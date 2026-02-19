@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { List, Avatar, Button, Typography, Space, theme, Tabs, Select, message, Popconfirm, Tag } from 'antd'
 import { CheckOutlined, CloseOutlined, DeleteOutlined, TeamOutlined, ClockCircleOutlined } from '@ant-design/icons'
+import posthog from 'posthog-js'
 import { api } from '../../services/api'
 import { useAppHeader } from '../hooks/useAppHeader'
 import { useTeam } from '../contexts/TeamContext'
@@ -105,7 +106,12 @@ export function TeamMembersPage() {
                                 <Select
                                     value={member.role}
                                     style={{ width: 130 }}
-                                    onChange={(val) => handleUpdateRole(member.userId, val)}
+                                    value={member.role}
+                                    style={{ width: 130 }}
+                                    onChange={(val) => {
+                                        posthog.capture('member_role_updated', { userId: member.userId, role: val })
+                                        handleUpdateRole(member.userId, val)
+                                    }}
                                     variant="filled"
                                     disabled={member.userId === currentUserId || member.role === 'OWNER' && member.userId !== currentUserId}
                                     options={[
@@ -118,7 +124,12 @@ export function TeamMembersPage() {
                                     <Popconfirm
                                         title="Remover membro?"
                                         description="O usuário perderá acesso ao time imediatamente."
-                                        onConfirm={() => handleRemoveMember(member.userId)}
+                                        title="Remover membro?"
+                                        description="O usuário perderá acesso ao time imediatamente."
+                                        onConfirm={() => {
+                                            posthog.capture('member_removed', { userId: member.userId })
+                                            handleRemoveMember(member.userId)
+                                        }}
                                         okText="Sim"
                                         cancelText="Não"
                                     >
@@ -169,7 +180,12 @@ export function TeamMembersPage() {
                             type="primary"
                             icon={<CheckOutlined />}
                             style={{ background: token.colorSuccess, borderRadius: 10, height: 40, fontWeight: 600 }}
-                            onClick={() => handleRespondRequest(req.id, 'APPROVE')}
+                            icon={<CheckOutlined />}
+                            style={{ background: token.colorSuccess, borderRadius: 10, height: 40, fontWeight: 600 }}
+                            onClick={() => {
+                                posthog.capture('request_responded', { requestId: req.id, action: 'APPROVE' })
+                                handleRespondRequest(req.id, 'APPROVE')
+                            }}
                         >
                             Aceitar
                         </Button>
@@ -177,7 +193,13 @@ export function TeamMembersPage() {
                             danger
                             icon={<CloseOutlined />}
                             style={{ borderRadius: 10, height: 40, fontWeight: 600 }}
-                            onClick={() => handleRespondRequest(req.id, 'REJECT')}
+                            danger
+                            icon={<CloseOutlined />}
+                            style={{ borderRadius: 10, height: 40, fontWeight: 600 }}
+                            onClick={() => {
+                                posthog.capture('request_responded', { requestId: req.id, action: 'REJECT' })
+                                handleRespondRequest(req.id, 'REJECT')
+                            }}
                         >
                             Recusar
                         </Button>

@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { List, Typography, Input, Card, theme, FloatButton, Row, Col, Collapse, Space, Tag, Empty } from 'antd'
+import posthog from 'posthog-js'
 import {
   CalendarOutlined,
   EnvironmentOutlined,
@@ -319,7 +320,10 @@ export function MatchesPage() {
                           cursor: 'pointer',
                           transition: 'background-color 0.2s ease',
                         }}
-                        onClick={() => navigate(`/app/matches/${match.id}`)}
+                        onClick={() => {
+                          posthog.capture('match_list_item_clicked', { match_id: match.id, opponent: match.opponent })
+                          navigate(`/app/matches/${match.id}`)
+                        }}
                       >
                         <div style={{ width: '100%' }}>
                           <div
@@ -391,7 +395,10 @@ export function MatchesPage() {
           <FloatButton
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => setCreateModalOpen(true)}
+            onClick={() => {
+              posthog.capture('create_match_clicked')
+              setCreateModalOpen(true)
+            }}
             style={{
               bottom: 88,
               boxShadow: '0 4px 12px rgba(0,0,0,0.3)',

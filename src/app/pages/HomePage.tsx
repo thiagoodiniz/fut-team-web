@@ -12,6 +12,7 @@ import {
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
+import posthog from 'posthog-js'
 
 const { Title, Text } = Typography
 
@@ -86,10 +87,16 @@ export function HomePage() {
         <div style={{ marginBottom: 24 }}>
           <Card
             bordered={false}
+            onClick={() => {
+              posthog.capture('next_match_card_clicked', { match_id: data.nextMatch?.id })
+              navigate(`/app/matches/${data.nextMatch?.id}`)
+            }}
+            hoverable
             style={{
               background: token.colorBgContainer,
               border: `1px solid ${token.colorBorderSecondary}`,
               boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              cursor: 'pointer'
             }}
             bodyStyle={{ padding: '20px 24px' }}
           >

@@ -15,6 +15,7 @@ import {
   Input,
   Avatar,
 } from 'antd'
+import posthog from 'posthog-js'
 import {
   CalendarOutlined,
   EnvironmentOutlined,
@@ -259,6 +260,7 @@ export function MatchDetailsPage() {
                   key={p.playerId}
                   onClick={() => {
                     if (!isActiveSeason || !isAdmin) return
+                    posthog.capture('toggle_presence_clicked', { player_id: p.playerId, present: !p.present })
                     togglePresence(p.playerId, !p.present)
                   }}
                   style={{
@@ -315,7 +317,10 @@ export function MatchDetailsPage() {
             <Button
               type="dashed"
               block
-              onClick={() => setGoalModalOpen(true)}
+              onClick={() => {
+                posthog.capture('add_goal_modal_opened')
+                setGoalModalOpen(true)
+              }}
               disabled={presentPlayersOptions.length === 0}
               icon={<EditOutlined />}
             >
@@ -372,6 +377,7 @@ export function MatchDetailsPage() {
                         type="text"
                         size="small"
                         onClick={async () => {
+                          posthog.capture('delete_goal_clicked', { goal_id: g.id })
                           try {
                             await deleteGoal(g.id)
                             message.success('Gol removido')
@@ -421,7 +427,10 @@ export function MatchDetailsPage() {
                   <Button
                     type="text"
                     icon={<EditOutlined />}
-                    onClick={() => setEditMatchModalOpen(true)}
+                    onClick={() => {
+                      posthog.capture('edit_match_clicked')
+                      setEditMatchModalOpen(true)
+                    }}
                   />
                 )}
               </div>

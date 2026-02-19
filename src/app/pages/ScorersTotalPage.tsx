@@ -2,6 +2,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Card, List, Avatar, Typography, Space, Tag, Empty } from 'antd'
 import { CalendarOutlined, FireOutlined, AimOutlined } from '@ant-design/icons'
+import posthog from 'posthog-js'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
 import { useSeason } from '../contexts/SeasonContext'
 
@@ -81,7 +82,10 @@ export function ScorersTotalPage() {
                     <Text
                       strong
                       style={{ fontSize: 16, display: 'block', cursor: 'pointer' }}
-                      onClick={() => navigate(`/app/ranking/scorers/${item.id}/goals`)}
+                      onClick={() => {
+                        posthog.capture('scorer_item_clicked', { player_id: item.id, name: item.name })
+                        navigate(`/app/ranking/scorers/${item.id}/goals`)
+                      }}
                     >
                       {item.nickname || item.name}
                     </Text>

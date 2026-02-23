@@ -73,8 +73,6 @@ export function MatchDetailsPage() {
   const [editMatchModalOpen, setEditMatchModalOpen] = React.useState(false)
 
   const [creatingGoal, setCreatingGoal] = React.useState(false)
-  const [syncingPresences, setSyncingPresences] = React.useState(false)
-  const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
   async function load() {
     if (!id) return
@@ -110,43 +108,15 @@ export function MatchDetailsPage() {
     )
     setPresences(updatedPresences)
 
-    // Clear existing timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current)
+    try {
+      await updateMatchPresences(id, [{ playerId, present: value }])
+    } catch (err) {
+      console.error(err)
+      message.error('Erro ao salvar presença')
+      setPresences(originalPresences) // Revert on error
     }
-
-    // Set new timer
-    debounceTimerRef.current = setTimeout(async () => {
-      try {
-        setSyncingPresences(true)
-        // Send the full updated list
-        await updateMatchPresences(
-          id,
-          updatedPresences.map((p) => ({
-            playerId: p.playerId,
-            present: p.present,
-          })),
-        )
-        // message.success(value ? 'Presença confirmada' : 'Presença removida')
-      } catch (err) {
-        console.error(err)
-        message.error('Erro ao sincronizar presenças')
-        setPresences(originalPresences) // Revert on error
-      } finally {
-        setSyncingPresences(false)
-        debounceTimerRef.current = null
-      }
-    }, 800) // 800ms debounce
   }
 
-  // Cleanup on unmount
-  React.useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current)
-      }
-    }
-  }, [])
 
   const presentCount = presences.filter((p) => p.present).length
   const totalPlayers = presences.length
@@ -230,7 +200,6 @@ export function MatchDetailsPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
           <Text strong>Presenças</Text>
           <Space size={8}>
-            {syncingPresences && <Text type="secondary" style={{ fontSize: 12 }}>Sincronizando...</Text>}
             <Text type="secondary" style={{ fontSize: 13 }}>
               {presentCount}/{totalPlayers}
             </Text>

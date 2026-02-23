@@ -439,17 +439,25 @@ export function HomePage() {
                           </Space>
                         }
                         description={
-                          item.lastGoal && (
+                          <Space direction="vertical" size={2}>
+                            {item.lastGoal && (
+                              <Text type="secondary" style={{ fontSize: 11 }}>
+                                Último: {new Date(item.lastGoal.date).toLocaleDateString()}
+                              </Text>
+                            )}
                             <Text type="secondary" style={{ fontSize: 11 }}>
-                              Último: {new Date(item.lastGoal.date).toLocaleDateString()}
+                              <Text strong>{item.matchesPlayed > 0 ? (item.goals / item.matchesPlayed).toFixed(2) : '0.00'}</Text> gols por jogo
                             </Text>
-                          )
+                          </Space>
                         }
                       />
                       <div style={{ textAlign: 'right', minWidth: 60 }}>
                         <Text strong style={{ fontSize: 16 }}>{item.goals}</Text>
-                        <div style={{ fontSize: 12, color: token.colorTextSecondary }}>
+                        <div style={{ fontSize: 12, color: token.colorTextSecondary, lineHeight: 1 }}>
                           gols
+                        </div>
+                        <div style={{ fontSize: 10, color: token.colorTextSecondary }}>
+                          {item.matchesPlayed} jogos
                         </div>
                       </div>
                     </List.Item>

@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Card, List, Avatar, Typography, Space, Tag, Empty } from 'antd'
+import { Button, Card, List, Avatar, Typography, Space, Tag, Empty, theme } from 'antd'
 import { CalendarOutlined, FireOutlined, AimOutlined } from '@ant-design/icons'
 import posthog from 'posthog-js'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
@@ -18,6 +18,7 @@ function DoubleBallIcon() {
 }
 
 export function ScorersTotalPage() {
+  const { token } = theme.useToken()
   const navigate = useNavigate()
   const { season } = useSeason()
   const [loading, setLoading] = React.useState(true)
@@ -94,10 +95,15 @@ export function ScorersTotalPage() {
 
                   <div style={{ textAlign: 'right' }}>
                     <Text strong style={{ fontSize: 20, color: '#16a34a' }}>{item.goals}</Text>
-                    <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>Gols</Text>
-                    <div style={{ marginTop: 4 }}>
+                    <div style={{ fontSize: 12, color: token.colorTextSecondary, lineHeight: 1.2 }}>
+                      Gols
+                    </div>
+                    <div style={{ fontSize: 11, color: token.colorTextSecondary }}>
+                      {item.matchesPlayed} jogos
+                    </div>
+                    <div style={{ marginTop: 6 }}>
                       <Text type="secondary" style={{ fontSize: 11 }}>
-                        Média: <Text strong>{item.matchesPlayed > 0 ? (item.goals / item.matchesPlayed).toFixed(2) : '0.00'}</Text>
+                        <Text strong>{item.matchesPlayed > 0 ? (item.goals / item.matchesPlayed).toFixed(2) : '0.00'}</Text> gols por jogo
                       </Text>
                     </div>
                   </div>

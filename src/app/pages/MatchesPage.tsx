@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { List, Typography, Input, Card, theme, FloatButton, Row, Col, Collapse, Space, Tag, Empty } from 'antd'
+import { List, Typography, Input, Card, theme, FloatButton, Space, Tag, Empty, Divider } from 'antd'
 import posthog from 'posthog-js'
 import {
   CalendarOutlined,
@@ -10,6 +10,7 @@ import {
 } from '@ant-design/icons'
 import { listMatches, type MatchDTO } from '../../services/matches.service'
 import { CreateMatchModal } from '../components/CreateMatchModal'
+import { MonthSummaryModal } from '../components/MonthSummaryModal'
 
 const { Text, Title } = Typography
 
@@ -36,6 +37,8 @@ export function MatchesPage() {
   const [matches, setMatches] = React.useState<MatchDTO[]>([])
   const [filter, setFilter] = React.useState('')
   const [createModalOpen, setCreateModalOpen] = React.useState(false)
+  const [summaryModalOpen, setSummaryModalOpen] = React.useState(false)
+  const [selectedMonthGroup, setSelectedMonthGroup] = React.useState<{ monthYear: string; data: MatchDTO[] } | null>(null)
 
   async function load() {
     if (!season) return
@@ -196,7 +199,6 @@ export function MatchesPage() {
                 </div>
               </div>
 
-              {/* MONTH SUMMARY COLLAPSE */}
               {(() => {
                 const wins = group.data.filter(m => m.ourScore > m.theirScore).length
                 const losses = group.data.filter(m => m.ourScore < m.theirScore).length
@@ -204,104 +206,45 @@ export function MatchesPage() {
                 const goalsFor = group.data.reduce((acc, m) => acc + m.ourScore, 0)
                 const goalsAgainst = group.data.reduce((acc, m) => acc + m.theirScore, 0)
 
-                // Top Scorer
-                const scorers = new Map<string, { count: number, name: string }>()
-                group.data.forEach(m => {
-                  m.goals?.forEach(g => {
-                    if (g.player) {
-                      const current = scorers.get(g.player.name) || { count: 0, name: g.player.nickname || g.player.name }
-                      scorers.set(g.player.name, { ...current, count: current.count + 1 })
-                    }
-                  })
-                })
-                let topScorerText = '-'
-                if (scorers.size > 0) {
-                  const sorted = [...scorers.values()].sort((a, b) => b.count - a.count)
-                  const max = sorted[0].count
-                  const ties = sorted.filter(s => s.count === max)
-                  // Format: Name (X gols)
-                  const suffix = max === 1 ? 'gol' : 'gols'
-                  if (ties.length === 1) {
-                    topScorerText = `${ties[0].name} (${max} ${suffix})`
-                  } else if (ties.length === 2) {
-                    topScorerText = `${ties[0].name}, ${ties[1].name} (${max} ${suffix})`
-                  } else {
-                    topScorerText = `${ties[0].name} e +${ties.length - 1} (${max} ${suffix})`
-                  }
-                }
-
-                // Top Presence
-                const presences = new Map<string, { count: number, name: string }>()
-                group.data.forEach(m => {
-                  m.presences?.forEach(p => {
-                    if (p.player) {
-                      const current = presences.get(p.player.name) || { count: 0, name: p.player.nickname || p.player.name }
-                      presences.set(p.player.name, { ...current, count: current.count + 1 })
-                    }
-                  })
-                })
-                let topPresenceText = '-'
-                if (presences.size > 0) {
-                  const sorted = [...presences.values()].sort((a, b) => b.count - a.count)
-                  const max = sorted[0].count
-                  const ties = sorted.filter(s => s.count === max)
-                  // Format: Name (X jogos)
-                  const suffix = max === 1 ? 'jogo' : 'jogos'
-                  if (ties.length === 1) {
-                    topPresenceText = `${ties[0].name} (${max} ${suffix})`
-                  } else if (ties.length === 2) {
-                    topPresenceText = `${ties[0].name}, ${ties[1].name} (${max} ${suffix})`
-                  } else {
-                    topPresenceText = `${ties[0].name} e +${ties.length - 1} (${max} ${suffix})`
-                  }
-                }
-
-                const header = (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                return (
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    width: '100%',
+                    padding: '8px 12px',
+                    background: token.colorFillQuaternary,
+                    borderRadius: 8,
+                    marginBottom: 16
+                  }}>
                     <Space size={4} wrap>
                       <Tag style={{ margin: 0 }}>{group.data.length} Jogos</Tag>
                       <Tag color="success" style={{ margin: 0 }}>{wins}V</Tag>
                       <Tag color="error" style={{ margin: 0 }}>{losses}D</Tag>
                       {draws > 0 && <Tag color="warning" style={{ margin: 0 }}>{draws}E</Tag>}
+                      <Divider type="vertical" style={{ margin: '0 4px' }} />
+                      <Text style={{ fontSize: 12, fontWeight: 500 }}>
+                        Gols: <span style={{ color: token.colorSuccess }}>{goalsFor}</span> / <span style={{ color: token.colorError }}>{goalsAgainst}</span>
+                      </Text>
                     </Space>
-                    <Text type="secondary" style={{ fontSize: 11, marginLeft: 8 }}>
-                      Ver detalhes
+                    <Text
+                      strong
+                      style={{
+                        fontSize: 11,
+                        cursor: 'pointer',
+                        color: token.colorPrimary,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2
+                      }}
+                      onClick={() => {
+                        setSelectedMonthGroup(group)
+                        setSummaryModalOpen(true)
+                      }}
+                    >
+                      Ver resumo do mês <RightOutlined style={{ fontSize: 9 }} />
                     </Text>
                   </div>
-                )
-
-                return (
-                  <Collapse
-                    size="small"
-                    ghost
-                    style={{ marginBottom: 16, background: token.colorFillQuaternary, borderRadius: 8 }}
-                    items={[{
-                      key: '1',
-                      label: header,
-                      children: (
-                        <div style={{ padding: '0 4px 8px 4px' }}>
-                          <Row gutter={[16, 16]}>
-                            <Col span={12}>
-                              <Text type="secondary" style={{ fontSize: 10, display: 'block' }}>GOLS PRÓ</Text>
-                              <Text strong style={{ color: token.colorSuccess, fontSize: 13 }}>{goalsFor}</Text>
-                            </Col>
-                            <Col span={12}>
-                              <Text type="secondary" style={{ fontSize: 10, display: 'block' }}>GOLS SOFR.</Text>
-                              <Text strong style={{ color: token.colorError, fontSize: 13 }}>{goalsAgainst}</Text>
-                            </Col>
-                            <Col span={12}>
-                              <Text type="secondary" style={{ fontSize: 10, display: 'block', textTransform: 'uppercase' }}>ARTILHEIRO</Text>
-                              <Text strong style={{ display: 'block', lineHeight: 1.2, fontSize: 13 }}>{topScorerText}</Text>
-                            </Col>
-                            <Col span={12}>
-                              <Text type="secondary" style={{ fontSize: 10, display: 'block', textTransform: 'uppercase' }}>MAIS JOGOS</Text>
-                              <Text strong style={{ display: 'block', lineHeight: 1.2, fontSize: 13 }}>{topPresenceText}</Text>
-                            </Col>
-                          </Row>
-                        </div>
-                      )
-                    }]}
-                  />
                 )
               })()}
 
@@ -411,6 +354,16 @@ export function MatchesPage() {
         open={createModalOpen}
         onCancel={() => setCreateModalOpen(false)}
         onSuccess={load}
+      />
+
+      <MonthSummaryModal
+        open={summaryModalOpen}
+        onCancel={() => {
+          setSummaryModalOpen(false)
+          setSelectedMonthGroup(null)
+        }}
+        monthYear={selectedMonthGroup?.monthYear || ''}
+        matches={selectedMonthGroup?.data || []}
       />
     </Space >
   )

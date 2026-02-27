@@ -1,6 +1,7 @@
 import React from 'react'
 import { Modal, Form, Input, Select, Button, Upload, message, theme, Statistic, Divider, Spin } from 'antd'
 import { CameraOutlined, DeleteOutlined, TrophyOutlined, TeamOutlined, FireOutlined } from '@ant-design/icons'
+import { Link } from 'react-router-dom'
 import {
   createPlayer,
   updatePlayer,
@@ -9,6 +10,7 @@ import {
   type PlayerStats,
 } from '../../services/players.service'
 import { useSeason } from '../contexts/SeasonContext'
+import { useTeam } from '../contexts/TeamContext'
 
 const positions = ['Goleiro', 'Zagueiro', 'Lateral', 'Meio-campo', 'Atacante']
 
@@ -69,7 +71,10 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
   const [stats, setStats] = React.useState<PlayerStats | null>(null)
   const [loadingStats, setLoadingStats] = React.useState(false)
   const { token } = theme.useToken()
-  const { season } = useSeason()
+  const { season, isActiveSeason } = useSeason()
+  const { isAdmin } = useTeam()
+
+  const isReadOnly = !isAdmin || !isActiveSeason
 
   React.useEffect(() => {
     if (open) {
@@ -134,9 +139,13 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
   return (
     <Modal
       open={open}
-      title={player ? 'Editar jogador' : 'Adicionar jogador'}
+      title={player ? (isReadOnly ? 'Detalhes do jogador' : 'Editar jogador') : 'Adicionar jogador'}
       onCancel={onClose}
-      footer={[
+      footer={isReadOnly ? [
+        <Button key="close" type="primary" onClick={onClose}>
+          Fechar
+        </Button>
+      ] : [
         <Button key="cancel" onClick={onClose}>
           Cancelar
         </Button>,
@@ -164,14 +173,30 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
               }}
             >
               <Statistic
-                title="Presenças"
+                title={
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                    Presenças
+                    <Link to={`/app/ranking/attendance/${player.id}/matches`} onClick={onClose} style={{ fontSize: 12 }}>
+                      (ver todas)
+                    </Link>
+                  </div>
+                }
                 value={stats.presences}
                 suffix={`/ ${stats.totalMatches}`}
                 prefix={<TeamOutlined />}
                 valueStyle={{ fontSize: 18 }}
               />
               <Statistic
-                title="Gols"
+                title={
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                    Gols
+                    {stats.goals > 0 && (
+                      <Link to={`/app/ranking/scorers/${player.id}/goals`} onClick={onClose} style={{ fontSize: 12 }}>
+                        (ver todos)
+                      </Link>
+                    )}
+                  </div>
+                }
                 value={stats.goals}
                 prefix={<FireOutlined />}
                 valueStyle={{ fontSize: 18 }}
@@ -189,7 +214,7 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
         </>
       )}
 
-      <Form form={form} layout="vertical">
+      <Form form={form} layout="vertical" disabled={isReadOnly}>
         {/* Photo */}
         <div style={{ textAlign: 'center', marginBottom: 16 }}>
           <div
@@ -227,27 +252,29 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
             )}
           </div>
 
-          <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center', gap: 8 }}>
-            <Upload
-              beforeUpload={handlePhotoChange}
-              showUploadList={false}
-              accept="image/*"
-            >
-              <Button size="small" icon={<CameraOutlined />}>
-                {photoBase64 ? 'Trocar' : 'Foto'}
-              </Button>
-            </Upload>
-            {photoBase64 && (
-              <Button
-                size="small"
-                danger
-                icon={<DeleteOutlined />}
-                onClick={() => setPhotoBase64(null)}
+          {!isReadOnly && (
+            <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center', gap: 8 }}>
+              <Upload
+                beforeUpload={handlePhotoChange}
+                showUploadList={false}
+                accept="image/*"
               >
-                Remover
-              </Button>
-            )}
-          </div>
+                <Button size="small" icon={<CameraOutlined />}>
+                  {photoBase64 ? 'Trocar' : 'Foto'}
+                </Button>
+              </Upload>
+              {photoBase64 && (
+                <Button
+                  size="small"
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={() => setPhotoBase64(null)}
+                >
+                  Remover
+                </Button>
+              )}
+            </div>
+          )}
         </div>
 
         <Form.Item

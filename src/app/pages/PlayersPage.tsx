@@ -151,7 +151,7 @@ export function PlayersPage() {
               style={{
                 borderRadius: 12,
                 background: player.active ? undefined : '#f5f5f5',
-                cursor: (isActiveSeason && isAdmin) ? 'pointer' : 'default',
+                cursor: 'pointer',
               }}
               styles={{
                 body: {
@@ -161,7 +161,6 @@ export function PlayersPage() {
                 },
               }}
               onClick={() => {
-                if (!isActiveSeason || !isAdmin) return
                 setEditingPlayer(player)
                 setModalOpen(true)
               }}
@@ -179,6 +178,8 @@ export function PlayersPage() {
                   {player.position ? (
                     <Text style={{ marginLeft: 8 }}>({player.position})</Text>
                   ) : null}
+                  <br />
+                  <Text type="secondary" style={{ fontSize: 11 }}>Clique para ver detalhes</Text>
                 </div>
               </div>
 

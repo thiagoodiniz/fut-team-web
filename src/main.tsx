@@ -26,9 +26,15 @@ const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN
 const STORAGE_VERSION = '2'
 const currentVersion = localStorage.getItem('storage_version')
 if (currentVersion !== STORAGE_VERSION) {
+  const wasLoggedIn = !!localStorage.getItem('token')
   localStorage.clear()
   sessionStorage.clear()
   localStorage.setItem('storage_version', STORAGE_VERSION)
+
+  // If user was logged in, force a hard redirect to login page with update flag
+  if (wasLoggedIn) {
+    window.location.href = '/login?update=1'
+  }
 }
 
 if (POSTHOG_KEY) {
@@ -98,7 +104,6 @@ function ApiHealthGate({ children }: { children: React.ReactNode }) {
           centered
           footer={null}
           closable={false}
-          maskClosable={false}
           keyboard={false}
           width={460}
         >

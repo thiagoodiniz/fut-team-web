@@ -34,8 +34,18 @@ export function AppShell() {
 
   const activeTab = getActiveTab(location.pathname)
 
+  // Auth check — main.tsx already handles storage_version cleanup on page reload
   const authData = localStorage.getItem('auth')
-  const auth = authData ? JSON.parse(authData) : null
+  let auth: { teamId?: string; userId?: string } | null = null
+  try {
+    auth = authData ? JSON.parse(authData) : null
+  } catch {
+    auth = null
+  }
+
+  if (!auth?.userId) {
+    return <Navigate to="/login" replace />
+  }
 
   if (!auth?.teamId) {
     return <Navigate to="/onboarding" replace />

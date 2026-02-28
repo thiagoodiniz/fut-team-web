@@ -104,16 +104,23 @@ export function TeamPage() {
 
     return (
         <Space direction="vertical" size={24} style={{ width: '100%' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <Title level={4} style={{ margin: 0 }}>Meu time</Title>
-                {isAdmin && (
+                <Space wrap>
                     <Button
-                        icon={<UserOutlined />}
-                        onClick={() => navigate('/app/team/members')}
+                        onClick={() => navigate('/onboarding')}
                     >
-                        Gerenciar Membros
+                        Trocar de Time
                     </Button>
-                )}
+                    {isAdmin && (
+                        <Button
+                            icon={<UserOutlined />}
+                            onClick={() => navigate('/app/team/members')}
+                        >
+                            Gerenciar Membros
+                        </Button>
+                    )}
+                </Space>
             </div>
 
             <Card style={{ borderRadius: 16 }}>

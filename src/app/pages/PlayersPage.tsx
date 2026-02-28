@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-  Button,
   Card,
   Empty,
   Space,
@@ -13,12 +12,11 @@ import {
   Skeleton,
   theme,
 } from 'antd'
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
+import { PlusOutlined } from '@ant-design/icons'
 
 import {
   listPlayers,
   updatePlayer,
-  deletePlayer,
   type PlayerDTO,
 } from '../../services/players.service'
 import { AddPlayerModal } from '../components/AddPlayerModal'
@@ -39,7 +37,6 @@ export function PlayersPage() {
   const [editingPlayer, setEditingPlayer] = React.useState<PlayerDTO | null>(null)
 
   const [updatingPlayerId, setUpdatingPlayerId] = React.useState<string | null>(null)
-  const [deletingPlayerId, setDeletingPlayerId] = React.useState<string | null>(null)
 
   const [filter, setFilter] = React.useState('')
 
@@ -72,19 +69,6 @@ export function PlayersPage() {
     }
   }
 
-  async function removePlayer(player: PlayerDTO) {
-    try {
-      setDeletingPlayerId(player.id)
-      await deletePlayer(player.id)
-      message.success('Jogador removido!')
-      await loadPlayers()
-    } catch (err) {
-      console.error(err)
-      message.error('Erro ao deletar jogador')
-    } finally {
-      setDeletingPlayerId(null)
-    }
-  }
 
   const sortedPlayers = [...players].sort((a, b) => {
     // 1. Ativos primeiro
@@ -185,25 +169,13 @@ export function PlayersPage() {
 
               <Space size={10}>
                 {isActiveSeason && isAdmin && (
-                  <>
-                    <span onClick={(e) => e.stopPropagation()}>
-                      <Switch
-                        checked={player.active}
-                        onChange={() => toggleActive(player)}
-                        loading={updatingPlayerId === player.id}
-                      />
-                    </span>
-
-                    <Button
-                      type="text"
-                      icon={<DeleteOutlined />}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        removePlayer(player)
-                      }}
-                      loading={deletingPlayerId === player.id}
+                  <span onClick={(e) => e.stopPropagation()}>
+                    <Switch
+                      checked={player.active}
+                      onChange={() => toggleActive(player)}
+                      loading={updatingPlayerId === player.id}
                     />
-                  </>
+                  </span>
                 )}
               </Space>
             </Card>

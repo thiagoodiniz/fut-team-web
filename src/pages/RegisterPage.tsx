@@ -20,8 +20,9 @@ type LoginResponse = {
         id: string
         name: string
         slug: string
-        role: 'OWNER' | 'ADMIN' | 'MEMBER'
+        role: 'ADMIN' | 'MEMBER'
     }
+    isManager?: boolean
     onboarding?: boolean
     pendingRequest?: {
         teamName: string
@@ -39,12 +40,14 @@ export function RegisterPage() {
 
     async function handleLoginSuccess(data: LoginResponse) {
         localStorage.setItem('token', data.token)
+        localStorage.setItem('storage_version', '2')
         localStorage.setItem('auth', JSON.stringify({
             userId: data.user.id,
             teamId: data.team?.id,
             name: data.user.name,
             email: data.user.email,
             role: data.team?.role,
+            isManager: data.isManager ?? false,
         }))
 
         const isBlocked = applyAnalyticsPreferenceByEmail(data.user.email)

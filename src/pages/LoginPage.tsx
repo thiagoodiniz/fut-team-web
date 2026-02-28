@@ -21,8 +21,9 @@ type LoginResponse = {
     id: string
     name: string
     slug: string
-    role: 'OWNER' | 'ADMIN' | 'MEMBER'
+    role: 'ADMIN' | 'MEMBER'
   }
+  isManager?: boolean
   onboarding?: boolean
   pendingRequest?: {
     teamName: string
@@ -35,17 +36,28 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false)
   const { token: antdToken } = theme.useToken()
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('update') === '1') {
+      message.info('Aplicativo atualizado! Por favor, faça login novamente para continuar.')
+      // Limpa os parâmetros da URL sem recarregar a página
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
+  }, [])
+
   const token = localStorage.getItem('token')
   if (token) return <Navigate to="/app/home" replace />
 
   async function handleLoginSuccess(data: LoginResponse) {
     localStorage.setItem('token', data.token)
+    localStorage.setItem('storage_version', '2')
     localStorage.setItem('auth', JSON.stringify({
       userId: data.user.id,
       teamId: data.team?.id,
       name: data.user.name,
       email: data.user.email,
       role: data.team?.role,
+      isManager: data.isManager ?? false,
     }))
 
     const isBlocked = applyAnalyticsPreferenceByEmail(data.user.email)

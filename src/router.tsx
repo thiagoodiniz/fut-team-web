@@ -47,6 +47,7 @@ export const router = createBrowserRouter([
       {
         element: <AppShell />,
         children: [
+          { index: true, element: <Navigate to="home" replace /> },
           { path: 'home', element: <HomePage /> },
           { path: 'matches', element: <MatchesPage /> },
           { path: 'matches/:id', element: <MatchDetailsPage /> },

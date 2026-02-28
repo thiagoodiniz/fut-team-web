@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Card, Input, List, Button, Typography, Space, theme, message, Avatar, Empty } from 'antd'
-import { SearchOutlined, RocketOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons'
+import { useState, useEffect } from 'react'
+import { Card, Input, List, Button, Typography, Space, theme, message, Avatar, Empty, Form, Modal } from 'antd'
+import { SearchOutlined, PlusCircleOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons'
 import { api } from '../../services/api'
 import { useLocation, useNavigate } from 'react-router-dom'
 
@@ -11,6 +11,9 @@ export function JoinTeamPage() {
     const [teams, setTeams] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
     const [requesting, setRequesting] = useState<string | null>(null)
+    const [createModalOpen, setCreateModalOpen] = useState(false)
+    const [creating, setCreating] = useState(false)
+    const [form] = Form.useForm()
 
     const location = useLocation()
     const navigate = useNavigate()
@@ -18,11 +21,16 @@ export function JoinTeamPage() {
 
     const pendingRequest = location.state?.pendingRequest
 
+    // Read isManager from localStorage
+    const authData = localStorage.getItem('auth')
+    const auth = authData ? JSON.parse(authData) : null
+    const isManager = auth?.isManager === true
+
+    useEffect(() => {
+        handleSearch('')
+    }, [])
+
     async function handleSearch(val: string) {
-        if (val.length < 2) {
-            setTeams([])
-            return
-        }
         try {
             setLoading(true)
             const { data } = await api.get('/teams/search', { params: { q: val } })
@@ -35,23 +43,62 @@ export function JoinTeamPage() {
     async function handleJoin(teamId: string) {
         try {
             setRequesting(teamId)
-            await api.post('/teams/join', { teamId })
-            message.success('Solicitação enviada com sucesso!')
+            const { data } = await api.post('/teams/join-direct', { teamId })
 
-            // Update local state to show pending message
-            navigate('/onboarding', {
-                replace: true,
-                state: {
-                    pendingRequest: {
-                        teamName: teams.find(t => t.id === teamId)?.name || 'Time',
-                        createdAt: new Date().toISOString()
-                    }
-                }
-            })
+            // Update localStorage so AppShell can navigate correctly
+            if (data.token) {
+                localStorage.setItem('token', data.token)
+                localStorage.setItem('storage_version', '2')
+                const authData = localStorage.getItem('auth')
+                const auth = authData ? JSON.parse(authData) : {}
+                localStorage.setItem('auth', JSON.stringify({
+                    ...auth,
+                    userId: auth.userId || data.userId, // Ensure userId is never lost
+                    teamId: data.teamId,
+                    role: data.role,
+                    isManager: auth.isManager ?? data.isManager ?? false,
+                }))
+            }
+
+            message.success('Você entrou no time com sucesso!')
+            window.location.href = '/app/home'
         } catch (err: any) {
-            message.error(err?.response?.data?.error ?? 'Erro ao enviar solicitação')
+            message.error(err?.response?.data?.error ?? 'Erro ao entrar no time')
         } finally {
             setRequesting(null)
+        }
+    }
+
+    async function handleCreateTeam(values: { name: string; slug: string }) {
+        try {
+            setCreating(true)
+            const { data } = await api.post('/teams', values)
+
+            if (data.token) {
+                localStorage.setItem('token', data.token)
+                localStorage.setItem('storage_version', '2')
+                const authData = localStorage.getItem('auth')
+                const auth = authData ? JSON.parse(authData) : {}
+                localStorage.setItem('auth', JSON.stringify({
+                    ...auth,
+                    userId: auth.userId || data.userId,
+                    teamId: data.teamId,
+                    role: 'ADMIN',
+                    isManager: auth.isManager ?? data.isManager ?? false,
+                }))
+            }
+
+            message.success('Time criado com sucesso!')
+            window.location.href = '/app/home'
+        } catch (err: any) {
+            const errorCode = err?.response?.data?.error
+            if (errorCode === 'SLUG_ALREADY_EXISTS') {
+                message.error('Esse slug já está em uso. Escolha outro.')
+            } else {
+                message.error(errorCode ?? 'Erro ao criar time')
+            }
+        } finally {
+            setCreating(false)
         }
     }
 
@@ -97,7 +144,7 @@ export function JoinTeamPage() {
                     >
                         <Input
                             prefix={<SearchOutlined style={{ color: token.colorTextSecondary }} />}
-                            placeholder="Digite o nome ou slug do time..."
+                            placeholder="Buscar pelo nome ou slug do time..."
                             size="large"
                             onChange={(e) => {
                                 setQuery(e.target.value)
@@ -113,7 +160,7 @@ export function JoinTeamPage() {
                                 emptyText: query.length >= 2 ?
                                     <Empty description="Nenhum time encontrado com esse nome" /> :
                                     <div style={{ padding: '20px 0' }}>
-                                        <Text type="secondary">Digite pelo menos 2 caracteres para buscar</Text>
+                                        <Text type="secondary">Inicie uma busca ou escolha um time abaixo</Text>
                                     </div>
                             }}
                             renderItem={(team) => (
@@ -126,7 +173,7 @@ export function JoinTeamPage() {
                                             icon={<CheckCircleOutlined />}
                                             style={{ borderRadius: 8 }}
                                         >
-                                            Solicitar Entrada
+                                            Entrar no Time
                                         </Button>
                                     ]}
                                     style={{ borderBottom: '1px solid #f0f0f0', padding: '20px 0' }}
@@ -141,25 +188,28 @@ export function JoinTeamPage() {
                         />
                     </Card>
 
-                    <Card
-                        styles={{ body: { padding: 32 } }}
-                        style={{ borderRadius: 24, border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', background: 'linear-gradient(to right, #ffffff, #f8fafc)' }}
-                    >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
-                            <div style={{ flex: 1 }}>
-                                <Title level={4} style={{ margin: '0 0 4px 0' }}>Criar seu próprio Time</Title>
-                                <Text type="secondary">Comece uma nova temporada e gerencie seus próprios jogadores.</Text>
+                    {isManager && (
+                        <Card
+                            styles={{ body: { padding: 32 } }}
+                            style={{ borderRadius: 24, border: `1px solid ${token.colorPrimaryBorder}`, boxShadow: '0 10px 30px rgba(0,0,0,0.05)', background: `linear-gradient(to right, ${token.colorPrimaryBg}, #f8fafc)` }}
+                        >
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
+                                <div style={{ flex: 1 }}>
+                                    <Title level={4} style={{ margin: '0 0 4px 0' }}>Criar novo Time</Title>
+                                    <Text type="secondary">Crie e gerencie um novo time como administrador.</Text>
+                                </div>
+                                <Button
+                                    type="primary"
+                                    icon={<PlusCircleOutlined />}
+                                    size="large"
+                                    style={{ borderRadius: 12 }}
+                                    onClick={() => setCreateModalOpen(true)}
+                                >
+                                    Criar Time
+                                </Button>
                             </div>
-                            <Button
-                                icon={<RocketOutlined />}
-                                size="large"
-                                style={{ borderRadius: 12 }}
-                                onClick={() => message.info('A criação de times automotiva está em desenvolvimento.')}
-                            >
-                                Em breve
-                            </Button>
-                        </div>
-                    </Card>
+                        </Card>
+                    )}
                 </Space>
 
                 <div style={{ textAlign: 'center', marginTop: 48 }}>
@@ -175,6 +225,59 @@ export function JoinTeamPage() {
                     </Button>
                 </div>
             </div>
+
+            {/* Create Team Modal - only visible to managers */}
+            <Modal
+                title="Criar novo Time"
+                open={createModalOpen}
+                onCancel={() => { setCreateModalOpen(false); form.resetFields() }}
+                onOk={() => form.submit()}
+                okText="Criar Time"
+                cancelText="Cancelar"
+                confirmLoading={creating}
+                mask={{ closable: false }}
+            >
+                <Form
+                    form={form}
+                    layout="vertical"
+                    onFinish={handleCreateTeam}
+                    style={{ marginTop: 16 }}
+                >
+                    <Form.Item
+                        label="Nome do Time"
+                        name="name"
+                        rules={[{ required: true, message: 'O nome é obrigatório', min: 2 }]}
+                    >
+                        <Input
+                            placeholder="Ex: Galáticos FC"
+                            size="large"
+                            onChange={(e) => {
+                                // Auto-generate slug from name
+                                const slug = e.target.value
+                                    .toLowerCase()
+                                    .normalize('NFD')
+                                    .replace(/[\u0300-\u036f]/g, '')
+                                    .replace(/[^a-z0-9\s-]/g, '')
+                                    .replace(/\s+/g, '-')
+                                    .replace(/-+/g, '-')
+                                    .trim()
+                                form.setFieldValue('slug', slug)
+                            }}
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        label="Slug (identificador único)"
+                        name="slug"
+                        rules={[
+                            { required: true, message: 'O slug é obrigatório' },
+                            { pattern: /^[a-z0-9-]+$/, message: 'Apenas letras minúsculas, números e hífens' }
+                        ]}
+                        extra="Usado na URL do time. Gerado automaticamente a partir do nome."
+                    >
+                        <Input placeholder="ex: galaticos-fc" size="large" />
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     )
 }

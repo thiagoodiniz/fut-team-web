@@ -65,7 +65,15 @@ export function LoginPage() {
       posthog.identify(data.user.id, {
         name: data.user.name,
         email: data.user.email,
+        team_id: data.team?.id,
       })
+
+      if (data.team?.id) {
+        posthog.group('team', data.team.id, {
+          name: data.team.name,
+          slug: data.team.slug,
+        })
+      }
     }
 
     if (data.onboarding || !data.team) {

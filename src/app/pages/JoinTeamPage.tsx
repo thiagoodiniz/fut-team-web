@@ -3,6 +3,7 @@ import { Card, Input, List, Button, Typography, Space, theme, message, Avatar, E
 import { SearchOutlined, PlusCircleOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons'
 import { api } from '../../services/api'
 import { useLocation, useNavigate } from 'react-router-dom'
+import posthog from 'posthog-js'
 
 const { Title, Text } = Typography
 
@@ -58,6 +59,13 @@ export function JoinTeamPage() {
                     role: data.role,
                     isManager: auth.isManager ?? data.isManager ?? false,
                 }))
+
+                // Track team context in PostHog
+                posthog.group('team', data.teamId)
+                posthog.capture('team_joined', {
+                    team_id: data.teamId,
+                    role: data.role
+                })
             }
 
             message.success('Você entrou no time com sucesso!')
@@ -86,6 +94,17 @@ export function JoinTeamPage() {
                     role: 'ADMIN',
                     isManager: auth.isManager ?? data.isManager ?? false,
                 }))
+
+                // Track team context in PostHog
+                posthog.group('team', data.teamId, {
+                    name: values.name,
+                    slug: values.slug
+                })
+                posthog.capture('team_created', {
+                    team_id: data.teamId,
+                    name: values.name,
+                    slug: values.slug
+                })
             }
 
             message.success('Time criado com sucesso!')

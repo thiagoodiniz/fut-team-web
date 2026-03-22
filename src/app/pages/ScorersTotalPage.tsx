@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Card, List, Avatar, Typography, Space, Tag, Empty, theme } from 'antd'
+import { Button, Card, List, Avatar, Typography, Space, Tag, Empty, theme, FloatButton } from 'antd'
 import { CalendarOutlined, FireOutlined, AimOutlined } from '@ant-design/icons'
 import posthog from 'posthog-js'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
@@ -44,7 +44,7 @@ export function ScorersTotalPage() {
   const scorers = stats?.topScorers || []
 
   return (
-    <Space direction="vertical" size={16} style={{ width: '100%' }}>
+    <Space direction="vertical" size={16} style={{ width: '100%', paddingBottom: 16 }}>
       <Card styles={{ body: { padding: 0 } }}>
         <List
           dataSource={scorers}
@@ -165,6 +165,14 @@ export function ScorersTotalPage() {
           )}
         />
       </Card>
+
+      <FloatButton.BackTop
+        style={{
+          right: '50%',
+          transform: 'translateX(50%)',
+          bottom: 92,
+        }}
+      />
     </Space>
   )
 }

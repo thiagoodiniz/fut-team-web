@@ -91,7 +91,7 @@ export function PlayersPage() {
   const totalPlayersCount = players.length
 
   return (
-    <div style={{ position: 'relative', width: '100%', marginBottom: 46 }}>
+    <div style={{ position: 'relative', width: '100%', marginBottom: 46, paddingBottom: 16 }}>
       {/* Filtro e Contagem */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
         <Search
@@ -205,6 +205,14 @@ export function PlayersPage() {
         onClose={() => setModalOpen(false)}
         onSaved={loadPlayers}
         player={editingPlayer ?? undefined}
+      />
+
+      <FloatButton.BackTop
+        style={{
+          right: '50%',
+          transform: 'translateX(50%)',
+          bottom: 92,
+        }}
       />
     </div>
   )

@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Card, List, Avatar, Typography, Space, Progress, Empty } from 'antd'
+import { Button, Card, List, Avatar, Typography, Space, Progress, Empty, FloatButton } from 'antd'
 import { CalendarOutlined } from '@ant-design/icons'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
 import { useSeason } from '../contexts/SeasonContext'
@@ -33,7 +33,7 @@ export function AttendanceTotalPage() {
     const attendanceList = stats?.attendance || []
 
     return (
-        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+        <Space direction="vertical" size={16} style={{ width: '100%', paddingBottom: 16 }}>
             <Card styles={{ body: { padding: 0 } }}>
                 <List
                     dataSource={attendanceList}
@@ -104,6 +104,14 @@ export function AttendanceTotalPage() {
                     )}
                 />
             </Card>
+
+            <FloatButton.BackTop
+                style={{
+                    right: '50%',
+                    transform: 'translateX(50%)',
+                    bottom: 92,
+                }}
+            />
         </Space>
     )
 }

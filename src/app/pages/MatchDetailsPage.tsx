@@ -14,6 +14,7 @@ import {
   theme,
   Input,
   Avatar,
+  FloatButton,
 } from 'antd'
 import posthog from 'posthog-js'
 import {
@@ -195,82 +196,6 @@ export function MatchDetailsPage() {
 
   const collapseItems = [
     {
-      key: 'presences',
-      label: (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-          <Text strong>Presenças</Text>
-          <Space size={8}>
-            <Text type="secondary" style={{ fontSize: 13 }}>
-              {presentCount}/{totalPlayers}
-            </Text>
-          </Space>
-        </div>
-      ),
-      children: presences.length === 0 ? (
-        <Empty
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description="Nenhuma presença registrada"
-        />
-      ) : (
-        <Space orientation="vertical" size={12} style={{ width: '100%' }}>
-          <Input.Search
-            placeholder="Filtrar por nome ou apelido"
-            allowClear
-            onChange={(e) => setPresenceFilter(e.target.value)}
-            style={{ width: '100%' }}
-          />
-
-          {filteredPresences.length === 0 ? (
-            <Empty description="Nenhum jogador encontrado" />
-          ) : (
-            <Space orientation="vertical" size={10} style={{ width: '100%' }}>
-              {filteredPresences.map((p) => (
-                <div
-                  key={p.playerId}
-                  onClick={() => {
-                    if (!isActiveSeason || !isAdmin) return
-                    posthog.capture('toggle_presence_clicked', { player_id: p.playerId, present: !p.present })
-                    togglePresence(p.playerId, !p.present)
-                  }}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    gap: 12,
-                    alignItems: 'center',
-                    padding: '10px 12px',
-                    borderRadius: 12,
-                    background: token.colorFillQuaternary,
-                    opacity: p.present ? 1 : 0.7,
-                    cursor: isActiveSeason && isAdmin ? 'pointer' : 'default',
-                  }}
-                >
-                  <div style={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <Avatar size={34} src={p.player.photo ?? undefined}>
-                      {(p.player.nickname || p.player.name)?.[0]}
-                    </Avatar>
-                    <div style={{ minWidth: 0 }}>
-                      <Text strong style={{ display: 'block' }}>
-                        {p.player.nickname || p.player.name}
-                      </Text>
-                      <Text type="secondary" style={{ fontSize: 12 }}>
-                        {p.player.name}
-                      </Text>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={p.present}
-                    disabled={!isActiveSeason || !isAdmin}
-                    onClick={(_, event) => event.stopPropagation()}
-                    onChange={(val) => togglePresence(p.playerId, val)}
-                  />
-                </div>
-              ))}
-            </Space>
-          )}
-        </Space>
-      ),
-    },
-    {
       key: 'goals',
       label: (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -372,10 +297,86 @@ export function MatchDetailsPage() {
         </Space>
       ),
     },
+    {
+      key: 'presences',
+      label: (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <Text strong>Presenças</Text>
+          <Space size={8}>
+            <Text type="secondary" style={{ fontSize: 13 }}>
+              {presentCount}/{totalPlayers}
+            </Text>
+          </Space>
+        </div>
+      ),
+      children: presences.length === 0 ? (
+        <Empty
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          description="Nenhuma presença registrada"
+        />
+      ) : (
+        <Space orientation="vertical" size={12} style={{ width: '100%' }}>
+          <Input.Search
+            placeholder="Filtrar por nome ou apelido"
+            allowClear
+            onChange={(e) => setPresenceFilter(e.target.value)}
+            style={{ width: '100%' }}
+          />
+
+          {filteredPresences.length === 0 ? (
+            <Empty description="Nenhum jogador encontrado" />
+          ) : (
+            <Space orientation="vertical" size={10} style={{ width: '100%' }}>
+              {filteredPresences.map((p) => (
+                <div
+                  key={p.playerId}
+                  onClick={() => {
+                    if (!isActiveSeason || !isAdmin) return
+                    posthog.capture('toggle_presence_clicked', { player_id: p.playerId, present: !p.present })
+                    togglePresence(p.playerId, !p.present)
+                  }}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: 12,
+                    alignItems: 'center',
+                    padding: '10px 12px',
+                    borderRadius: 12,
+                    background: token.colorFillQuaternary,
+                    opacity: p.present ? 1 : 0.7,
+                    cursor: isActiveSeason && isAdmin ? 'pointer' : 'default',
+                  }}
+                >
+                  <div style={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <Avatar size={34} src={p.player.photo ?? undefined}>
+                      {(p.player.nickname || p.player.name)?.[0]}
+                    </Avatar>
+                    <div style={{ minWidth: 0 }}>
+                      <Text strong style={{ display: 'block' }}>
+                        {p.player.nickname || p.player.name}
+                      </Text>
+                      <Text type="secondary" style={{ fontSize: 12 }}>
+                        {p.player.name}
+                      </Text>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={p.present}
+                    disabled={!isActiveSeason || !isAdmin}
+                    onClick={(_, event) => event.stopPropagation()}
+                    onChange={(val) => togglePresence(p.playerId, val)}
+                  />
+                </div>
+              ))}
+            </Space>
+          )}
+        </Space>
+      ),
+    },
   ]
 
   return (
-    <Space orientation="vertical" size={14} style={{ width: '100%' }}>
+    <Space orientation="vertical" size={14} style={{ width: '100%', paddingBottom: 16 }}>
       {/* Card principal do jogo */}
       <Card>
         <Space orientation="vertical" size={10} style={{ width: '100%' }}>
@@ -442,7 +443,7 @@ export function MatchDetailsPage() {
 
       <Collapse
         items={collapseItems}
-        defaultActiveKey={['presences', 'goals']}
+        defaultActiveKey={['goals', 'presences']}
         ghost
         style={{ background: token.colorBgContainer, borderRadius: token.borderRadius }}
       />
@@ -471,6 +472,14 @@ export function MatchDetailsPage() {
             console.error(err)
             message.error('Erro ao remover jogo')
           }
+        }}
+      />
+
+      <FloatButton.BackTop
+        style={{
+          right: '50%',
+          transform: 'translateX(50%)',
+          bottom: 92,
         }}
       />
     </Space>

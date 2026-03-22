@@ -112,7 +112,7 @@ export function MatchesPage() {
   }
 
   return (
-    <Space direction="vertical" size={14} style={{ width: '100%' }}>
+    <Space direction="vertical" size={14} style={{ width: '100%', paddingBottom: 16 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Title level={4} style={{ margin: 0 }}>
           Jogos
@@ -365,6 +365,14 @@ export function MatchesPage() {
         monthYear={selectedMonthGroup?.monthYear || ''}
         matches={selectedMonthGroup?.data || []}
       />
-    </Space >
+
+      <FloatButton.BackTop
+        style={{
+          right: '50%',
+          transform: 'translateX(50%)',
+          bottom: 92,
+        }}
+      />
+    </Space>
   )
 }

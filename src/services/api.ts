@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { router } from '../router'
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -19,6 +20,7 @@ api.interceptors.response.use(
   (error) => {
     if (error?.response?.status === 401) {
       localStorage.removeItem('token')
+      router.navigate('/login')
     }
 
     return Promise.reject(error)

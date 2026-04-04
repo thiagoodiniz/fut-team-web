@@ -7,10 +7,9 @@ import {
   TeamOutlined,
   SettingOutlined,
 } from '@ant-design/icons'
-
 import posthog from 'posthog-js'
-import { PostHogPageviewTracker } from '../../components/PostHogPageviewTracker'
 
+import { PostHogPageviewTracker } from '../../components/PostHogPageviewTracker'
 import { AppHeader } from './AppHeader'
 import { useAppHeader } from '../hooks/useAppHeader'
 import { SeasonProvider } from '../contexts/SeasonContext'
@@ -32,10 +31,10 @@ export function AppShell() {
   const navigate = useNavigate()
   const location = useLocation()
   const { title, showBack } = useAppHeader()
+  const { token } = theme.useToken()
 
   const activeTab = getActiveTab(location.pathname)
 
-  // Auth check — main.tsx already handles storage_version cleanup on page reload
   const authData = localStorage.getItem('auth')
   let auth: { teamId?: string; userId?: string } | null = null
   try {
@@ -44,13 +43,8 @@ export function AppShell() {
     auth = null
   }
 
-  if (!auth?.userId) {
-    return <Navigate to="/login" replace />
-  }
-
-  if (!auth?.teamId) {
-    return <Navigate to="/onboarding" replace />
-  }
+  if (!auth?.userId) return <Navigate to="/login" replace />
+  if (!auth?.teamId) return <Navigate to="/onboarding" replace />
 
   function onTabClick(key: TabKey) {
     posthog.capture('bottom_tab_clicked', { tab: key })
@@ -62,55 +56,28 @@ export function AppShell() {
       <ThemeProvider>
         <SeasonProvider>
           <PostHogPageviewTracker />
-          <AppShellInner
-            title={title}
-            showBack={showBack}
-            activeTab={activeTab}
-            onTabClick={onTabClick}
-          />
+          <Layout style={{ minHeight: '100dvh', background: token.colorBgLayout }}>
+            <AppHeader title={title} showBack={showBack} />
+            <Content style={{ padding: '74px 14px calc(76px + env(safe-area-inset-bottom)) 14px' }}>
+              <Outlet />
+            </Content>
+            <BottomTabs activeTab={activeTab} onTabClick={onTabClick} />
+          </Layout>
         </SeasonProvider>
       </ThemeProvider>
     </TeamProvider>
   )
 }
 
-function AppShellInner({
-  title,
-  showBack,
+function BottomTabs({
   activeTab,
-  onTabClick
+  onTabClick,
 }: {
-  title: string,
-  showBack: boolean,
-  activeTab: TabKey,
+  activeTab: TabKey
   onTabClick: (key: TabKey) => void
 }) {
   const { token } = theme.useToken()
 
-  return (
-    <Layout style={{ minHeight: '100dvh', background: token.colorBgLayout }}>
-      <AppHeader title={title} showBack={showBack} />
-
-      {/* Conteúdo precisa dar espaço pro header fixo */}
-      <Content style={{ padding: '74px 14px 92px 14px' }}>
-        <Outlet />
-      </Content>
-
-      <BottomTabs activeTab={activeTab} onTabClick={onTabClick} token={token} />
-    </Layout>
-  )
-}
-
-function BottomTabs({
-  activeTab,
-  onTabClick,
-  token,
-}: {
-  activeTab: TabKey
-  onTabClick: (key: TabKey) => void
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  token: any
-}) {
   return (
     <nav
       style={{
@@ -118,48 +85,20 @@ function BottomTabs({
         left: 0,
         right: 0,
         bottom: 0,
-        height: 76,
+        height: 'calc(60px + env(safe-area-inset-bottom))',
+        paddingBottom: 'env(safe-area-inset-bottom)',
         zIndex: 1000,
-
         display: 'grid',
         gridTemplateColumns: 'repeat(4, 1fr)',
-
         background: token.colorBgElevated,
         borderTop: `1px solid ${token.colorBorderSecondary}`,
-        backdropFilter: 'blur(10px)',
+        backdropFilter: 'blur(12px)',
       }}
     >
-      <TabButton
-        active={activeTab === 'home'}
-        icon={<HomeOutlined style={{ fontSize: 20 }} />}
-        label="Home"
-        onClick={() => onTabClick('home')}
-        token={token}
-      />
-
-      <TabButton
-        active={activeTab === 'matches'}
-        icon={<CalendarOutlined style={{ fontSize: 20 }} />}
-        label="Jogos"
-        onClick={() => onTabClick('matches')}
-        token={token}
-      />
-
-      <TabButton
-        active={activeTab === 'players'}
-        icon={<TeamOutlined style={{ fontSize: 20 }} />}
-        label="Jogadores"
-        onClick={() => onTabClick('players')}
-        token={token}
-      />
-
-      <TabButton
-        active={activeTab === 'team'}
-        icon={<SettingOutlined style={{ fontSize: 20 }} />}
-        label="Meu time"
-        onClick={() => onTabClick('team')}
-        token={token}
-      />
+      <TabButton active={activeTab === 'home'} icon={<HomeOutlined />} label="Home" onClick={() => onTabClick('home')} />
+      <TabButton active={activeTab === 'matches'} icon={<CalendarOutlined />} label="Jogos" onClick={() => onTabClick('matches')} />
+      <TabButton active={activeTab === 'players'} icon={<TeamOutlined />} label="Jogadores" onClick={() => onTabClick('players')} />
+      <TabButton active={activeTab === 'team'} icon={<SettingOutlined />} label="Meu time" onClick={() => onTabClick('team')} />
     </nav>
   )
 }
@@ -169,15 +108,14 @@ function TabButton({
   icon,
   label,
   onClick,
-  token,
 }: {
   active: boolean
   icon: React.ReactNode
   label: string
   onClick: () => void
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  token: any
 }) {
+  const { token } = theme.useToken()
+
   return (
     <button
       type="button"
@@ -186,20 +124,37 @@ function TabButton({
         appearance: 'none',
         border: 0,
         background: 'transparent',
-
+        cursor: 'pointer',
+        WebkitTapHighlightColor: 'transparent',
         display: 'flex',
         flexDirection: 'column',
-        gap: 6,
         alignItems: 'center',
         justifyContent: 'center',
-
+        gap: 4,
+        padding: '6px 4px',
         color: active ? token.colorPrimary : token.colorTextSecondary,
         fontSize: 11,
-        fontWeight: active ? 700 : 500,
+        fontWeight: active ? 600 : 400,
+        transition: 'color 0.2s',
       }}
     >
-      {icon}
-      <span>{label}</span>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 44,
+          height: 28,
+          borderRadius: 14,
+          fontSize: 20,
+          background: active ? token.colorPrimaryBg : 'transparent',
+          transition: 'background 0.2s',
+        }}
+      >
+        {icon}
+      </div>
+      <span style={{ lineHeight: 1 }}>{label}</span>
     </button>
   )
 }
+

@@ -95,7 +95,7 @@ function BottomTabs({
         backdropFilter: 'blur(12px)',
       }}
     >
-      <TabButton active={activeTab === 'home'} icon={<HomeOutlined />} label="Home" onClick={() => onTabClick('home')} />
+      <TabButton active={activeTab === 'home'} icon={<HomeOutlined />} label="Início" onClick={() => onTabClick('home')} />
       <TabButton active={activeTab === 'matches'} icon={<CalendarOutlined />} label="Jogos" onClick={() => onTabClick('matches')} />
       <TabButton active={activeTab === 'players'} icon={<TeamOutlined />} label="Jogadores" onClick={() => onTabClick('players')} />
       <TabButton active={activeTab === 'team'} icon={<SettingOutlined />} label="Meu time" onClick={() => onTabClick('team')} />

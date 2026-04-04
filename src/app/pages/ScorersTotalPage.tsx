@@ -1,18 +1,39 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Avatar, Typography, Tag, Empty, theme, FloatButton, Skeleton } from 'antd'
-import { CalendarOutlined, FireOutlined, AimOutlined, RightOutlined } from '@ant-design/icons'
+import { Avatar, Typography, Empty, theme, FloatButton, Skeleton } from 'antd'
+import { FireOutlined, AimOutlined } from '@ant-design/icons'
 import posthog from 'posthog-js'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
 import { useSeason } from '../contexts/SeasonContext'
 
 const { Text } = Typography
 
-function DoubleBallIcon() {
+type PillProps = {
+  bg: string
+  color: string
+  icon: React.ReactNode
+  label: string
+}
+
+function Pill({ bg, color, icon, label }: PillProps) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 1, fontSize: 12, lineHeight: 1 }}>
-      <span>{'\u26BD'}</span>
-      <span>{'\u26BD'}</span>
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        padding: '3px 8px',
+        borderRadius: 100,
+        background: bg,
+        color: color,
+        fontSize: 11,
+        fontWeight: 600,
+        lineHeight: 1.4,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {icon}
+      {label}
     </span>
   )
 }
@@ -91,8 +112,7 @@ export function ScorersTotalPage() {
               item.doubles > 0 ||
               item.freeKickGoals > 0 ||
               item.penaltyGoals > 0 ||
-              item.currentStreak >= 2 ||
-              !!item.lastGoal
+              item.currentStreak >= 2
             const avg =
               item.matchesPlayed > 0 ? (item.goals / item.matchesPlayed).toFixed(2) : '0.00'
 
@@ -117,7 +137,7 @@ export function ScorersTotalPage() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 12,
-                    padding: '14px 20px',
+                    padding: '14px 20px 10px',
                   }}
                 >
                   <div
@@ -147,15 +167,15 @@ export function ScorersTotalPage() {
                       {item.nickname || item.name}
                     </Text>
                     <Text type="secondary" style={{ fontSize: 12 }}>
-                      {avg} gols/jogo · {item.matchesPlayed} jogos
+                      {avg} gols/jogo
                     </Text>
                   </div>
 
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{ textAlign: 'right', flexShrink: 0, lineHeight: 1 }}>
                     <Text
                       strong
                       style={{
-                        fontSize: 24,
+                        fontSize: 26,
                         color: token.colorPrimary,
                         lineHeight: 1,
                         display: 'block',
@@ -163,60 +183,82 @@ export function ScorersTotalPage() {
                     >
                       {item.goals}
                     </Text>
-                    <Text type="secondary" style={{ fontSize: 11 }}>
+                    <Text type="secondary" style={{ fontSize: 11, display: 'block', marginTop: 2 }}>
                       gols
                     </Text>
+                    <Text type="secondary" style={{ fontSize: 11, display: 'block', marginTop: 1 }}>
+                      {item.matchesPlayed} jogos
+                    </Text>
                   </div>
-
-                  <RightOutlined
-                    style={{ fontSize: 12, color: token.colorTextSecondary, flexShrink: 0 }}
-                  />
                 </div>
 
-                {hasExtra && (
-                  <div
+                <div
+                  style={{
+                    paddingLeft: 20,
+                    paddingRight: 20,
+                    paddingBottom: 12,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: hasExtra ? 'space-between' : 'flex-end',
+                    gap: 8,
+                    minHeight: 28,
+                  }}
+                >
+                  {hasExtra && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {item.hatTricks > 0 && (
+                        <Pill
+                          bg="#fadb14"
+                          color="#1a1a1a"
+                          icon={<span style={{ fontSize: 11 }}>{'\uD83C\uDFA9'}</span>}
+                          label={`${item.hatTricks}\u00d7 hat-trick${item.hatTricks > 1 ? 's' : ''}`}
+                        />
+                      )}
+                      {item.doubles > 0 && (
+                        <Pill
+                          bg={token.colorSuccessBg}
+                          color={token.colorSuccess}
+                          icon={<span style={{ fontSize: 10 }}>{'\u26BD\u26BD'}</span>}
+                          label={`${item.doubles}\u00d7 doblete${item.doubles > 1 ? 's' : ''}`}
+                        />
+                      )}
+                      {item.freeKickGoals > 0 && (
+                        <Pill
+                          bg={token.colorPrimaryBg}
+                          color={token.colorPrimary}
+                          icon={<AimOutlined style={{ fontSize: 11 }} />}
+                          label={`${item.freeKickGoals} de falta`}
+                        />
+                      )}
+                      {item.penaltyGoals > 0 && (
+                        <Pill
+                          bg={token.colorFillTertiary}
+                          color={token.colorTextSecondary}
+                          icon={<span style={{ fontSize: 11 }}>{'\uD83E\uDD45'}</span>}
+                          label={`${item.penaltyGoals} de p\u00eanalt\u00ed`}
+                        />
+                      )}
+                      {item.currentStreak >= 2 && (
+                        <Pill
+                          bg={token.colorWarningBg}
+                          color={token.colorWarning}
+                          icon={<FireOutlined style={{ fontSize: 11 }} />}
+                          label={`${item.currentStreak} em sequ\u00eancia`}
+                        />
+                      )}
+                    </div>
+                  )}
+                  <Text
                     style={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: 6,
-                      paddingBottom: 14,
-                      paddingLeft: 20,
-                      paddingRight: 20,
+                      fontSize: 12,
+                      color: token.colorPrimary,
+                      flexShrink: 0,
+                      opacity: 0.8,
                     }}
                   >
-                    {item.hatTricks > 0 && (
-                      <Tag color="gold" icon={<span style={{ fontSize: 13 }}>{'🎩'}</span>}>
-                        <b>{item.hatTricks}</b> Hat-tricks
-                      </Tag>
-                    )}
-                    {item.doubles > 0 && (
-                      <Tag color="blue" icon={<DoubleBallIcon />}>
-                        <b>{item.doubles}</b> Dobletes
-                      </Tag>
-                    )}
-                    {item.freeKickGoals > 0 && (
-                      <Tag color="cyan" icon={<AimOutlined />}>
-                        <b>{item.freeKickGoals}</b> de falta
-                      </Tag>
-                    )}
-                    {item.penaltyGoals > 0 && (
-                      <Tag color="magenta" icon={<span style={{ fontSize: 13 }}>{'\u{1F945}'}</span>}>
-                        <b>{item.penaltyGoals}</b> de pênalti
-                      </Tag>
-                    )}
-                    {item.currentStreak >= 2 && (
-                      <Tag color="orange" icon={<FireOutlined />}>
-                        Série: <b>{item.currentStreak}</b> jogos
-                      </Tag>
-                    )}
-                    {item.lastGoal && (
-                      <Tag icon={<CalendarOutlined />}>
-                        Último: {new Date(item.lastGoal.date).toLocaleDateString()} vs{' '}
-                        {item.lastGoal.opponent || 'Adversário'}
-                      </Tag>
-                    )}
-                  </div>
-                )}
+                    Ver todos os gols
+                  </Text>
+                </div>
               </div>
             )
           })

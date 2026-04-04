@@ -1,8 +1,6 @@
 import React from 'react'
 import {
-  Card,
   Empty,
-  Space,
   Switch,
   Typography,
   Input,
@@ -11,8 +9,9 @@ import {
   Avatar,
   Skeleton,
   theme,
+  Tag,
 } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
+import { PlusOutlined, SearchOutlined, RightOutlined } from '@ant-design/icons'
 
 import {
   listPlayers,
@@ -24,7 +23,6 @@ import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
 
 const { Text } = Typography
-const { Search } = Input
 
 export function PlayersPage() {
   const { season, isActiveSeason } = useSeason()
@@ -35,9 +33,7 @@ export function PlayersPage() {
 
   const [modalOpen, setModalOpen] = React.useState(false)
   const [editingPlayer, setEditingPlayer] = React.useState<PlayerDTO | null>(null)
-
   const [updatingPlayerId, setUpdatingPlayerId] = React.useState<string | null>(null)
-
   const [filter, setFilter] = React.useState('')
 
   async function loadPlayers() {
@@ -69,13 +65,8 @@ export function PlayersPage() {
     }
   }
 
-
   const sortedPlayers = [...players].sort((a, b) => {
-    // 1. Ativos primeiro
-    if (a.active !== b.active) {
-      return a.active ? -1 : 1
-    }
-    // 2. Ordem alfabética (apelido ou nome)
+    if (a.active !== b.active) return a.active ? -1 : 1
     const nameA = (a.nickname || a.name).toLowerCase()
     const nameB = (b.nickname || b.name).toLowerCase()
     return nameA.localeCompare(nameB, 'pt-BR')
@@ -87,14 +78,14 @@ export function PlayersPage() {
       (p.nickname?.toLowerCase().includes(filter.toLowerCase()) ?? false),
   )
 
-  const activePlayersCount = players.filter((p) => p.active).length
-  const totalPlayersCount = players.length
+  const activeCount = players.filter((p) => p.active).length
 
   return (
-    <div style={{ position: 'relative', width: '100%', marginBottom: 46, paddingBottom: 16 }}>
-      {/* Filtro e Contagem */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-        <Search
+    <div style={{ paddingBottom: 80 }}>
+      {/* Search + count */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+        <Input
+          prefix={<SearchOutlined style={{ color: token.colorTextSecondary, fontSize: 14 }} />}
           placeholder="Filtrar por nome ou apelido"
           allowClear
           onChange={(e) => setFilter(e.target.value)}
@@ -102,88 +93,114 @@ export function PlayersPage() {
         />
         <div
           style={{
-            background: token.colorFillQuaternary,
-            padding: '4px 12px',
+            background: token.colorFillTertiary,
+            padding: '5px 12px',
             borderRadius: 20,
             whiteSpace: 'nowrap',
-            fontSize: 13,
-            fontWeight: 600,
-            color: token.colorTextSecondary
+            flexShrink: 0,
           }}
         >
-          {activePlayersCount} / {totalPlayersCount} <span style={{ fontWeight: 400, opacity: 0.8 }}>atletas</span>
+          <Text style={{ fontSize: 13, fontWeight: 600 }}>{activeCount}</Text>
+          <Text type="secondary" style={{ fontSize: 13 }}>/{players.length}</Text>
         </div>
       </div>
 
-      {/* Lista de jogadores */}
+      {/* Player list */}
       {loading ? (
-        <Space orientation="vertical" size={10} style={{ width: '100%' }}>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} size="small" style={{ borderRadius: 12 }}>
-              <Skeleton avatar paragraph={{ rows: 1 }} active />
-            </Card>
-          ))}
-        </Space>
+        <div
+          style={{
+            background: token.colorBgContainer,
+            border: `1px solid ${token.colorBorderSecondary}`,
+            borderRadius: 16,
+            padding: '20px 24px',
+          }}
+        >
+          <Skeleton avatar active paragraph={{ rows: 1 }} />
+          <Skeleton avatar active paragraph={{ rows: 1 }} style={{ marginTop: 16 }} />
+          <Skeleton avatar active paragraph={{ rows: 1 }} style={{ marginTop: 16 }} />
+        </div>
       ) : filteredPlayers.length === 0 ? (
         <Empty description="Nenhum jogador encontrado" />
       ) : (
-        <Space orientation="vertical" size={10} style={{ width: '100%' }}>
-          {filteredPlayers.map((player) => (
-            <Card
+        <div
+          style={{
+            background: token.colorBgContainer,
+            border: `1px solid ${token.colorBorderSecondary}`,
+            borderRadius: 16,
+            overflow: 'hidden',
+          }}
+        >
+          {filteredPlayers.map((player, i) => (
+            <div
               key={player.id}
-              size="small"
-              style={{
-                borderRadius: 12,
-                background: player.active ? undefined : '#f5f5f5',
-                cursor: 'pointer',
-              }}
-              styles={{
-                body: {
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                },
-              }}
               onClick={() => {
                 setEditingPlayer(player)
                 setModalOpen(true)
               }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: '12px 20px',
+                borderBottom:
+                  i < filteredPlayers.length - 1
+                    ? `1px solid ${token.colorFillQuaternary}`
+                    : 'none',
+                opacity: player.active ? 1 : 0.5,
+                cursor: 'pointer',
+                transition: 'background 0.15s',
+              }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                {/* Avatar */}
-                <Avatar src={player.photo ?? undefined} size={48}>
-                  {!player.photo && (player.nickname?.[0] || player.name[0])}
-                </Avatar>
+              <Avatar src={player.photo ?? undefined} size={44}>
+                {!player.photo && (player.nickname?.[0] || player.name[0])}
+              </Avatar>
 
-                <div style={{ minWidth: 0 }}>
-                  <Text strong>{player.nickname || player.name}</Text>
-                  <br />
-                  <Text type="secondary">{player.name}</Text>
-                  {player.position ? (
-                    <Text style={{ marginLeft: 8 }}>({player.position})</Text>
-                  ) : null}
-                  <br />
-                  <Text type="secondary" style={{ fontSize: 11 }}>Clique para ver detalhes</Text>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                  <Text strong style={{ fontSize: 14 }}>
+                    {player.nickname || player.name}
+                  </Text>
+                  {player.position && (
+                    <Tag style={{ margin: 0, fontSize: 11, borderRadius: 6 }}>
+                      {player.position}
+                    </Tag>
+                  )}
+                  {!player.active && (
+                    <Tag color="default" style={{ margin: 0, fontSize: 11, borderRadius: 6 }}>
+                      Inativo
+                    </Tag>
+                  )}
                 </div>
+                {player.nickname && (
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    {player.name}
+                  </Text>
+                )}
               </div>
 
-              <Space size={10}>
-                {isActiveSeason && isAdmin && (
+              {isActiveSeason && isAdmin ? (
+                <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
                   <span onClick={(e) => e.stopPropagation()}>
                     <Switch
                       checked={player.active}
                       onChange={() => toggleActive(player)}
                       loading={updatingPlayerId === player.id}
+                      size="small"
                     />
                   </span>
-                )}
-              </Space>
-            </Card>
+                  <Text type="secondary" style={{ fontSize: 10 }}>Clique para ver detalhes</Text>
+                </div>
+              ) : (
+                <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+                  <RightOutlined style={{ fontSize: 12, color: token.colorTextSecondary }} />
+                  <Text type="secondary" style={{ fontSize: 10 }}>Clique para ver detalhes</Text>
+                </div>
+              )}
+            </div>
           ))}
-        </Space>
+        </div>
       )}
 
-      {/* Botão flutuante */}
       {isActiveSeason && isAdmin && (
         <FloatButton
           type="primary"
@@ -192,14 +209,10 @@ export function PlayersPage() {
             setEditingPlayer(null)
             setModalOpen(true)
           }}
-          style={{
-            bottom: 88,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-          }}
+          style={{ bottom: 88, boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}
         />
       )}
 
-      {/* Modal de adicionar / editar */}
       <AddPlayerModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -208,12 +221,9 @@ export function PlayersPage() {
       />
 
       <FloatButton.BackTop
-        style={{
-          right: '50%',
-          transform: 'translateX(50%)',
-          bottom: 92,
-        }}
+        style={{ right: '50%', transform: 'translateX(50%)', bottom: 92 }}
       />
     </div>
   )
 }
+

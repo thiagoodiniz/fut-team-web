@@ -268,7 +268,7 @@ export function MatchesPage() {
                       setSummaryModalOpen(true)
                     }}
                   >
-                    Ver resumo <RightOutlined style={{ fontSize: 9 }} />
+                    Ver resumo do mês <RightOutlined style={{ fontSize: 9 }} />
                   </Text>
                 </div>
 
@@ -367,7 +367,7 @@ export function MatchesPage() {
                           </div>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
                           <Tag
                             color={resultColor}
                             style={{
@@ -382,7 +382,9 @@ export function MatchesPage() {
                           >
                             {match.ourScore} x {match.theirScore}
                           </Tag>
-                          <RightOutlined style={{ fontSize: 11, color: token.colorTextSecondary }} />
+                          <Text style={{ fontSize: 11, color: token.colorPrimary, opacity: 0.8 }}>
+                            ver detalhes
+                          </Text>
                         </div>
                       </div>
                     )

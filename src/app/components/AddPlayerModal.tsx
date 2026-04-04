@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Form, Input, Select, Button, Upload, message, theme, Statistic, Divider, Spin } from 'antd'
+import { Modal, Form, Input, InputNumber, Select, Button, Upload, message, theme, Typography, Skeleton } from 'antd'
 import { CameraOutlined, DeleteOutlined, TrophyOutlined, TeamOutlined, FireOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
 import {
@@ -11,6 +11,8 @@ import {
 } from '../../services/players.service'
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
+
+const { Text } = Typography
 
 const positions = ['Goleiro', 'Zagueiro', 'Lateral', 'Meio-campo', 'Atacante']
 
@@ -139,94 +141,107 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
   return (
     <Modal
       open={open}
-      title={player ? (isReadOnly ? 'Detalhes do jogador' : 'Editar jogador') : 'Adicionar jogador'}
+      title={
+        <Text strong style={{ fontSize: 15 }}>
+          {player ? (isReadOnly ? 'Detalhes do jogador' : 'Editar jogador') : 'Adicionar jogador'}
+        </Text>
+      }
       onCancel={onClose}
-      footer={isReadOnly ? [
-        <Button key="close" type="primary" onClick={onClose}>
-          Fechar
-        </Button>
-      ] : [
-        <Button key="cancel" onClick={onClose}>
-          Cancelar
-        </Button>,
-        <Button key="save" type="primary" onClick={handleSubmit} loading={saving}>
-          Salvar
-        </Button>,
-      ]}
+      footer={null}
     >
-      {/* Stats section (only for editing) */}
+      {/* Stats section — edit mode only */}
       {player && (
-        <>
+        <div
+          style={{
+            background: token.colorFillQuaternary,
+            borderRadius: 12,
+            padding: '14px 16px',
+            marginBottom: 20,
+            marginTop: 12,
+          }}
+        >
           {loadingStats ? (
-            <div style={{ textAlign: 'center', padding: 16 }}>
-              <Spin size="small" />
-            </div>
-          ) : stats && (
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-around',
-                padding: '12px 0',
-                marginBottom: 8,
-                borderRadius: 12,
-                background: token.colorFillQuaternary,
-              }}
-            >
-              <Statistic
-                title={
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+            <Skeleton active paragraph={{ rows: 1 }} title={false} />
+          ) : stats ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+              {/* Presenças */}
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginBottom: 2 }}>
+                  <TeamOutlined style={{ fontSize: 12, color: token.colorTextSecondary }} />
+                  <Text style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorTextSecondary, fontWeight: 600 }}>
                     Presenças
-                    <Link to={`/app/ranking/attendance/${player.id}/matches`} onClick={onClose} style={{ fontSize: 12 }}>
-                      (ver todas)
+                  </Text>
+                </div>
+                <Text strong style={{ fontSize: 20 }}>{stats.presences}</Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>/{stats.totalMatches}</Text>
+                <div style={{ marginTop: 2 }}>
+                  <Link to={`/app/ranking/attendance/${player.id}/matches`} onClick={onClose} style={{ fontSize: 11 }}>
+                    ver todas
+                  </Link>
+                </div>
+              </div>
+
+              {/* Gols */}
+              <div style={{ textAlign: 'center', borderLeft: `1px solid ${token.colorBorderSecondary}`, borderRight: `1px solid ${token.colorBorderSecondary}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginBottom: 2 }}>
+                  <FireOutlined style={{ fontSize: 12, color: token.colorTextSecondary }} />
+                  <Text style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorTextSecondary, fontWeight: 600 }}>
+                    Gols
+                  </Text>
+                </div>
+                <Text strong style={{ fontSize: 20, color: stats.goals > 0 ? token.colorPrimary : undefined }}>
+                  {stats.goals}
+                </Text>
+                {stats.goals > 0 && (
+                  <div style={{ marginTop: 2 }}>
+                    <Link to={`/app/ranking/scorers/${player.id}/goals`} onClick={onClose} style={{ fontSize: 11 }}>
+                      ver todos
                     </Link>
                   </div>
-                }
-                value={stats.presences}
-                suffix={`/ ${stats.totalMatches}`}
-                prefix={<TeamOutlined />}
-                valueStyle={{ fontSize: 18 }}
-              />
-              <Statistic
-                title={
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-                    Gols
-                    {stats.goals > 0 && (
-                      <Link to={`/app/ranking/scorers/${player.id}/goals`} onClick={onClose} style={{ fontSize: 12 }}>
-                        (ver todos)
-                      </Link>
-                    )}
-                  </div>
-                }
-                value={stats.goals}
-                prefix={<FireOutlined />}
-                valueStyle={{ fontSize: 18 }}
-              />
-              <Statistic
-                title="Frequência"
-                value={stats.totalMatches > 0 ? Math.round((stats.presences / stats.totalMatches) * 100) : 0}
-                suffix="%"
-                prefix={<TrophyOutlined />}
-                valueStyle={{ fontSize: 18 }}
-              />
+                )}
+              </div>
+
+              {/* Frequência */}
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginBottom: 2 }}>
+                  <TrophyOutlined style={{ fontSize: 12, color: token.colorTextSecondary }} />
+                  <Text style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorTextSecondary, fontWeight: 600 }}>
+                    Frequência
+                  </Text>
+                </div>
+                <Text
+                  strong
+                  style={{
+                    fontSize: 20,
+                    color:
+                      stats.totalMatches > 0 && stats.presences / stats.totalMatches >= 0.7
+                        ? token.colorSuccess
+                        : stats.totalMatches > 0 && stats.presences / stats.totalMatches >= 0.4
+                          ? token.colorWarning
+                          : token.colorError,
+                  }}
+                >
+                  {stats.totalMatches > 0 ? Math.round((stats.presences / stats.totalMatches) * 100) : 0}%
+                </Text>
+              </div>
             </div>
-          )}
-          <Divider style={{ margin: '12px 0' }} />
-        </>
+          ) : null}
+        </div>
       )}
 
       <Form form={form} layout="vertical" disabled={isReadOnly}>
-        {/* Photo */}
-        <div style={{ textAlign: 'center', marginBottom: 16 }}>
+        {/* Photo upload */}
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
           <div
             style={{
               position: 'relative',
               display: 'inline-block',
-              width: 96,
-              height: 96,
+              width: 88,
+              height: 88,
               borderRadius: '50%',
               overflow: 'hidden',
               background: token.colorFillSecondary,
-              border: `2px dashed ${token.colorBorder}`,
+              border: `2px dashed ${isReadOnly ? token.colorFillTertiary : token.colorPrimary}`,
             }}
           >
             {photoBase64 ? (
@@ -244,7 +259,7 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: token.colorTextQuaternary,
-                  fontSize: 28,
+                  fontSize: 24,
                 }}
               >
                 <CameraOutlined />
@@ -254,13 +269,9 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
 
           {!isReadOnly && (
             <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center', gap: 8 }}>
-              <Upload
-                beforeUpload={handlePhotoChange}
-                showUploadList={false}
-                accept="image/*"
-              >
+              <Upload beforeUpload={handlePhotoChange} showUploadList={false} accept="image/*">
                 <Button size="small" icon={<CameraOutlined />}>
-                  {photoBase64 ? 'Trocar' : 'Foto'}
+                  {photoBase64 ? 'Trocar foto' : 'Adicionar foto'}
                 </Button>
               </Upload>
               {photoBase64 && (
@@ -278,25 +289,44 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
         </div>
 
         <Form.Item
-          label="Nome"
+          label="Nome completo"
           name="name"
           rules={[{ required: true, message: 'Informe o nome do jogador' }]}
         >
-          <Input />
+          <Input placeholder="Ex: João da Silva" />
         </Form.Item>
 
         <Form.Item label="Apelido" name="nickname">
-          <Input />
+          <Input placeholder="Como é chamado no time?" />
         </Form.Item>
 
-        <Form.Item label="Posição" name="position">
-          <Select options={positions.map((p) => ({ label: p, value: p }))} />
-        </Form.Item>
-
-        <Form.Item label="Número" name="number">
-          <Input type="number" min={1} max={99} />
-        </Form.Item>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <Form.Item label="Posição" name="position" style={{ flex: 1 }}>
+            <Select
+              placeholder="Selecione"
+              options={positions.map((p) => ({ label: p, value: p }))}
+              allowClear
+            />
+          </Form.Item>
+          <Form.Item label="Número" name="number" style={{ width: 90 }}>
+            <InputNumber min={1} max={99} placeholder="—" style={{ width: '100%' }} />
+          </Form.Item>
+        </div>
       </Form>
+
+      {/* Footer */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
+        {isReadOnly ? (
+          <Button type="primary" onClick={onClose}>Fechar</Button>
+        ) : (
+          <>
+            <Button onClick={onClose}>Cancelar</Button>
+            <Button type="primary" loading={saving} onClick={handleSubmit}>
+              {player ? 'Salvar' : 'Adicionar'}
+            </Button>
+          </>
+        )}
+      </div>
     </Modal>
   )
 }

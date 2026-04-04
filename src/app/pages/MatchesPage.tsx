@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { List, Typography, Input, Card, theme, FloatButton, Tag, Empty } from 'antd'
+import { Typography, Input, Card, theme, FloatButton, Tag, Empty } from 'antd'
 import posthog from 'posthog-js'
 import {
   CalendarOutlined,

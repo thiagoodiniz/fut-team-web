@@ -1,13 +1,28 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Card, List, Avatar, Typography, Space, Progress, Empty, FloatButton } from 'antd'
-import { CalendarOutlined } from '@ant-design/icons'
+import { Avatar, Typography, Empty, theme, FloatButton, Skeleton } from 'antd'
+import { CalendarOutlined, RightOutlined } from '@ant-design/icons'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
 import { useSeason } from '../contexts/SeasonContext'
 
 const { Text } = Typography
 
+function rankBg(index: number, fallback: string) {
+  if (index === 0) return '#fadb14'
+  if (index === 1) return '#d9d9d9'
+  if (index === 2) return '#d48806'
+  return fallback
+}
+
+function rankTextColor(index: number, fallback: string) {
+  if (index === 0) return '#1a1a1a'
+  if (index === 1) return '#1a1a1a'
+  if (index === 2) return '#ffffff'
+  return fallback
+}
+
 export function AttendanceTotalPage() {
+    const { token } = theme.useToken()
     const navigate = useNavigate()
     const { season } = useSeason()
     const [loading, setLoading] = React.useState(true)
@@ -28,90 +43,193 @@ export function AttendanceTotalPage() {
         load()
     }, [season])
 
-    if (loading && !stats) return <Card loading />
+    if (loading && !stats) {
+        return (
+            <div
+                style={{
+                    background: token.colorBgContainer,
+                    border: `1px solid ${token.colorBorderSecondary}`,
+                    borderRadius: 16,
+                    padding: '20px 24px',
+                }}
+            >
+                <Skeleton active paragraph={{ rows: 6 }} />
+            </div>
+        )
+    }
 
     const attendanceList = stats?.attendance || []
 
     return (
-        <Space direction="vertical" size={16} style={{ width: '100%', paddingBottom: 16 }}>
-            <Card styles={{ body: { padding: 0 } }}>
-                <List
-                    dataSource={attendanceList}
-                    locale={{ emptyText: <Empty description="Nenhuma presença registrada nesta temporada" /> }}
-                    renderItem={(item) => (
-                        <List.Item style={{ padding: '16px 20px' }}>
-                            <div style={{ width: '100%' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                                    <Avatar size={48} src={item.photo}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 16 }}>
+            <div
+                style={{
+                    background: token.colorBgContainer,
+                    border: `1px solid ${token.colorBorderSecondary}`,
+                    borderRadius: 16,
+                    overflow: 'hidden',
+                }}
+            >
+                {attendanceList.length === 0 ? (
+                    <div style={{ padding: 32 }}>
+                        <Empty description="Nenhuma presença registrada nesta temporada" />
+                    </div>
+                ) : (
+                    attendanceList.map((item, index) => {
+                        const pctColor =
+                            item.percentage >= 70
+                                ? token.colorSuccess
+                                : item.percentage >= 40
+                                    ? token.colorWarning
+                                    : token.colorError
+
+                        return (
+                            <div
+                                key={item.id}
+                                onClick={() => navigate(`/app/ranking/attendance/${item.id}/matches`)}
+                                style={{
+                                    borderBottom:
+                                        index < attendanceList.length - 1
+                                            ? `1px solid ${token.colorFillQuaternary}`
+                                            : 'none',
+                                    cursor: 'pointer',
+                                    transition: 'background 0.15s',
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 12,
+                                        padding: '14px 20px',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            width: 28,
+                                            height: 28,
+                                            borderRadius: '50%',
+                                            background: rankBg(index, token.colorFillTertiary),
+                                            color: rankTextColor(index, token.colorTextSecondary),
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontSize: 12,
+                                            fontWeight: 700,
+                                            flexShrink: 0,
+                                        }}
+                                    >
+                                        {index + 1}
+                                    </div>
+
+                                    <Avatar size={44} src={item.photo ?? undefined}>
                                         {item.nickname?.[0] || item.name[0]}
                                     </Avatar>
 
                                     <div style={{ flex: 1, minWidth: 0 }}>
-                                        <Text
-                                            strong
-                                            style={{ fontSize: 15, display: 'block', cursor: 'pointer' }}
-                                            onClick={() => navigate(`/app/ranking/attendance/${item.id}/matches`)}
-                                        >
+                                        <Text strong style={{ fontSize: 15, display: 'block' }}>
                                             {item.nickname || item.name}
                                         </Text>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <div style={{ flex: 1 }}>
-                                                <Progress
-                                                    percent={item.percentage}
-                                                    size="small"
-                                                    strokeColor={item.percentage >= 70 ? '#16a34a' : item.percentage >= 40 ? '#fbbf24' : '#ef4444'}
-                                                    showInfo={false}
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 8,
+                                                marginTop: 4,
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    flex: 1,
+                                                    height: 4,
+                                                    background: token.colorFillTertiary,
+                                                    borderRadius: 99,
+                                                    overflow: 'hidden',
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        height: '100%',
+                                                        width: `${item.percentage}%`,
+                                                        background: pctColor,
+                                                        borderRadius: 99,
+                                                        transition: 'width 0.3s',
+                                                    }}
                                                 />
                                             </div>
-                                            <Text type="secondary" style={{ fontSize: 12, minWidth: 35 }}>{item.percentage}%</Text>
+                                            <Text
+                                                style={{
+                                                    fontSize: 12,
+                                                    color: pctColor,
+                                                    fontWeight: 600,
+                                                    minWidth: 32,
+                                                    flexShrink: 0,
+                                                }}
+                                            >
+                                                {item.percentage}%
+                                            </Text>
                                         </div>
                                     </div>
 
-                                    <div style={{ textAlign: 'right' }}>
-                                        <Text strong style={{ fontSize: 16 }}>{item.presentCount}</Text>
-                                        <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>Jogos</Text>
+                                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                        <Text
+                                            strong
+                                            style={{ fontSize: 22, lineHeight: 1, display: 'block' }}
+                                        >
+                                            {item.presentCount}
+                                        </Text>
+                                        <Text type="secondary" style={{ fontSize: 11 }}>
+                                            jogos
+                                        </Text>
                                     </div>
+
+                                    <RightOutlined
+                                        style={{
+                                            fontSize: 12,
+                                            color: token.colorTextSecondary,
+                                            flexShrink: 0,
+                                        }}
+                                    />
                                 </div>
 
                                 {item.lastMatch && (
-                                    <div style={{
-                                        marginTop: 12,
-                                        padding: '8px 12px',
-                                        background: '#f8fafc',
-                                        borderRadius: 8,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 8
-                                    }}>
-                                        <CalendarOutlined style={{ color: '#64748b' }} />
-                                        <Text type="secondary" style={{ fontSize: 12 }}>
-                                            Último jogo: <b>{new Date(item.lastMatch.date).toLocaleDateString()}</b> vs {item.lastMatch.opponent}
-                                        </Text>
+                                    <div style={{ paddingBottom: 12, paddingLeft: 84, paddingRight: 20 }}>
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 6,
+                                                background: token.colorFillQuaternary,
+                                                padding: '6px 10px',
+                                                borderRadius: 8,
+                                            }}
+                                        >
+                                            <CalendarOutlined
+                                                style={{
+                                                    fontSize: 12,
+                                                    color: token.colorTextSecondary,
+                                                    flexShrink: 0,
+                                                }}
+                                            />
+                                            <Text type="secondary" style={{ fontSize: 12 }}>
+                                                Último:{' '}
+                                                <Text strong style={{ fontSize: 12 }}>
+                                                    {new Date(item.lastMatch.date).toLocaleDateString()}
+                                                </Text>{' '}
+                                                vs {item.lastMatch.opponent || 'Adversário'}
+                                            </Text>
+                                        </div>
                                     </div>
                                 )}
-
-                                <div style={{ marginTop: 10 }}>
-                                    <Button
-                                        type="link"
-                                        style={{ padding: 0, height: 'auto' }}
-                                        onClick={() => navigate(`/app/ranking/attendance/${item.id}/matches`)}
-                                    >
-                                        Ver todos os jogos
-                                    </Button>
-                                </div>
                             </div>
-                        </List.Item>
-                    )}
-                />
-            </Card>
+                        )
+                    })
+                )}
+            </div>
 
             <FloatButton.BackTop
-                style={{
-                    right: '50%',
-                    transform: 'translateX(50%)',
-                    bottom: 92,
-                }}
+                style={{ right: '50%', transform: 'translateX(50%)', bottom: 92 }}
             />
-        </Space>
+        </div>
     )
 }

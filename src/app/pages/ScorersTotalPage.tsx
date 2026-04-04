@@ -1,7 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Card, List, Avatar, Typography, Space, Tag, Empty, theme, FloatButton } from 'antd'
-import { CalendarOutlined, FireOutlined, AimOutlined } from '@ant-design/icons'
+import { Avatar, Typography, Tag, Empty, theme, FloatButton, Skeleton } from 'antd'
+import { CalendarOutlined, FireOutlined, AimOutlined, RightOutlined } from '@ant-design/icons'
 import posthog from 'posthog-js'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
 import { useSeason } from '../contexts/SeasonContext'
@@ -15,6 +15,20 @@ function DoubleBallIcon() {
       <span>{'\u26BD'}</span>
     </span>
   )
+}
+
+function rankBg(index: number, fallback: string) {
+  if (index === 0) return '#fadb14'
+  if (index === 1) return '#d9d9d9'
+  if (index === 2) return '#d48806'
+  return fallback
+}
+
+function rankTextColor(index: number, fallback: string) {
+  if (index === 0) return '#1a1a1a'
+  if (index === 1) return '#1a1a1a'
+  if (index === 2) return '#ffffff'
+  return fallback
 }
 
 export function ScorersTotalPage() {
@@ -39,140 +53,179 @@ export function ScorersTotalPage() {
     load()
   }, [season])
 
-  if (loading && !stats) return <Card loading />
+  if (loading && !stats) {
+    return (
+      <div
+        style={{
+          background: token.colorBgContainer,
+          border: `1px solid ${token.colorBorderSecondary}`,
+          borderRadius: 16,
+          padding: '20px 24px',
+        }}
+      >
+        <Skeleton active paragraph={{ rows: 6 }} />
+      </div>
+    )
+  }
 
   const scorers = stats?.topScorers || []
 
   return (
-    <Space direction="vertical" size={16} style={{ width: '100%', paddingBottom: 16 }}>
-      <Card styles={{ body: { padding: 0 } }}>
-        <List
-          dataSource={scorers}
-          locale={{ emptyText: <Empty description="Nenhum gol marcado nesta temporada" /> }}
-          renderItem={(item, index) => (
-            <List.Item style={{ padding: '16px 20px' }}>
-              <div style={{ width: '100%' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <div style={{ position: 'relative' }}>
-                    <Avatar size={54} src={item.photo}>
-                      {item.nickname?.[0] || item.name[0]}
-                    </Avatar>
-                    <div
-                      style={{
-                        position: 'absolute',
-                        bottom: -5,
-                        right: -5,
-                        background: index === 0 ? '#fbbf24' : index === 1 ? '#94a3b8' : index === 2 ? '#b45309' : '#e2e8f0',
-                        color: index < 3 ? '#fff' : '#64748b',
-                        width: 22,
-                        height: 22,
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 12,
-                        fontWeight: 'bold',
-                        border: '2px solid #fff',
-                      }}
-                    >
-                      {index + 1}
-                    </div>
-                  </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 16 }}>
+      <div
+        style={{
+          background: token.colorBgContainer,
+          border: `1px solid ${token.colorBorderSecondary}`,
+          borderRadius: 16,
+          overflow: 'hidden',
+        }}
+      >
+        {scorers.length === 0 ? (
+          <div style={{ padding: 32 }}>
+            <Empty description="Nenhum gol marcado nesta temporada" />
+          </div>
+        ) : (
+          scorers.map((item, index) => {
+            const hasExtra =
+              item.hatTricks > 0 ||
+              item.doubles > 0 ||
+              item.freeKickGoals > 0 ||
+              item.penaltyGoals > 0 ||
+              item.currentStreak >= 2 ||
+              !!item.lastGoal
+            const avg =
+              item.matchesPlayed > 0 ? (item.goals / item.matchesPlayed).toFixed(2) : '0.00'
 
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <Text
-                      strong
-                      style={{ fontSize: 16, display: 'block', cursor: 'pointer' }}
-                      onClick={() => {
-                        posthog.capture('scorer_item_clicked', { player_id: item.id, name: item.name })
-                        navigate(`/app/ranking/scorers/${item.id}/goals`)
-                      }}
-                    >
-                      {item.nickname || item.name}
-                    </Text>
-                    <Text type="secondary" style={{ fontSize: 12 }}>{item.name}</Text>
-                  </div>
-
-                  <div style={{ textAlign: 'right' }}>
-                    <Text strong style={{ fontSize: 20, color: '#16a34a' }}>{item.goals}</Text>
-                    <div style={{ fontSize: 12, color: token.colorTextSecondary, lineHeight: 1.2 }}>
-                      Gols
-                    </div>
-                    <div style={{ fontSize: 11, color: token.colorTextSecondary }}>
-                      {item.matchesPlayed} jogos
-                    </div>
-                    <div style={{ marginTop: 6 }}>
-                      <Text type="secondary" style={{ fontSize: 11 }}>
-                        <Text strong>{item.matchesPlayed > 0 ? (item.goals / item.matchesPlayed).toFixed(2) : '0.00'}</Text> gols por jogo
-                      </Text>
-                    </div>
-                  </div>
-                </div>
-
+            return (
+              <div
+                key={item.id}
+                onClick={() => {
+                  posthog.capture('scorer_item_clicked', { player_id: item.id, name: item.name })
+                  navigate(`/app/ranking/scorers/${item.id}/goals`)
+                }}
+                style={{
+                  borderBottom:
+                    index < scorers.length - 1
+                      ? `1px solid ${token.colorFillQuaternary}`
+                      : 'none',
+                  cursor: 'pointer',
+                  transition: 'background 0.15s',
+                }}
+              >
                 <div
                   style={{
                     display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: 8,
-                    marginTop: 16,
-                    paddingTop: 12,
-                    borderTop: '1px solid #f0f0f0',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '14px 20px',
                   }}
                 >
-                  {item.hatTricks > 0 && (
-                    <Tag color="gold" icon={<span style={{ fontSize: 14 }}>{'\u{1F3A9}'}</span>}>
-                      <b>{item.hatTricks}</b> Hat-tricks
-                    </Tag>
-                  )}
-                  {item.doubles > 0 && (
-                    <Tag color="blue" icon={<DoubleBallIcon />}>
-                      <b>{item.doubles}</b> Dobletes
-                    </Tag>
-                  )}
-                  {item.freeKickGoals > 0 && (
-                    <Tag color="cyan" icon={<AimOutlined />}>
-                      <b>{item.freeKickGoals}</b> de falta
-                    </Tag>
-                  )}
-                  {item.penaltyGoals > 0 && (
-                    <Tag color="magenta" icon={<span style={{ fontSize: 14 }}>{'\u{1F945}'}</span>}>
-                      <b>{item.penaltyGoals}</b> de penalti
-                    </Tag>
-                  )}
-                  {item.currentStreak >= 2 && (
-                    <Tag color="orange" icon={<FireOutlined />}>
-                      Serie: <b>{item.currentStreak}</b> jogos
-                    </Tag>
-                  )}
-                  {item.lastGoal && (
-                    <Tag icon={<CalendarOutlined />}>
-                      Ultimo: {new Date(item.lastGoal.date).toLocaleDateString()} vs {item.lastGoal.opponent}
-                    </Tag>
-                  )}
+                  <div
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      background: rankBg(index, token.colorFillTertiary),
+                      color: rankTextColor(index, token.colorTextSecondary),
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 12,
+                      fontWeight: 700,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {index + 1}
+                  </div>
+
+                  <Avatar size={44} src={item.photo ?? undefined}>
+                    {item.nickname?.[0] || item.name[0]}
+                  </Avatar>
+
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <Text strong style={{ fontSize: 15, display: 'block' }}>
+                      {item.nickname || item.name}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {avg} gols/jogo · {item.matchesPlayed} jogos
+                    </Text>
+                  </div>
+
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    <Text
+                      strong
+                      style={{
+                        fontSize: 24,
+                        color: token.colorPrimary,
+                        lineHeight: 1,
+                        display: 'block',
+                      }}
+                    >
+                      {item.goals}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: 11 }}>
+                      gols
+                    </Text>
+                  </div>
+
+                  <RightOutlined
+                    style={{ fontSize: 12, color: token.colorTextSecondary, flexShrink: 0 }}
+                  />
                 </div>
 
-                <div style={{ marginTop: 10 }}>
-                  <Button
-                    type="link"
-                    style={{ padding: 0, height: 'auto' }}
-                    onClick={() => navigate(`/app/ranking/scorers/${item.id}/goals`)}
+                {hasExtra && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: 6,
+                      paddingBottom: 14,
+                      paddingLeft: 20,
+                      paddingRight: 20,
+                    }}
                   >
-                    Ver todos os gols
-                  </Button>
-                </div>
+                    {item.hatTricks > 0 && (
+                      <Tag color="gold" icon={<span style={{ fontSize: 13 }}>{'🎩'}</span>}>
+                        <b>{item.hatTricks}</b> Hat-tricks
+                      </Tag>
+                    )}
+                    {item.doubles > 0 && (
+                      <Tag color="blue" icon={<DoubleBallIcon />}>
+                        <b>{item.doubles}</b> Dobletes
+                      </Tag>
+                    )}
+                    {item.freeKickGoals > 0 && (
+                      <Tag color="cyan" icon={<AimOutlined />}>
+                        <b>{item.freeKickGoals}</b> de falta
+                      </Tag>
+                    )}
+                    {item.penaltyGoals > 0 && (
+                      <Tag color="magenta" icon={<span style={{ fontSize: 13 }}>{'\u{1F945}'}</span>}>
+                        <b>{item.penaltyGoals}</b> de pênalti
+                      </Tag>
+                    )}
+                    {item.currentStreak >= 2 && (
+                      <Tag color="orange" icon={<FireOutlined />}>
+                        Série: <b>{item.currentStreak}</b> jogos
+                      </Tag>
+                    )}
+                    {item.lastGoal && (
+                      <Tag icon={<CalendarOutlined />}>
+                        Último: {new Date(item.lastGoal.date).toLocaleDateString()} vs{' '}
+                        {item.lastGoal.opponent || 'Adversário'}
+                      </Tag>
+                    )}
+                  </div>
+                )}
               </div>
-            </List.Item>
-          )}
-        />
-      </Card>
+            )
+          })
+        )}
+      </div>
 
       <FloatButton.BackTop
-        style={{
-          right: '50%',
-          transform: 'translateX(50%)',
-          bottom: 92,
-        }}
+        style={{ right: '50%', transform: 'translateX(50%)', bottom: 92 }}
       />
-    </Space>
+    </div>
   )
 }

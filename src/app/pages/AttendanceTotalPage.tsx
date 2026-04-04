@@ -2,6 +2,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Avatar, Typography, Empty, theme, FloatButton, Skeleton } from 'antd'
 import { CalendarOutlined, RightOutlined } from '@ant-design/icons'
+import posthog from 'posthog-js'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
 import { useSeason } from '../contexts/SeasonContext'
 
@@ -86,7 +87,10 @@ export function AttendanceTotalPage() {
                         return (
                             <div
                                 key={item.id}
-                                onClick={() => navigate(`/app/ranking/attendance/${item.id}/matches`)}
+                                onClick={() => {
+                                posthog.capture('attendance_item_clicked', { player_id: item.id, name: item.name })
+                                navigate(`/app/ranking/attendance/${item.id}/matches`)
+                            }}
                                 style={{
                                     borderBottom:
                                         index < attendanceList.length - 1

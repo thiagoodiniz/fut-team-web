@@ -8,6 +8,7 @@ import {
   SettingOutlined,
 } from '@ant-design/icons'
 
+import posthog from 'posthog-js'
 import { PostHogPageviewTracker } from '../../components/PostHogPageviewTracker'
 
 import { AppHeader } from './AppHeader'
@@ -52,6 +53,7 @@ export function AppShell() {
   }
 
   function onTabClick(key: TabKey) {
+    posthog.capture('bottom_tab_clicked', { tab: key })
     navigate(`/app/${key}`)
   }
 

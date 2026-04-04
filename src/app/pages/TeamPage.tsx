@@ -4,6 +4,7 @@ import { CameraOutlined, DeleteOutlined, SaveOutlined, UserOutlined } from '@ant
 import { updateMyTeam } from '../../services/teams.service'
 import { useTeam } from '../contexts/TeamContext'
 import { useNavigate } from 'react-router-dom'
+import posthog from 'posthog-js'
 
 const { Title, Text } = Typography
 
@@ -108,14 +109,20 @@ export function TeamPage() {
                 <Title level={4} style={{ margin: 0 }}>Meu time</Title>
                 <Space wrap>
                     <Button
-                        onClick={() => navigate('/onboarding')}
+                        onClick={() => {
+                            posthog.capture('switch_team_clicked')
+                            navigate('/onboarding')
+                        }}
                     >
                         Trocar de Time
                     </Button>
                     {isAdmin && (
                         <Button
                             icon={<UserOutlined />}
-                            onClick={() => navigate('/app/team/members')}
+                            onClick={() => {
+                                posthog.capture('manage_members_clicked')
+                                navigate('/app/team/members')
+                            }}
                         >
                             Gerenciar Membros
                         </Button>

@@ -12,6 +12,7 @@ import {
   Tag,
 } from 'antd'
 import { PlusOutlined, SearchOutlined, RightOutlined } from '@ant-design/icons'
+import posthog from 'posthog-js'
 
 import {
   listPlayers,
@@ -134,6 +135,7 @@ export function PlayersPage() {
             <div
               key={player.id}
               onClick={() => {
+                posthog.capture('player_item_clicked', { player_id: player.id, name: player.name })
                 setEditingPlayer(player)
                 setModalOpen(true)
               }}
@@ -206,6 +208,7 @@ export function PlayersPage() {
           type="primary"
           icon={<PlusOutlined />}
           onClick={() => {
+            posthog.capture('add_player_fab_clicked')
             setEditingPlayer(null)
             setModalOpen(true)
           }}

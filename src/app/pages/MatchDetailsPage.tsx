@@ -223,7 +223,7 @@ export function MatchDetailsPage() {
                 type="text"
                 icon={<EditOutlined />}
                 onClick={() => {
-                  posthog.capture('edit_match_clicked')
+                  posthog.capture('edit_match_clicked', { match_id: id })
                   setEditMatchModalOpen(true)
                 }}
               />
@@ -295,7 +295,7 @@ export function MatchDetailsPage() {
               type="dashed"
               block
               onClick={() => {
-                posthog.capture('add_goal_modal_opened')
+                posthog.capture('add_goal_modal_opened', { match_id: id })
                 setGoalModalOpen(true)
               }}
               disabled={presentPlayersOptions.length === 0}

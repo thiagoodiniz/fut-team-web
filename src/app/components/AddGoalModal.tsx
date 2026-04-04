@@ -1,6 +1,6 @@
 import React from 'react'
-import { Button, Checkbox, Form, InputNumber, Modal, Select, Typography, theme } from 'antd'
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
+import { Button, Checkbox, Form, InputNumber, Modal, Select, Typography, theme, Tag } from 'antd'
+import { MinusCircleOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons'
 
 const { Text } = Typography
 
@@ -78,12 +78,9 @@ export function AddGoalModal({ open, loading, players, maxGoals, currentGoalsCou
   return (
     <Modal
       open={open}
-      title="Adicionar gol"
+      title={<Text strong style={{ fontSize: 15 }}>Adicionar gol</Text>}
       onCancel={onCancel}
-      onOk={handleOk}
-      okText="Salvar"
-      cancelText="Cancelar"
-      confirmLoading={loading}
+      footer={null}
       destroyOnHidden
     >
       <Form
@@ -91,45 +88,84 @@ export function AddGoalModal({ open, loading, players, maxGoals, currentGoalsCou
         layout="vertical"
         onFinish={handleFinish}
         initialValues={{ isOwnGoal: false, goals: [{}] }}
-        style={{ marginTop: 12 }}
+        style={{ marginTop: 16 }}
       >
-        <Form.Item
-          label="Jogador"
-          name="playerId"
-          rules={[
-            {
-              validator: (_, value) => {
-                if (hasNonOwnGoals && !value) {
-                  return Promise.reject(new Error('Selecione um jogador para gols normais'))
-                }
-                return Promise.resolve()
-              },
-            },
-          ]}
+        {/* Player + own goal toggle */}
+        <div
+          style={{
+            background: token.colorFillQuaternary,
+            borderRadius: 12,
+            padding: '16px 16px 8px',
+            marginBottom: 20,
+          }}
         >
-          <Select
-            placeholder={hasNonOwnGoals ? 'Selecione' : 'Nao se aplica para gol contra'}
-            options={players}
-            showSearch
-            optionFilterProp="label"
-            disabled={!hasNonOwnGoals}
-            allowClear
-          />
-        </Form.Item>
-
-        <Form.Item name="isOwnGoal" valuePropName="checked" style={{ marginTop: -4, marginBottom: 14 }}>
-          <Checkbox>
-            <Text style={{ fontSize: 12, whiteSpace: 'nowrap' }}>Gol contra</Text>
-          </Checkbox>
-        </Form.Item>
-
-        <Text strong style={{ display: 'block', marginBottom: 8 }}>Gols</Text>
-
-        {remainingGoals <= 0 && (
-          <div style={{ color: token.colorError, marginBottom: 12, fontSize: 13 }}>
-            Todos os gols do placar já foram atribuídos.
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <UserOutlined style={{ fontSize: 13, color: token.colorTextSecondary }} />
+            <Text
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.07em',
+                color: token.colorTextSecondary,
+              }}
+            >
+              Quem marcou
+            </Text>
           </div>
-        )}
+
+          <Form.Item
+            name="playerId"
+            style={{ marginBottom: 8 }}
+            rules={[
+              {
+                validator: (_, value) => {
+                  if (hasNonOwnGoals && !value) {
+                    return Promise.reject(new Error('Selecione um jogador'))
+                  }
+                  return Promise.resolve()
+                },
+              },
+            ]}
+          >
+            <Select
+              placeholder={hasNonOwnGoals ? 'Selecione o jogador' : 'Não se aplica para gol contra'}
+              options={players}
+              showSearch
+              optionFilterProp="label"
+              disabled={!hasNonOwnGoals}
+              allowClear
+            />
+          </Form.Item>
+
+          <Form.Item name="isOwnGoal" valuePropName="checked" style={{ margin: 0 }}>
+            <Checkbox>
+              <Text style={{ fontSize: 13 }}>Gol contra (adversário marcou)</Text>
+            </Checkbox>
+          </Form.Item>
+        </div>
+
+        {/* Goals list */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <Text
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.07em',
+              color: token.colorTextSecondary,
+            }}
+          >
+            Gols
+          </Text>
+          {remainingGoals <= 0 ? (
+            <Tag color="error" style={{ margin: 0, fontSize: 11 }}>Placar já atribuído</Tag>
+          ) : maxGoals !== undefined ? (
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              {currentGoalsCount} / {maxGoals} atribuídos
+            </Text>
+          ) : null}
+        </div>
 
         <Form.List name="goals">
           {(fields, { add, remove }) => (
@@ -138,15 +174,16 @@ export function AddGoalModal({ open, loading, players, maxGoals, currentGoalsCou
                 <div
                   key={field.key}
                   style={{
-                    marginBottom: 10,
-                    padding: '8px 12px',
-                    borderRadius: 8,
+                    marginBottom: 8,
+                    padding: '12px 14px',
+                    borderRadius: 10,
                     background: token.colorFillQuaternary,
+                    borderLeft: `3px solid ${token.colorPrimary}`,
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <Text style={{ minWidth: 28, fontWeight: 600 }}>
-                      {index + 1}º
+                    <Text style={{ minWidth: 24, fontWeight: 700, fontSize: 13, color: token.colorTextSecondary }}>
+                      #{index + 1}
                     </Text>
 
                     <Form.Item
@@ -159,19 +196,20 @@ export function AddGoalModal({ open, loading, players, maxGoals, currentGoalsCou
                         max={150}
                         style={{ width: '100%' }}
                         placeholder="Minuto (opcional)"
+                        addonAfter="'"
                       />
                     </Form.Item>
 
                     {fields.length > 1 && (
                       <MinusCircleOutlined
-                        style={{ color: token.colorError, fontSize: 18, cursor: 'pointer' }}
+                        style={{ color: token.colorError, fontSize: 18, cursor: 'pointer', flexShrink: 0 }}
                         onClick={() => remove(field.name)}
                       />
                     )}
                   </div>
 
                   {!isOwnGoalChecked && (
-                    <div style={{ display: 'flex', gap: 16, marginTop: 8, paddingLeft: 38, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: 16, marginTop: 10, paddingLeft: 34, flexWrap: 'wrap' }}>
                       <Form.Item
                         {...field}
                         name={[field.name, 'freeKick']}
@@ -179,13 +217,13 @@ export function AddGoalModal({ open, loading, players, maxGoals, currentGoalsCou
                         style={{ margin: 0 }}
                       >
                         <Checkbox
-                          onChange={(event) => {
-                            if (event.target.checked) {
+                          onChange={(e) => {
+                            if (e.target.checked) {
                               form.setFieldValue(['goals', field.name, 'penalty'], false)
                             }
                           }}
                         >
-                          <Text style={{ fontSize: 12, whiteSpace: 'nowrap' }}>Gol de falta</Text>
+                          <Text style={{ fontSize: 12 }}>Falta</Text>
                         </Checkbox>
                       </Form.Item>
 
@@ -196,13 +234,13 @@ export function AddGoalModal({ open, loading, players, maxGoals, currentGoalsCou
                         style={{ margin: 0 }}
                       >
                         <Checkbox
-                          onChange={(event) => {
-                            if (event.target.checked) {
+                          onChange={(e) => {
+                            if (e.target.checked) {
                               form.setFieldValue(['goals', field.name, 'freeKick'], false)
                             }
                           }}
                         >
-                          <Text style={{ fontSize: 12, whiteSpace: 'nowrap' }}>Gol de penalti</Text>
+                          <Text style={{ fontSize: 12 }}>Pênalti</Text>
                         </Checkbox>
                       </Form.Item>
                     </div>
@@ -210,7 +248,7 @@ export function AddGoalModal({ open, loading, players, maxGoals, currentGoalsCou
                 </div>
               ))}
 
-              {fields.length < 10 && (
+              {fields.length < 10 && remainingGoals > 0 && (
                 <Button
                   type="dashed"
                   block
@@ -224,6 +262,13 @@ export function AddGoalModal({ open, loading, players, maxGoals, currentGoalsCou
             </>
           )}
         </Form.List>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
+          <Button onClick={onCancel}>Cancelar</Button>
+          <Button type="primary" loading={loading} onClick={handleOk}>
+            Salvar
+          </Button>
+        </div>
 
         <Button htmlType="submit" style={{ display: 'none' }} />
       </Form>

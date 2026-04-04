@@ -2,11 +2,7 @@ import React from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   Button,
-  Card,
-  Collapse,
-  Divider,
   Empty,
-  Space,
   Switch,
   Tag,
   Typography,
@@ -15,6 +11,7 @@ import {
   Input,
   Avatar,
   FloatButton,
+  Skeleton,
 } from 'antd'
 import posthog from 'posthog-js'
 import {
@@ -179,11 +176,14 @@ export function MatchDetailsPage() {
 
   if (loading) {
     return (
-      <Space orientation="vertical" size={14} style={{ width: '100%' }}>
-        <Card loading />
-        <Card loading />
-        <Card loading />
-      </Space>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ background: token.colorBgContainer, borderRadius: 16, border: `1px solid ${token.colorBorderSecondary}`, padding: '20px 24px' }}>
+          <Skeleton active paragraph={{ rows: 3 }} />
+        </div>
+        <div style={{ background: token.colorBgContainer, borderRadius: 16, border: `1px solid ${token.colorBorderSecondary}`, padding: '20px 24px' }}>
+          <Skeleton active paragraph={{ rows: 4 }} />
+        </div>
+      </div>
     )
   }
 
@@ -194,20 +194,103 @@ export function MatchDetailsPage() {
   const opponent = match.opponent?.trim() || 'Sem adversário'
   const dateLabel = formatFullDate(match.date)
 
-  const collapseItems = [
-    {
-      key: 'goals',
-      label: (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text strong>Gols</Text>
+  const resultColor =
+    match.ourScore > match.theirScore
+      ? token.colorSuccess
+      : match.ourScore < match.theirScore
+        ? token.colorError
+        : token.colorWarning
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 80 }}>
+      {/* Match Header */}
+      <div
+        style={{
+          background: token.colorBgContainer,
+          border: `1px solid ${token.colorBorderSecondary}`,
+          borderRadius: 16,
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ height: 4, background: resultColor }} />
+        <div style={{ padding: '20px 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <Title level={4} style={{ margin: 0, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {opponent}
+            </Title>
+            {isActiveSeason && isAdmin && (
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => {
+                  posthog.capture('edit_match_clicked')
+                  setEditMatchModalOpen(true)
+                }}
+              />
+            )}
+          </div>
+
+          {/* Score */}
+          <div style={{ textAlign: 'center', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+              <div>
+                <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block', marginBottom: 2 }}>
+                  Nós
+                </Text>
+                <Text style={{ fontSize: 48, fontWeight: 800, lineHeight: 1, color: resultColor }}>{match.ourScore}</Text>
+              </div>
+              <Text type="secondary" style={{ fontSize: 24, fontWeight: 300 }}>×</Text>
+              <div>
+                <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block', marginBottom: 2 }}>
+                  Eles
+                </Text>
+                <Text style={{ fontSize: 48, fontWeight: 800, lineHeight: 1, color: token.colorTextSecondary }}>{match.theirScore}</Text>
+              </div>
+            </div>
+          </div>
+
+          {/* Date + Location */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <CalendarOutlined style={{ fontSize: 13, color: token.colorTextSecondary, flexShrink: 0 }} />
+              <Text type="secondary" style={{ fontSize: 13 }}>{dateLabel}</Text>
+            </div>
+            {match.location ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <EnvironmentOutlined style={{ fontSize: 13, color: token.colorTextSecondary, flexShrink: 0 }} />
+                <Text type="secondary" style={{ fontSize: 13 }}>{match.location}</Text>
+              </div>
+            ) : null}
+          </div>
+
+          {match.notes ? (
+            <div style={{ marginTop: 12, padding: 12, background: token.colorFillQuaternary, borderRadius: 8 }}>
+              <Text>{match.notes}</Text>
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      {/* Goals Section */}
+      <div
+        style={{
+          background: token.colorBgContainer,
+          border: `1px solid ${token.colorBorderSecondary}`,
+          borderRadius: 16,
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ padding: '16px 20px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: token.colorTextSecondary }}>
+            Gols
+          </Text>
           <Text type="secondary" style={{ fontSize: 13 }}>
-            {goals.length} gols
+            {goals.length} {goals.length === 1 ? 'gol' : 'gols'}
           </Text>
         </div>
-      ),
-      children: (
-        <Space orientation="vertical" size={12} style={{ width: '100%' }}>
-          {isActiveSeason && isAdmin && (
+
+        {isActiveSeason && isAdmin && (
+          <div style={{ padding: '0 20px 12px' }}>
             <Button
               type="dashed"
               block
@@ -220,38 +303,50 @@ export function MatchDetailsPage() {
             >
               Adicionar gol
             </Button>
-          )}
+          </div>
+        )}
 
-          {goals.length === 0 ? (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description="Nenhum gol registrado"
-            />
-          ) : (
-            <Space orientation="vertical" size={10} style={{ width: '100%' }}>
-              {goals.map((g) => (
+        {goals.length === 0 ? (
+          <div style={{ padding: '8px 20px 20px' }}>
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum gol registrado" />
+          </div>
+        ) : (
+          <div>
+            {goals.map((g, i) => {
+              const accent = g.ownGoal
+                ? token.colorError
+                : g.penalty
+                  ? '#722ed1'
+                  : g.freeKick
+                    ? token.colorPrimary
+                    : token.colorSuccess
+              const playerName = g.ownGoal
+                ? 'Gol contra'
+                : g.player?.nickname || g.player?.name || 'Sem jogador'
+              const playerSub = g.ownGoal
+                ? 'Adversário'
+                : g.player?.nickname
+                  ? g.player?.name
+                  : undefined
+              return (
                 <div
                   key={g.id}
                   style={{
                     display: 'flex',
-                    justifyContent: 'space-between',
-                    gap: 12,
                     alignItems: 'center',
-                    padding: '10px 12px',
-                    borderRadius: 12,
-                    background: token.colorFillQuaternary,
+                    gap: 12,
+                    padding: '12px 20px',
+                    borderBottom: i < goals.length - 1 ? `1px solid ${token.colorFillQuaternary}` : 'none',
+                    borderLeft: `3px solid ${accent}`,
                   }}
                 >
-                  <div style={{ minWidth: 0 }}>
-                    <Text strong style={{ display: 'block' }}>
-                      {g.ownGoal ? 'Gol contra' : (g.player?.nickname || g.player?.name || 'Sem jogador')}
-                    </Text>
-                    <Text type="secondary" style={{ fontSize: 12 }}>
-                      {g.ownGoal ? 'Adversario' : (g.player?.name || 'Sem jogador')}
-                    </Text>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <Text strong style={{ display: 'block' }}>{playerName}</Text>
+                    {playerSub && (
+                      <Text type="secondary" style={{ fontSize: 12 }}>{playerSub}</Text>
+                    )}
                   </div>
-
-                  <Space size={6}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                     {g.ownGoal && (
                       <Tag color="red" style={{ margin: 0, fontSize: 11 }}>Gol contra</Tag>
                     )}
@@ -259,12 +354,11 @@ export function MatchDetailsPage() {
                       <Tag color="blue" icon={<AimOutlined />} style={{ margin: 0, fontSize: 11 }}>Falta</Tag>
                     )}
                     {!g.ownGoal && g.penalty && (
-                      <Tag color="purple" icon={<span>{'\u{1F945}'}</span>} style={{ margin: 0, fontSize: 11 }}>Penalti</Tag>
+                      <Tag color="purple" style={{ margin: 0, fontSize: 11 }}>Pênalti</Tag>
                     )}
-                    <Tag style={{ margin: 0 }}>
+                    <Tag style={{ margin: 0, borderRadius: 999, fontWeight: 600 }}>
                       {g.minute !== null ? `${g.minute}'` : '—'}
                     </Tag>
-
                     {isActiveSeason && isAdmin && (
                       <Button
                         danger
@@ -277,7 +371,6 @@ export function MatchDetailsPage() {
                             message.success('Gol removido')
                             const goalsData = await listMatchGoals(id)
                             setGoals(goalsData)
-                            // Refresh match for score
                             const matchData = await getMatchById(id)
                             setMatch(matchData)
                           } catch (err) {
@@ -289,45 +382,51 @@ export function MatchDetailsPage() {
                         Remover
                       </Button>
                     )}
-                  </Space>
+                  </div>
                 </div>
-              ))}
-            </Space>
-          )}
-        </Space>
-      ),
-    },
-    {
-      key: 'presences',
-      label: (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-          <Text strong>Presenças</Text>
-          <Space size={8}>
-            <Text type="secondary" style={{ fontSize: 13 }}>
-              {presentCount}/{totalPlayers}
-            </Text>
-          </Space>
-        </div>
-      ),
-      children: presences.length === 0 ? (
-        <Empty
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description="Nenhuma presença registrada"
-        />
-      ) : (
-        <Space orientation="vertical" size={12} style={{ width: '100%' }}>
-          <Input.Search
-            placeholder="Filtrar por nome ou apelido"
-            allowClear
-            onChange={(e) => setPresenceFilter(e.target.value)}
-            style={{ width: '100%' }}
-          />
+              )
+            })}
+          </div>
+        )}
+      </div>
 
-          {filteredPresences.length === 0 ? (
-            <Empty description="Nenhum jogador encontrado" />
-          ) : (
-            <Space orientation="vertical" size={10} style={{ width: '100%' }}>
-              {filteredPresences.map((p) => (
+      {/* Presences Section */}
+      <div
+        style={{
+          background: token.colorBgContainer,
+          border: `1px solid ${token.colorBorderSecondary}`,
+          borderRadius: 16,
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ padding: '16px 20px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: token.colorTextSecondary }}>
+            Presenças
+          </Text>
+          <Text type="secondary" style={{ fontSize: 13 }}>{presentCount}/{totalPlayers}</Text>
+        </div>
+
+        {presences.length === 0 ? (
+          <div style={{ padding: '8px 20px 20px' }}>
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhuma presença registrada" />
+          </div>
+        ) : (
+          <div>
+            <div style={{ padding: '0 16px 12px' }}>
+              <Input.Search
+                placeholder="Filtrar por nome ou apelido"
+                allowClear
+                onChange={(e) => setPresenceFilter(e.target.value)}
+                style={{ width: '100%' }}
+              />
+            </div>
+
+            {filteredPresences.length === 0 ? (
+              <div style={{ padding: '8px 20px 20px' }}>
+                <Empty description="Nenhum jogador encontrado" />
+              </div>
+            ) : (
+              filteredPresences.map((p, i) => (
                 <div
                   key={p.playerId}
                   onClick={() => {
@@ -337,17 +436,16 @@ export function MatchDetailsPage() {
                   }}
                   style={{
                     display: 'flex',
-                    justifyContent: 'space-between',
-                    gap: 12,
                     alignItems: 'center',
-                    padding: '10px 12px',
-                    borderRadius: 12,
-                    background: token.colorFillQuaternary,
-                    opacity: p.present ? 1 : 0.7,
+                    gap: 12,
+                    padding: '12px 20px',
+                    borderBottom: i < filteredPresences.length - 1 ? `1px solid ${token.colorFillQuaternary}` : 'none',
+                    opacity: p.present ? 1 : 0.6,
                     cursor: isActiveSeason && isAdmin ? 'pointer' : 'default',
+                    transition: 'opacity 0.2s',
                   }}
                 >
-                  <div style={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ minWidth: 0, flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
                     <Avatar size={34} src={p.player.photo ?? undefined}>
                       {(p.player.nickname || p.player.name)?.[0]}
                     </Avatar>
@@ -355,9 +453,11 @@ export function MatchDetailsPage() {
                       <Text strong style={{ display: 'block' }}>
                         {p.player.nickname || p.player.name}
                       </Text>
-                      <Text type="secondary" style={{ fontSize: 12 }}>
-                        {p.player.name}
-                      </Text>
+                      {p.player.nickname && (
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          {p.player.name}
+                        </Text>
+                      )}
                     </div>
                   </div>
                   <Switch
@@ -367,93 +467,18 @@ export function MatchDetailsPage() {
                     onChange={(val) => togglePresence(p.playerId, val)}
                   />
                 </div>
-              ))}
-            </Space>
-          )}
-        </Space>
-      ),
-    },
-  ]
-
-  return (
-    <Space orientation="vertical" size={14} style={{ width: '100%', paddingBottom: 16 }}>
-      {/* Card principal do jogo */}
-      <Card>
-        <Space orientation="vertical" size={10} style={{ width: '100%' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              gap: 12,
-              alignItems: 'flex-start',
-            }}
-          >
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Title level={4} style={{ margin: 0 }}>
-                  {opponent}
-                </Title>
-                {isActiveSeason && isAdmin && (
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => {
-                      posthog.capture('edit_match_clicked')
-                      setEditMatchModalOpen(true)
-                    }}
-                  />
-                )}
-              </div>
-
-              <Space size={10} style={{ marginTop: 6, flexWrap: 'wrap' }}>
-                <Text type="secondary">
-                  <CalendarOutlined /> {dateLabel}
-                </Text>
-
-                {match.location ? (
-                  <Text type="secondary">
-                    <EnvironmentOutlined /> {match.location}
-                  </Text>
-                ) : null}
-              </Space>
-            </div>
-
-            <Tag
-              style={{
-                margin: 0,
-                fontWeight: 800,
-                fontSize: 14,
-                padding: '4px 12px',
-                borderRadius: 999,
-                borderColor: token.colorBorderSecondary,
-              }}
-            >
-              {match.ourScore} x {match.theirScore}
-            </Tag>
+              ))
+            )}
           </div>
-
-          {match.notes ? (
-            <>
-              <Divider style={{ margin: '10px 0' }} />
-              <Text>{match.notes}</Text>
-            </>
-          ) : null}
-        </Space>
-      </Card>
-
-      <Collapse
-        items={collapseItems}
-        defaultActiveKey={['goals', 'presences']}
-        ghost
-        style={{ background: token.colorBgContainer, borderRadius: token.borderRadius }}
-      />
+        )}
+      </div>
 
       <AddGoalModal
         open={goalModalOpen}
         loading={creatingGoal}
         players={presentPlayersOptions}
         maxGoals={match.ourScore}
-        currentGoalsCount={goals.filter(g => !g.ownGoal).length}
+        currentGoalsCount={goals.filter((g) => !g.ownGoal).length}
         onCancel={() => setGoalModalOpen(false)}
         onSubmit={onCreateGoal}
       />
@@ -482,7 +507,7 @@ export function MatchDetailsPage() {
           bottom: 92,
         }}
       />
-    </Space>
+    </div>
   )
 }
 

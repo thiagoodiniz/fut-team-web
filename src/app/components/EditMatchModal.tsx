@@ -1,9 +1,11 @@
 import React from 'react'
-import { Modal, Form, Input, DatePicker, message, InputNumber, Button, Popconfirm } from 'antd'
+import { Modal, Form, Input, DatePicker, message, InputNumber, Button, Popconfirm, Typography, theme } from 'antd'
 import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
 import { updateMatch, type MatchDTO } from '../../services/matches.service'
 import { DeleteOutlined } from '@ant-design/icons'
+
+const { Text } = Typography
 
 interface EditMatchModalProps {
     open: boolean
@@ -22,6 +24,7 @@ export function EditMatchModal({
 }: EditMatchModalProps) {
     const [form] = Form.useForm()
     const [loading, setLoading] = React.useState(false)
+    const { token } = theme.useToken()
 
     React.useEffect(() => {
         if (open && match) {
@@ -67,38 +70,12 @@ export function EditMatchModal({
 
     return (
         <Modal
-            title="Editar Jogo"
+            title={<Text strong style={{ fontSize: 15 }}>Editar Jogo</Text>}
             open={open}
             onCancel={onCancel}
-            onOk={form.submit}
-            confirmLoading={loading}
-            okText="Salvar"
-            cancelText="Cancelar"
-            footer={[
-                onDelete && (
-                    <Popconfirm
-                        key="delete"
-                        title="Tem certeza que deseja excluir este jogo?"
-                        description="Isso excluirá também todos os gols e presenças associados."
-                        onConfirm={onDelete}
-                        okText="Sim, excluir"
-                        cancelText="Cancelar"
-                        okButtonProps={{ danger: true }}
-                    >
-                        <Button danger icon={<DeleteOutlined />} style={{ float: 'left' }}>
-                            Excluir Jogo
-                        </Button>
-                    </Popconfirm>
-                ),
-                <Button key="cancel" onClick={onCancel}>
-                    Cancelar
-                </Button>,
-                <Button key="submit" type="primary" loading={loading} onClick={form.submit}>
-                    Salvar
-                </Button>,
-            ]}
+            footer={null}
         >
-            <Form layout="vertical" form={form} onFinish={handleSubmit}>
+            <Form layout="vertical" form={form} onFinish={handleSubmit} style={{ marginTop: 16 }}>
                 <Form.Item
                     name="date"
                     label="Data e Hora"
@@ -112,21 +89,82 @@ export function EditMatchModal({
                 </Form.Item>
 
                 <Form.Item name="location" label="Local">
-                    <Input placeholder="Onde será o jogo?" />
+                    <Input placeholder="Onde foi o jogo?" />
                 </Form.Item>
 
-                <div style={{ display: 'flex', gap: 16 }}>
-                    <Form.Item name="ourScore" label="Gols Pró" style={{ flex: 1 }}>
-                        <InputNumber min={0} style={{ width: '100%' }} />
-                    </Form.Item>
-                    <Form.Item name="theirScore" label="Gols Contra" style={{ flex: 1 }}>
-                        <InputNumber min={0} style={{ width: '100%' }} />
-                    </Form.Item>
+                {/* Score */}
+                <div
+                    style={{
+                        background: token.colorFillQuaternary,
+                        borderRadius: 12,
+                        padding: '16px 20px',
+                        marginBottom: 24,
+                    }}
+                >
+                    <Text
+                        style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.07em',
+                            color: token.colorTextSecondary,
+                            display: 'block',
+                            marginBottom: 12,
+                        }}
+                    >
+                        Placar
+                    </Text>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12 }}>
+                        <Form.Item name="ourScore" label="Nós" style={{ flex: 1, margin: 0 }}>
+                            <InputNumber min={0} style={{ width: '100%' }} controls />
+                        </Form.Item>
+                        <div
+                            style={{
+                                paddingBottom: 6,
+                                color: token.colorTextSecondary,
+                                fontSize: 20,
+                                fontWeight: 300,
+                                lineHeight: 1,
+                                flexShrink: 0,
+                            }}
+                        >
+                            ×
+                        </div>
+                        <Form.Item name="theirScore" label="Eles" style={{ flex: 1, margin: 0 }}>
+                            <InputNumber min={0} style={{ width: '100%' }} controls />
+                        </Form.Item>
+                    </div>
                 </div>
 
-                <Form.Item name="notes" label="Observações">
-                    <Input.TextArea rows={3} />
+                <Form.Item name="notes" label="Observações" style={{ marginBottom: 24 }}>
+                    <Input.TextArea rows={3} placeholder="Alguma observação sobre o jogo?" />
                 </Form.Item>
+
+                {/* Footer */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                    {onDelete ? (
+                        <Popconfirm
+                            title="Excluir este jogo?"
+                            description="Todos os gols e presenças também serão removidos."
+                            onConfirm={onDelete}
+                            okText="Sim, excluir"
+                            cancelText="Cancelar"
+                            okButtonProps={{ danger: true }}
+                        >
+                            <Button danger icon={<DeleteOutlined />} type="text">
+                                Excluir jogo
+                            </Button>
+                        </Popconfirm>
+                    ) : (
+                        <span />
+                    )}
+                    <div style={{ display: 'flex', gap: 8 }}>
+                        <Button onClick={onCancel}>Cancelar</Button>
+                        <Button type="primary" loading={loading} onClick={form.submit}>
+                            Salvar
+                        </Button>
+                    </div>
+                </div>
             </Form>
         </Modal>
     )

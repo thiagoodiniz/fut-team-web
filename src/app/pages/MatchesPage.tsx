@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { List, Typography, Input, Card, theme, FloatButton, Space, Tag, Empty, Divider } from 'antd'
+import { List, Typography, Input, Card, theme, FloatButton, Tag, Empty } from 'antd'
 import posthog from 'posthog-js'
 import {
   CalendarOutlined,
@@ -111,43 +111,83 @@ export function MatchesPage() {
     return 'warning'
   }
 
-  return (
-    <Space direction="vertical" size={14} style={{ width: '100%', paddingBottom: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Title level={4} style={{ margin: 0 }}>
-          Jogos
-        </Title>
-      </div>
+  function getResultAccent(our: number, their: number) {
+    if (our > their) return token.colorSuccess
+    if (our < their) return token.colorError
+    return token.colorWarning
+  }
 
-      {/* Summary Stats Bar */}
-      <Card size="small" styles={{ body: { padding: '12px 16px' } }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px 8px' }}>
-          <div style={{ textAlign: 'center' }}>
-            <Text type="secondary" style={{ fontSize: 11, display: 'block', textTransform: 'uppercase' }}>Jogos</Text>
-            <Text strong style={{ fontSize: 18 }}>{stats.total}</Text>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <Text type="secondary" style={{ fontSize: 11, display: 'block', textTransform: 'uppercase' }}>Vitórias</Text>
-            <Text strong style={{ fontSize: 18, color: token.colorSuccess }}>{stats.w}</Text>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <Text type="secondary" style={{ fontSize: 11, display: 'block', textTransform: 'uppercase' }}>Empates</Text>
-            <Text strong style={{ fontSize: 18, color: token.colorWarning }}>{stats.d}</Text>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <Text type="secondary" style={{ fontSize: 11, display: 'block', textTransform: 'uppercase' }}>Derrotas</Text>
-            <Text strong style={{ fontSize: 18, color: token.colorError }}>{stats.l}</Text>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <Text type="secondary" style={{ fontSize: 11, display: 'block', textTransform: 'uppercase' }}>Gols Pró</Text>
-            <Text strong style={{ fontSize: 18 }}>{stats.gf}</Text>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <Text type="secondary" style={{ fontSize: 11, display: 'block', textTransform: 'uppercase' }}>Gols Sofr.</Text>
-            <Text strong style={{ fontSize: 18 }}>{stats.ga}</Text>
-          </div>
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingBottom: 40 }}>
+      <Title level={4} style={{ margin: 0 }}>Jogos</Title>
+
+      {/* Summary Stats */}
+      <div
+        style={{
+          background: token.colorBgContainer,
+          border: `1px solid ${token.colorBorderSecondary}`,
+          borderRadius: 12,
+          padding: '12px 16px',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '12px 8px',
+        }}
+      >
+        <div style={{ textAlign: 'center' }}>
+          <Text
+            strong
+            style={{ fontSize: 11, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorTextSecondary }}
+          >
+            Jogos
+          </Text>
+          <Text strong style={{ fontSize: 22 }}>{stats.total}</Text>
         </div>
-      </Card>
+        <div style={{ textAlign: 'center' }}>
+          <Text
+            strong
+            style={{ fontSize: 11, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorSuccessText }}
+          >
+            Vitórias
+          </Text>
+          <Text strong style={{ fontSize: 22, color: token.colorSuccessText }}>{stats.w}</Text>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <Text
+            strong
+            style={{ fontSize: 11, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorWarning }}
+          >
+            Empates
+          </Text>
+          <Text strong style={{ fontSize: 22, color: token.colorWarning }}>{stats.d}</Text>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <Text
+            strong
+            style={{ fontSize: 11, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorErrorText }}
+          >
+            Derrotas
+          </Text>
+          <Text strong style={{ fontSize: 22, color: token.colorErrorText }}>{stats.l}</Text>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <Text
+            strong
+            style={{ fontSize: 11, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorTextSecondary }}
+          >
+            Gols Pró
+          </Text>
+          <Text strong style={{ fontSize: 22, color: token.colorPrimary }}>{stats.gf}</Text>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <Text
+            strong
+            style={{ fontSize: 11, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorTextSecondary }}
+          >
+            Gols Sofr.
+          </Text>
+          <Text strong style={{ fontSize: 22, color: token.colorErrorText }}>{stats.ga}</Text>
+        </div>
+      </div>
 
       <Input.Search
         placeholder="Filtrar por nome ou local"
@@ -155,200 +195,219 @@ export function MatchesPage() {
         onChange={(e) => setFilter(e.target.value)}
         style={{ width: '100%' }}
       />
-      <Text type="secondary" style={{ fontSize: 12 }}>
-        Toque em um jogo para ver detalhes, presencas e gols.
-      </Text>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
         {loading ? (
           <Card loading />
         ) : groupedMatches.length === 0 ? (
-          <Card>
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description="Nenhum jogo cadastrado ainda"
-            />
-          </Card>
+          <div
+            style={{
+              background: token.colorBgContainer,
+              border: `1px solid ${token.colorBorderSecondary}`,
+              borderRadius: 12,
+              padding: '32px 16px',
+              textAlign: 'center',
+            }}
+          >
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum jogo cadastrado ainda" />
+          </div>
         ) : (
-          groupedMatches.map((group) => (
-            <div key={group.monthYear}>
-              <div style={{
-                marginBottom: 12,
-                padding: '0 4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: 8
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{
-                    width: 4,
-                    height: 16,
-                    backgroundColor: token.colorPrimary,
-                    borderRadius: 2
-                  }} />
-                  <Text strong style={{
-                    fontSize: 14,
-                    color: token.colorTextSecondary,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}>
-                    {group.monthYear}
-                  </Text>
-                </div>
-              </div>
+          groupedMatches.map((group) => {
+            const wins = group.data.filter(m => m.ourScore > m.theirScore).length
+            const losses = group.data.filter(m => m.ourScore < m.theirScore).length
+            const draws = group.data.filter(m => m.ourScore === m.theirScore).length
+            const goalsFor = group.data.reduce((acc, m) => acc + m.ourScore, 0)
+            const goalsAgainst = group.data.reduce((acc, m) => acc + m.theirScore, 0)
 
-              {(() => {
-                const wins = group.data.filter(m => m.ourScore > m.theirScore).length
-                const losses = group.data.filter(m => m.ourScore < m.theirScore).length
-                const draws = group.data.filter(m => m.ourScore === m.theirScore).length
-                const goalsFor = group.data.reduce((acc, m) => acc + m.ourScore, 0)
-                const goalsAgainst = group.data.reduce((acc, m) => acc + m.theirScore, 0)
-
-                return (
-                  <div style={{
+            return (
+              <div key={group.monthYear}>
+                {/* Month header */}
+                <div
+                  style={{
                     display: 'flex',
-                    justifyContent: 'space-between',
                     alignItems: 'center',
-                    width: '100%',
-                    padding: '8px 12px',
-                    background: token.colorFillQuaternary,
-                    borderRadius: 8,
-                    marginBottom: 16
-                  }}>
-                    <Space size={4} wrap>
-                      <Tag style={{ margin: 0 }}>{group.data.length} Jogos</Tag>
-                      <Tag color="success" style={{ margin: 0 }}>{wins}V</Tag>
-                      <Tag color="error" style={{ margin: 0 }}>{losses}D</Tag>
-                      {draws > 0 && <Tag color="warning" style={{ margin: 0 }}>{draws}E</Tag>}
-                      <Divider type="vertical" style={{ margin: '0 4px' }} />
-                      <Text style={{ fontSize: 12, fontWeight: 500 }}>
-                        Gols: <span style={{ color: token.colorSuccess }}>{goalsFor}</span> / <span style={{ color: token.colorError }}>{goalsAgainst}</span>
-                      </Text>
-                    </Space>
+                    justifyContent: 'space-between',
+                    marginBottom: 8,
+                    padding: '0 2px',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div
+                      style={{
+                        width: 3,
+                        height: 14,
+                        backgroundColor: token.colorPrimary,
+                        borderRadius: 2,
+                        flexShrink: 0,
+                      }}
+                    />
                     <Text
                       strong
                       style={{
-                        fontSize: 11,
-                        cursor: 'pointer',
-                        color: token.colorPrimary,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2
-                      }}
-                      onClick={() => {
-                        setSelectedMonthGroup(group)
-                        setSummaryModalOpen(true)
+                        fontSize: 12,
+                        color: token.colorTextSecondary,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
                       }}
                     >
-                      Ver resumo do mês <RightOutlined style={{ fontSize: 9 }} />
+                      {group.monthYear}
                     </Text>
                   </div>
-                )
-              })()}
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      color: token.colorPrimary,
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 3,
+                    }}
+                    onClick={() => {
+                      setSelectedMonthGroup(group)
+                      setSummaryModalOpen(true)
+                    }}
+                  >
+                    Ver resumo <RightOutlined style={{ fontSize: 9 }} />
+                  </Text>
+                </div>
 
-              <Card styles={{ body: { padding: 0 } }}>
-                <List
-                  dataSource={group.data}
-                  renderItem={(match) => {
+                {/* Month summary pills */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    marginBottom: 10,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <Tag style={{ margin: 0, fontSize: 11 }}>{group.data.length} jogos</Tag>
+                  <Tag color="success" style={{ margin: 0, fontSize: 11 }}>{wins}V</Tag>
+                  {draws > 0 && <Tag color="warning" style={{ margin: 0, fontSize: 11 }}>{draws}E</Tag>}
+                  <Tag color="error" style={{ margin: 0, fontSize: 11 }}>{losses}D</Tag>
+                  <div
+                    style={{
+                      marginLeft: 4,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4,
+                    }}
+                  >
+                    <Text style={{ fontSize: 11, color: token.colorSuccessText, fontWeight: 600 }}>{goalsFor}</Text>
+                    <Text type="secondary" style={{ fontSize: 11 }}>×</Text>
+                    <Text style={{ fontSize: 11, color: token.colorErrorText, fontWeight: 600 }}>{goalsAgainst}</Text>
+                  </div>
+                </div>
+
+                {/* Match list */}
+                <div
+                  style={{
+                    background: token.colorBgContainer,
+                    border: `1px solid ${token.colorBorderSecondary}`,
+                    borderRadius: 12,
+                    overflow: 'hidden',
+                  }}
+                >
+                  {group.data.map((match, idx) => {
                     const opponent = match.opponent?.trim() || 'Sem adversário'
                     const dateLabel = formatMatchDate(match.date)
                     const resultColor = getResultColor(match.ourScore, match.theirScore)
+                    const accentColor = getResultAccent(match.ourScore, match.theirScore)
 
                     return (
-                      <List.Item
+                      <div
+                        key={match.id}
                         style={{
-                          padding: 14,
+                          padding: '12px 16px',
+                          borderBottom: idx < group.data.length - 1 ? `1px solid ${token.colorFillQuaternary}` : undefined,
+                          borderLeft: `3px solid ${accentColor}`,
                           cursor: 'pointer',
-                          transition: 'background-color 0.2s ease',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          gap: 12,
+                          transition: 'background 0.15s',
                         }}
                         onClick={() => {
                           posthog.capture('match_list_item_clicked', { match_id: match.id, opponent: match.opponent })
                           navigate(`/app/matches/${match.id}`)
                         }}
                       >
-                        <div style={{ width: '100%' }}>
-                          <div
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <Text
+                            strong
                             style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              gap: 12,
-                              alignItems: 'flex-start',
+                              display: 'block',
+                              fontSize: 14,
+                              lineHeight: 1.3,
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
                             }}
                           >
-                            <div style={{ minWidth: 0 }}>
-                              <Text
-                                strong
-                                style={{
-                                  display: 'block',
-                                  fontSize: 15,
-                                  lineHeight: 1.2,
-                                }}
-                              >
-                                {opponent}
-                              </Text>
-
-                              <Space size={10} style={{ marginTop: 6 }}>
-                                <Text type="secondary" style={{ fontSize: 12 }}>
-                                  <CalendarOutlined /> {dateLabel}
-                                </Text>
-
-                                {match.location ? (
-                                  <Text type="secondary" style={{ fontSize: 12 }}>
-                                    <EnvironmentOutlined /> {match.location}
-                                  </Text>
-                                ) : null}
-                              </Space>
+                            {opponent}
+                          </Text>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                              <CalendarOutlined style={{ fontSize: 10, color: token.colorTextSecondary }} />
+                              <Text type="secondary" style={{ fontSize: 11 }}>{dateLabel}</Text>
                             </div>
-
-                            <div style={{ flexShrink: 0 }}>
-                              <Space size={10}>
-                                <Tag
-                                  color={resultColor}
-                                  style={{
-                                    margin: 0,
-                                    fontWeight: 700,
-                                    fontSize: 13,
-                                    padding: '2px 10px',
-                                    borderRadius: 999,
-                                  }}
+                            {match.location && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                <EnvironmentOutlined style={{ fontSize: 10, color: token.colorTextSecondary }} />
+                                <Text
+                                  type="secondary"
+                                  style={{ fontSize: 11, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}
                                 >
-                                  {match.ourScore} x {match.theirScore}
-                                </Tag>
-                                <Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>
-                                  Ver detalhes <RightOutlined />
+                                  {match.location}
                                 </Text>
-                              </Space>
-                            </div>
+                              </div>
+                            )}
                           </div>
                         </div>
-                      </List.Item>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                          <Tag
+                            color={resultColor}
+                            style={{
+                              margin: 0,
+                              fontWeight: 700,
+                              fontSize: 13,
+                              padding: '2px 10px',
+                              borderRadius: 999,
+                              minWidth: 54,
+                              textAlign: 'center',
+                            }}
+                          >
+                            {match.ourScore} x {match.theirScore}
+                          </Tag>
+                          <RightOutlined style={{ fontSize: 11, color: token.colorTextSecondary }} />
+                        </div>
+                      </div>
                     )
-                  }}
-                />
-              </Card>
-            </div>
-          ))
+                  })}
+                </div>
+              </div>
+            )
+          })
         )}
       </div>
 
-      {
-        isActiveSeason && isAdmin && (
-          <FloatButton
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => {
-              posthog.capture('create_match_clicked')
-              setCreateModalOpen(true)
-            }}
-            style={{
-              bottom: 88,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-            }}
-          />
-        )
-      }
+      {isActiveSeason && isAdmin && (
+        <FloatButton
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => {
+            posthog.capture('create_match_clicked')
+            setCreateModalOpen(true)
+          }}
+          style={{
+            bottom: 88,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          }}
+        />
+      )}
 
       <CreateMatchModal
         open={createModalOpen}
@@ -373,6 +432,6 @@ export function MatchesPage() {
           bottom: 92,
         }}
       />
-    </Space>
+    </div>
   )
 }

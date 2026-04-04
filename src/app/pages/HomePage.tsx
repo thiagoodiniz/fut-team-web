@@ -1,12 +1,13 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, Col, List, Progress, Row, Statistic, Tag, Typography, theme, Avatar, Button, Space, FloatButton } from 'antd'
+import { Card, Col, Progress, Row, Tag, Typography, theme, Avatar, Button, FloatButton } from 'antd'
 import {
   TrophyOutlined,
   FireOutlined,
   CalendarOutlined,
   EnvironmentOutlined,
   AimOutlined,
+  RightOutlined,
 } from '@ant-design/icons'
 
 import { useSeason } from '../contexts/SeasonContext'
@@ -55,416 +56,450 @@ export function HomePage() {
 
   const { summary, lastMatches, attendance } = data
 
+  const rankColor = (index: number) =>
+    index === 0 ? '#fadb14' : index === 1 ? '#bfbfbf' : index === 2 ? '#d48806' : token.colorPrimary
+
+  const rankTextColor = (index: number) => (index < 3 ? '#1a1a1a' : '#ffffff')
+
+  const SectionHeader = ({ label, action, onAction }: { label: string; action?: string; onAction?: () => void }) => (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Text
+        strong
+        style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.07em', color: token.colorTextSecondary }}
+      >
+        {label}
+      </Text>
+      {action && onAction && (
+        <Button
+          type="link"
+          size="small"
+          onClick={onAction}
+          style={{ padding: 0, height: 'auto', fontSize: 12, color: token.colorPrimary }}
+          icon={<RightOutlined style={{ fontSize: 9 }} />}
+          iconPosition="end"
+        >
+          {action}
+        </Button>
+      )}
+    </div>
+  )
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24, paddingBottom: 40 }}>
-      {/* Team ID */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8 }}>
+      {/* Team Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <div
           style={{
-            width: 64,
-            height: 64,
-            borderRadius: 16,
+            width: 52,
+            height: 52,
+            borderRadius: 14,
             background: token.colorFillSecondary,
             display: 'grid',
             placeItems: 'center',
             overflow: 'hidden',
-            border: `1px solid ${token.colorBorderSecondary}`
+            flexShrink: 0,
+            border: `1px solid ${token.colorBorderSecondary}`,
           }}
         >
           {team?.logo ? (
             <img src={team.logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           ) : (
-            <Title level={3} style={{ margin: 0, color: token.colorPrimary }}>{team?.name?.[0] || 'T'}</Title>
+            <Text strong style={{ fontSize: 20, color: token.colorPrimary }}>{team?.name?.[0] || 'T'}</Text>
           )}
         </div>
-        <div>
-          <Title level={2} style={{ margin: 0 }}>{team?.name || 'Carregando...'}</Title>
-          <Text type="secondary">Temporada {season?.year}</Text>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Title level={3} style={{ margin: 0, lineHeight: 1.2 }}>
+            {team?.name || 'Carregando...'}
+          </Title>
+          <Text
+            strong
+            style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.07em', color: token.colorTextSecondary }}
+          >
+            Temporada {season?.year}
+          </Text>
         </div>
       </div>
-      {/* SECTION 0: Next Match */}
+
+      {/* Next Match */}
       {data.nextMatch && (
-        <div style={{ marginBottom: 24 }}>
-          <Card
-            bordered={false}
-            onClick={() => {
-              posthog.capture('next_match_card_clicked', { match_id: data.nextMatch?.id })
-              navigate(`/app/matches/${data.nextMatch?.id}`)
-            }}
-            hoverable
-            style={{
-              background: token.colorBgContainer,
-              border: `1px solid ${token.colorBorderSecondary}`,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              cursor: 'pointer'
-            }}
-            bodyStyle={{ padding: '20px 24px' }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <Space align="center" style={{ marginBottom: 4 }}>
-                  <CalendarOutlined style={{ color: token.colorPrimary }} />
-                  <Text strong style={{ color: token.colorPrimary, textTransform: 'uppercase', fontSize: 12, letterSpacing: 0.5 }}>
-                    Próximo Jogo
-                  </Text>
-                </Space>
-
-                <Title level={3} style={{ margin: 0 }}>
-                  vs {data.nextMatch.opponent || 'Adversário não definido'}
-                </Title>
-
-                {data.nextMatch.location && (
-                  <Text type="secondary" style={{ fontSize: 14 }}>
-                    <EnvironmentOutlined /> {data.nextMatch.location}
-                  </Text>
-                )}
-              </div>
-
-              <div
-                style={{
-                  textAlign: 'center',
-                  background: token.colorFillQuaternary,
-                  padding: '8px 16px',
-                  borderRadius: 8,
-                  minWidth: 100
-                }}
+        <div
+          role="button"
+          onClick={() => {
+            posthog.capture('next_match_card_clicked', { match_id: data.nextMatch?.id })
+            navigate(`/app/matches/${data.nextMatch?.id}`)
+          }}
+          style={{
+            background: token.colorBgContainer,
+            border: `1px solid ${token.colorBorderSecondary}`,
+            borderLeft: `4px solid ${token.colorPrimary}`,
+            borderRadius: 12,
+            padding: '14px 16px',
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 16,
+            transition: 'opacity 0.15s',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <CalendarOutlined style={{ fontSize: 11, color: token.colorPrimary }} />
+              <Text
+                strong
+                style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.07em', color: token.colorPrimary }}
               >
-                <div style={{ fontSize: 24, fontWeight: 'bold', color: token.colorTextHeading, lineHeight: 1.2 }}>
-                  {new Date(data.nextMatch.date).getDate()}
-                </div>
-                <div style={{ fontSize: 14, textTransform: 'uppercase', color: token.colorTextSecondary }}>
-                  {new Date(data.nextMatch.date).toLocaleString('pt-BR', { month: 'short' })}
-                </div>
-                <div style={{ fontSize: 12, color: token.colorTextSecondary, marginTop: 4, fontWeight: 500 }}>
-                  {new Date(data.nextMatch.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                </div>
-              </div>
+                Próximo Jogo
+              </Text>
             </div>
-          </Card>
+            <Title
+              level={4}
+              style={{ margin: 0, lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+            >
+              vs {data.nextMatch.opponent || 'Adversário não definido'}
+            </Title>
+            {data.nextMatch.location && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <EnvironmentOutlined style={{ fontSize: 11, color: token.colorTextSecondary }} />
+                <Text type="secondary" style={{ fontSize: 12 }}>{data.nextMatch.location}</Text>
+              </div>
+            )}
+          </div>
+
+          <div
+            style={{
+              background: token.colorPrimaryBg,
+              padding: '10px 14px',
+              borderRadius: 10,
+              textAlign: 'center',
+              flexShrink: 0,
+              minWidth: 64,
+            }}
+          >
+            <Text strong style={{ display: 'block', fontSize: 26, lineHeight: 1, color: token.colorPrimary }}>
+              {new Date(data.nextMatch.date).getDate()}
+            </Text>
+            <Text
+              style={{
+                display: 'block',
+                fontSize: 11,
+                textTransform: 'uppercase',
+                fontWeight: 600,
+                color: token.colorPrimary,
+                marginTop: 2,
+                letterSpacing: '0.05em',
+              }}
+            >
+              {new Date(data.nextMatch.date).toLocaleString('pt-BR', { month: 'short' })}
+            </Text>
+            <Text type="secondary" style={{ display: 'block', fontSize: 11, marginTop: 4 }}>
+              {new Date(data.nextMatch.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+            </Text>
+          </div>
         </div>
       )}
 
-      {/* SECTION 1: Summary Cards */}
-      <div>
-        <Title level={4}>Resumo da Temporada</Title>
-        <Row gutter={[12, 12]}>
+      {/* Summary Stats */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <SectionHeader label="Temporada" />
+        <Row gutter={[8, 8]}>
           <Col xs={12} sm={6}>
-            <Card
-              bordered={false}
-              style={{ background: token.colorFillQuaternary, cursor: 'pointer' }}
-              hoverable
-              onClick={() => {
-                posthog.capture('total_games_card_clicked')
-                navigate('/app/matches')
+            <div
+              role="button"
+              onClick={() => { posthog.capture('total_games_card_clicked'); navigate('/app/matches') }}
+              style={{
+                background: token.colorFillQuaternary,
+                borderRadius: 12,
+                padding: '14px 16px',
+                cursor: 'pointer',
+                transition: 'opacity 0.15s',
               }}
             >
-              <Statistic
-                title={
-                  <Space>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <CalendarOutlined style={{ fontSize: 12, color: token.colorTextSecondary }} />
+                  <Text style={{ fontSize: 11, color: token.colorTextSecondary, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
                     Jogos
-                    <Text type="secondary" style={{ fontSize: 10 }}>Ver todos</Text>
-                  </Space>
-                }
-                value={summary.totalGames}
-                prefix={<CalendarOutlined />}
-              />
-            </Card>
+                  </Text>
+                </div>
+                <Text style={{ fontSize: 10, color: token.colorPrimary, fontWeight: 500 }}>Ver todos</Text>
+              </div>
+              <Text strong style={{ fontSize: 28, lineHeight: 1, display: 'block', color: token.colorPrimary }}>
+                {summary.totalGames}
+              </Text>
+            </div>
           </Col>
           <Col xs={12} sm={6}>
-            <Card bordered={false} style={{ background: token.colorSuccessBg }}>
-              <Statistic
-                title="Vitórias"
-                value={summary.wins}
-                valueStyle={{ color: token.colorSuccessText }}
-                prefix={<TrophyOutlined />}
-              />
-            </Card>
+            <div style={{ background: token.colorSuccessBg, borderRadius: 12, padding: '14px 16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                <TrophyOutlined style={{ fontSize: 12, color: token.colorSuccessText }} />
+                <Text style={{ fontSize: 11, color: token.colorSuccessText, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+                  Vitórias
+                </Text>
+              </div>
+              <Text strong style={{ fontSize: 28, lineHeight: 1, display: 'block', color: token.colorSuccessText }}>
+                {summary.wins}
+              </Text>
+            </div>
           </Col>
           <Col xs={12} sm={6}>
-            <Card
-              bordered={false}
-              style={{ background: token.colorFillQuaternary, cursor: 'pointer' }}
-              hoverable
-              onClick={() => {
-                posthog.capture('total_goals_card_clicked')
-                navigate('/app/ranking/scorers')
+            <div
+              role="button"
+              onClick={() => { posthog.capture('total_goals_card_clicked'); navigate('/app/ranking/scorers') }}
+              style={{
+                background: token.colorFillQuaternary,
+                borderRadius: 12,
+                padding: '14px 16px',
+                cursor: 'pointer',
+                transition: 'opacity 0.15s',
               }}
             >
-              <Statistic
-                title={
-                  <Space>
-                    Gols Pró
-                    <Text type="secondary" style={{ fontSize: 10 }}>Ver artilharia</Text>
-                  </Space>
-                }
-                value={summary.goalsFor}
-                prefix={<FireOutlined />}
-              />
-            </Card>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <FireOutlined style={{ fontSize: 12, color: token.colorTextSecondary }} />
+                  <Text style={{ fontSize: 11, color: token.colorTextSecondary, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+                    Gols
+                  </Text>
+                </div>
+                <Text style={{ fontSize: 10, color: token.colorPrimary, fontWeight: 500 }}>Ver artilharia</Text>
+              </div>
+              <Text strong style={{ fontSize: 28, lineHeight: 1, display: 'block', color: token.colorPrimary }}>
+                {summary.goalsFor}
+              </Text>
+            </div>
           </Col>
           <Col xs={12} sm={6}>
-            <Card bordered={false} style={{ background: token.colorFillQuaternary }}>
-              <Statistic
-                title="Aproveitamento"
-                value={summary.winRate}
-                suffix="%"
-                precision={0}
-                valueStyle={{
-                  color: summary.winRate >= 50 ? token.colorSuccessText : token.colorErrorText,
-                }}
-              />
-            </Card>
+            <div
+              style={{
+                background: summary.winRate >= 50 ? token.colorSuccessBg : token.colorErrorBg,
+                borderRadius: 12,
+                padding: '14px 16px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                <Text style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600, color: summary.winRate >= 50 ? token.colorSuccessText : token.colorErrorText }}>
+                  Aprov.
+                </Text>
+              </div>
+              <Text strong style={{ fontSize: 28, lineHeight: 1, display: 'block', color: summary.winRate >= 50 ? token.colorSuccessText : token.colorErrorText }}>
+                {Math.round(summary.winRate)}%
+              </Text>
+            </div>
           </Col>
         </Row>
       </div>
 
-      <Row gutter={[24, 24]}>
-        {/* SECTION 2: Last Matches */}
+      <Row gutter={[16, 24]}>
+        {/* Last Matches */}
         <Col xs={24} lg={12}>
-          <Card title="Últimos Jogos" bordered={false}>
-            <List
-              dataSource={lastMatches}
-              renderItem={(item) => {
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <SectionHeader label="Últimos Jogos" action="Ver todos" onAction={() => navigate('/app/matches')} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {lastMatches.map((item, index) => {
                 const isWin = item.result === 'WIN'
                 const isLoss = item.result === 'LOSS'
-
-                // Use token colors instead of hardcoded
-                const bg = isWin
-                  ? token.colorSuccessBg
-                  : isLoss
-                    ? token.colorErrorBg
-                    : token.colorWarningBg
-
-                const border = isWin
-                  ? token.colorSuccessBorder
-                  : isLoss
-                    ? token.colorErrorBorder
-                    : token.colorWarningBorder
+                const bg = isWin ? token.colorSuccessBg : isLoss ? token.colorErrorBg : token.colorWarningBg
+                const borderColor = isWin ? token.colorSuccessBorder : isLoss ? token.colorErrorBorder : token.colorWarningBorder
+                const accentColor = isWin ? token.colorSuccess : isLoss ? token.colorError : token.colorWarning
 
                 return (
-                  <List.Item
+                  <div
+                    key={index}
                     style={{
-                      padding: '12px',
-                      marginBottom: 8,
-                      borderRadius: 8,
                       background: bg,
-                      border: `1px solid ${border}`,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      gap: 8,
+                      border: `1px solid ${borderColor}`,
+                      borderLeft: `3px solid ${accentColor}`,
+                      borderRadius: 10,
+                      padding: '10px 12px',
                     }}
                   >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        width: '100%',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <Text strong style={{ fontSize: 16 }}>
-                        {item.opponent}
-                      </Text>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                      <Text strong style={{ fontSize: 14 }}>{item.opponent}</Text>
                       <Tag
-                        color={
-                          isWin
-                            ? 'success'
-                            : isLoss
-                              ? 'error'
-                              : 'warning'
-                        }
-                        style={{ fontSize: 14, fontWeight: 'bold', margin: 0 }}
+                        color={isWin ? 'success' : isLoss ? 'error' : 'warning'}
+                        style={{ fontSize: 13, fontWeight: 700, margin: 0, lineHeight: '22px', minWidth: 54, textAlign: 'center' }}
                       >
                         {item.ourScore} x {item.theirScore}
                       </Tag>
                     </div>
-
-                    <Space size={10} style={{ marginTop: 0 }}>
-                      <Text type="secondary" style={{ fontSize: 12 }}>
-                        <CalendarOutlined /> {new Date(item.date).toLocaleDateString()}
-                      </Text>
-                      {item.location && (
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                          <EnvironmentOutlined /> {item.location}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <CalendarOutlined style={{ fontSize: 10, color: token.colorTextSecondary }} />
+                        <Text type="secondary" style={{ fontSize: 11 }}>
+                          {new Date(item.date).toLocaleDateString('pt-BR')}
                         </Text>
-                      )}
-                    </Space>
-
-                    {item.scorers.length > 0 && (
-                      <div style={{ fontSize: 13, color: token.colorTextSecondary }}>
-                        ⚽ {item.scorers.join(', ')}
                       </div>
+                      {item.location && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <EnvironmentOutlined style={{ fontSize: 10, color: token.colorTextSecondary }} />
+                          <Text type="secondary" style={{ fontSize: 11 }}>{item.location}</Text>
+                        </div>
+                      )}
+                    </div>
+                    {item.scorers.length > 0 && (
+                      <Text style={{ fontSize: 11, color: token.colorSuccessText, display: 'block', marginTop: 4 }}>
+                        ⚽ {item.scorers.join(', ')}
+                      </Text>
                     )}
-                  </List.Item>
+                  </div>
                 )
-              }}
-            />
-          </Card>
+              })}
+            </div>
+          </div>
         </Col>
 
-        {/* SECTION 3: Attendance Ranking */}
+        {/* Rankings */}
         <Col xs={24} lg={12}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            {/* SECTION 3: Attendance Ranking */}
-            <Card
-              title="Frequência"
-              bordered={false}
-              extra={
-                <Button type="link" onClick={() => navigate('/app/ranking/attendance')}>
-                  Ver mais
-                </Button>
-              }
-            >
-              <List
-                dataSource={attendance.slice(0, 5)}
-                renderItem={(item, index) => (
-                  <List.Item>
-                    <List.Item.Meta
-                      avatar={
-                        <Avatar
-                          src={item.photo ?? undefined}
-                          style={{
-                            backgroundColor:
-                              index === 0
-                                ? '#fadb14'
-                                : index === 1
-                                  ? '#d9d9d9'
-                                  : index === 2
-                                    ? '#d48806'
-                                    : token.colorPrimary,
-                          }}
-                        >
-                          {!item.photo && (item.nickname?.[0] || item.name[0])}
-                        </Avatar>
-                      }
-                      title={
-                        <Space direction="vertical" size={2}>
-                          <Text strong>{item.nickname || item.name}</Text>
-                          {item.lastMatch && (
-                            <Text type="secondary" style={{ fontSize: 11 }}>
-                              Último: {new Date(item.lastMatch.date).toLocaleDateString()}
-                            </Text>
-                          )}
-                        </Space>
-                      }
-                      description={
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Attendance */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <SectionHeader label="Frequência" action="Ver mais" onAction={() => navigate('/app/ranking/attendance')} />
+              <div
+                style={{
+                  background: token.colorBgContainer,
+                  borderRadius: 12,
+                  border: `1px solid ${token.colorBorderSecondary}`,
+                  overflow: 'hidden',
+                }}
+              >
+                {attendance.slice(0, 5).map((item, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      padding: '10px 16px',
+                      borderBottom: index < 4 ? `1px solid ${token.colorFillQuaternary}` : undefined,
+                    }}
+                  >
+                    <Avatar
+                      src={item.photo ?? undefined}
+                      size={36}
+                      style={{ backgroundColor: rankColor(index), color: rankTextColor(index), flexShrink: 0, fontSize: 13, fontWeight: 600 }}
+                    >
+                      {!item.photo && (item.nickname?.[0] || item.name[0])}
+                    </Avatar>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <Text strong style={{ fontSize: 13, display: 'block', lineHeight: 1.4 }}>
+                        {item.nickname || item.name}
+                      </Text>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3 }}>
                         <Progress
                           percent={item.percentage}
                           size="small"
-                          status="active"
                           strokeColor={token.colorPrimary}
                           showInfo={false}
+                          style={{ flex: 1, marginBottom: 0 }}
                         />
-                      }
-                    />
-                    <div style={{ textAlign: 'right', minWidth: 60 }}>
-                      <Text strong>{item.presentCount}</Text>
-                      <div style={{ fontSize: 12, color: token.colorTextSecondary }}>
-                        jogos
+                        <Text type="secondary" style={{ fontSize: 10, flexShrink: 0 }}>
+                          {item.percentage}%
+                        </Text>
                       </div>
                     </div>
-                  </List.Item>
-                )}
-              />
-            </Card>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <Text strong style={{ fontSize: 15, color: token.colorPrimary, display: 'block', lineHeight: 1 }}>
+                        {item.presentCount}
+                      </Text>
+                      <Text type="secondary" style={{ fontSize: 10 }}>jogos</Text>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-            {/* SECTION 4: Top Scorers Ranking */}
-            <Card
-              title="Artilharia"
-              bordered={false}
-              extra={
-                <Button type="link" onClick={() => navigate('/app/ranking/scorers')}>
-                  Ver mais
-                </Button>
-              }
-            >
+            {/* Top Scorers */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <SectionHeader label="Artilharia" action="Ver mais" onAction={() => navigate('/app/ranking/scorers')} />
               {data.topScorers.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: 20, color: token.colorTextSecondary }}>
-                  Nenhum gol marcado
+                <div
+                  style={{
+                    background: token.colorBgContainer,
+                    border: `1px solid ${token.colorBorderSecondary}`,
+                    borderRadius: 12,
+                    padding: '24px 16px',
+                    textAlign: 'center',
+                  }}
+                >
+                  <Text type="secondary" style={{ fontSize: 13 }}>Nenhum gol marcado</Text>
                 </div>
               ) : (
-                <List
-                  dataSource={data.topScorers.slice(0, 5)}
-                  renderItem={(item, index) => (
-                    <List.Item>
-                      <List.Item.Meta
-                        avatar={
-                          <Avatar
-                            src={item.photo ?? undefined}
-                            style={{
-                              backgroundColor:
-                                index === 0
-                                  ? '#fadb14'
-                                  : index === 1
-                                    ? '#d9d9d9'
-                                    : index === 2
-                                      ? '#d48806'
-                                      : token.colorPrimary,
-                            }}
-                          >
-                            {!item.photo && (item.nickname?.[0] || item.name[0])}
-                          </Avatar>
-                        }
-                        title={
-                          <Space direction="vertical" size={0}>
-                            <Text strong>{item.nickname || item.name}</Text>
-                            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                              {item.hatTricks > 0 && (
-                                <Tag color="gold" icon={<span style={{ fontSize: 12 }}>{'\u{1F3A9}'}</span>} style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>
-                                  {item.hatTricks}
-                                </Tag>
-                              )}
-                              {item.doubles > 0 && (
-                                <Tag color="blue" icon={<DoubleBallIcon />} style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>
-                                  {item.doubles}
-                                </Tag>
-                              )}
-                              {item.freeKickGoals > 0 && (
-                                <Tag color="cyan" icon={<AimOutlined />} style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>
-                                  {item.freeKickGoals}
-                                </Tag>
-                              )}
-                              {item.penaltyGoals > 0 && (
-                                <Tag color="magenta" icon={<span style={{ fontSize: 12 }}>{'\u{1F945}'}</span>} style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>
-                                  {item.penaltyGoals}
-                                </Tag>
-                              )}
-                              {item.currentStreak >= 2 && (
-                                <Tag color="orange" icon={<FireOutlined />} style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>
-                                  {item.currentStreak}
-                                </Tag>
-                              )}
-                            </div>
-                          </Space>
-                        }
-                        description={
-                          <Space direction="vertical" size={2}>
-                            {item.lastGoal && (
-                              <Text type="secondary" style={{ fontSize: 11 }}>
-                                Último: {new Date(item.lastGoal.date).toLocaleDateString()}
-                              </Text>
-                            )}
-                            <Text type="secondary" style={{ fontSize: 11 }}>
-                              <Text strong>{item.matchesPlayed > 0 ? (item.goals / item.matchesPlayed).toFixed(2) : '0.00'}</Text> gols por jogo
-                            </Text>
-                          </Space>
-                        }
-                      />
-                      <div style={{ textAlign: 'right', minWidth: 60 }}>
-                        <Text strong style={{ fontSize: 16 }}>{item.goals}</Text>
-                        <div style={{ fontSize: 12, color: token.colorTextSecondary, lineHeight: 1 }}>
-                          gols
+                <div
+                  style={{
+                    background: token.colorBgContainer,
+                    borderRadius: 12,
+                    border: `1px solid ${token.colorBorderSecondary}`,
+                    overflow: 'hidden',
+                  }}
+                >
+                  {data.topScorers.slice(0, 5).map((item, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        padding: '10px 16px',
+                        borderBottom:
+                          index < Math.min(data.topScorers.length, 5) - 1
+                            ? `1px solid ${token.colorFillQuaternary}`
+                            : undefined,
+                      }}
+                    >
+                      <Avatar
+                        src={item.photo ?? undefined}
+                        size={36}
+                        style={{ backgroundColor: rankColor(index), color: rankTextColor(index), flexShrink: 0, fontSize: 13, fontWeight: 600 }}
+                      >
+                        {!item.photo && (item.nickname?.[0] || item.name[0])}
+                      </Avatar>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <Text strong style={{ fontSize: 13, display: 'block', lineHeight: 1.4 }}>
+                          {item.nickname || item.name}
+                        </Text>
+                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 3 }}>
+                          {item.hatTricks > 0 && (
+                            <Tag color="gold" style={{ fontSize: 10, padding: '0 4px', margin: 0, lineHeight: '18px' }}>
+                              🎩 {item.hatTricks}
+                            </Tag>
+                          )}
+                          {item.doubles > 0 && (
+                            <Tag color="blue" style={{ fontSize: 10, padding: '0 4px', margin: 0, lineHeight: '18px' }}>
+                              <DoubleBallIcon /> {item.doubles}
+                            </Tag>
+                          )}
+                          {item.freeKickGoals > 0 && (
+                            <Tag color="cyan" style={{ fontSize: 10, padding: '0 4px', margin: 0, lineHeight: '18px' }}>
+                              <AimOutlined /> {item.freeKickGoals}
+                            </Tag>
+                          )}
+                          {item.penaltyGoals > 0 && (
+                            <Tag color="purple" style={{ fontSize: 10, padding: '0 4px', margin: 0, lineHeight: '18px' }}>
+                              🥅 {item.penaltyGoals}
+                            </Tag>
+                          )}
+                          {item.currentStreak >= 2 && (
+                            <Tag color="orange" style={{ fontSize: 10, padding: '0 4px', margin: 0, lineHeight: '18px' }}>
+                              <FireOutlined /> {item.currentStreak}
+                            </Tag>
+                          )}
                         </div>
-                        <div style={{ fontSize: 10, color: token.colorTextSecondary }}>
-                          {item.matchesPlayed} jogos
-                        </div>
+                        <Text type="secondary" style={{ fontSize: 10, display: 'block', marginTop: 2 }}>
+                          {item.matchesPlayed > 0 ? (item.goals / item.matchesPlayed).toFixed(2) : '0.00'} gols/jogo
+                        </Text>
                       </div>
-                    </List.Item>
-                  )}
-                />
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <Text strong style={{ fontSize: 20, color: token.colorPrimary, display: 'block', lineHeight: 1 }}>
+                          {item.goals}
+                        </Text>
+                        <Text type="secondary" style={{ fontSize: 10 }}>gols</Text>
+                        <Text type="secondary" style={{ fontSize: 10, display: 'block', marginTop: 1 }}>{item.matchesPlayed} jogos</Text>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
-            </Card>
+            </div>
           </div>
         </Col>
       </Row>

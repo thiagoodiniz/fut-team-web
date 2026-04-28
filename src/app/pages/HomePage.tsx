@@ -305,12 +305,18 @@ export function HomePage() {
                 return (
                   <div
                     key={index}
+                    onClick={() => {
+                      posthog.capture('last_match_card_clicked', { match_id: item.id })
+                      navigate(`/app/matches/${item.id}`)
+                    }}
                     style={{
                       background: bg,
                       border: `1px solid ${borderColor}`,
                       borderLeft: `3px solid ${accentColor}`,
                       borderRadius: 10,
                       padding: '10px 12px',
+                      cursor: 'pointer',
+                      transition: 'opacity 0.15s',
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>

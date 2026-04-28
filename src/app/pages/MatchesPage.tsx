@@ -7,6 +7,7 @@ import {
   EnvironmentOutlined,
   PlusOutlined,
   RightOutlined,
+  UserOutlined,
 } from '@ant-design/icons'
 import { listMatches, type MatchDTO } from '../../services/matches.service'
 import { CreateMatchModal } from '../components/CreateMatchModal'
@@ -364,6 +365,12 @@ export function MatchesPage() {
                                 </Text>
                               </div>
                             )}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                              <UserOutlined style={{ fontSize: 10, color: token.colorTextSecondary }} />
+                              <Text type="secondary" style={{ fontSize: 11 }}>
+                                {(match.presences?.length || 0) + (match.loanedPlayers?.length || 0)}
+                              </Text>
+                            </div>
                           </div>
                         </div>
 

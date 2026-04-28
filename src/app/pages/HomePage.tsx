@@ -381,9 +381,12 @@ export function HomePage() {
                       {!item.photo && (item.nickname?.[0] || item.name[0])}
                     </Avatar>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <Text strong style={{ fontSize: 13, display: 'block', lineHeight: 1.4 }}>
-                        {item.nickname || item.name}
-                      </Text>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <Text strong style={{ fontSize: 13, display: 'block', lineHeight: 1.4 }}>
+                          {item.nickname || item.name}
+                        </Text>
+                        {(item as any).isLoaned && <Tag color="blue" style={{ margin: 0, fontSize: 9, padding: '0 4px', lineHeight: '16px', borderRadius: 4 }}>emprestado</Tag>}
+                      </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3 }}>
                         <Progress
                           percent={item.percentage}
@@ -454,9 +457,12 @@ export function HomePage() {
                         {!item.photo && (item.nickname?.[0] || item.name[0])}
                       </Avatar>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <Text strong style={{ fontSize: 13, display: 'block', lineHeight: 1.4 }}>
-                          {item.nickname || item.name}
-                        </Text>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <Text strong style={{ fontSize: 13, display: 'block', lineHeight: 1.4 }}>
+                            {item.nickname || item.name}
+                          </Text>
+                          {(item as any).isLoaned && <Tag color="blue" style={{ margin: 0, fontSize: 9, padding: '0 4px', lineHeight: '16px', borderRadius: 4 }}>emprestado</Tag>}
+                        </div>
                         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 3 }}>
                           {item.hatTricks > 0 && (
                             <Tag color="gold" style={{ fontSize: 10, padding: '0 4px', margin: 0, lineHeight: '18px' }}>

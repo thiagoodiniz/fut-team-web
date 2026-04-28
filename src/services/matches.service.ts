@@ -13,6 +13,8 @@ export type MatchDTO = {
   ourScore: number
   theirScore: number
 
+  loanedPlayers: string[]
+
   createdAt: string
   updatedAt: string
 

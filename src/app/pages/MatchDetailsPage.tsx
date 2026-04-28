@@ -12,6 +12,7 @@ import {
   Avatar,
   FloatButton,
   Skeleton,
+  AutoComplete,
 } from 'antd'
 import posthog from 'posthog-js'
 import {
@@ -19,9 +20,11 @@ import {
   EnvironmentOutlined,
   EditOutlined,
   AimOutlined,
+  PlusOutlined,
+  CloseOutlined,
 } from '@ant-design/icons'
 
-import { getMatchById, deleteMatch, type MatchDTO } from '../../services/matches.service'
+import { getMatchById, deleteMatch, updateMatch, listMatches, type MatchDTO } from '../../services/matches.service'
 import {
   listMatchGoals,
   type GoalDTO,
@@ -71,6 +74,9 @@ export function MatchDetailsPage() {
   const [editMatchModalOpen, setEditMatchModalOpen] = React.useState(false)
 
   const [creatingGoal, setCreatingGoal] = React.useState(false)
+  const [loanedPlayersOptions, setLoanedPlayersOptions] = React.useState<{ value: string }[]>([])
+  const [newLoanedPlayer, setNewLoanedPlayer] = React.useState('')
+  const [addingLoanedPlayer, setAddingLoanedPlayer] = React.useState(false)
 
   async function load() {
     if (!id) return
@@ -96,6 +102,19 @@ export function MatchDetailsPage() {
     load()
   }, [id])
 
+  React.useEffect(() => {
+    if (match?.seasonId) {
+      listMatches(match.seasonId).then(matches => {
+        const uniqueLoaned = Array.from(new Set(
+          matches
+            .flatMap(m => m.loanedPlayers || [])
+            .filter((name): name is string => !!name)
+        ))
+        setLoanedPlayersOptions(uniqueLoaned.map(name => ({ value: name })))
+      }).catch(console.error)
+    }
+  }, [match?.seasonId])
+
   async function togglePresence(playerId: string, value: boolean) {
     if (!id || !isActiveSeason || !isAdmin) return
 
@@ -115,32 +134,75 @@ export function MatchDetailsPage() {
     }
   }
 
+  async function addLoanedPlayer(name: string) {
+    if (!id || !match || !name.trim() || !isActiveSeason || !isAdmin) return
+
+    const trimmedName = name.trim()
+    if (match.loanedPlayers?.includes(trimmedName)) {
+      message.warning('Jogador já adicionado')
+      return
+    }
+
+    try {
+      setAddingLoanedPlayer(true)
+      const updatedLoaned = [...(match.loanedPlayers || []), trimmedName]
+      const updatedMatch = await updateMatch(id, { loanedPlayers: updatedLoaned })
+      setMatch(updatedMatch)
+      setNewLoanedPlayer('')
+      message.success('Jogador emprestado adicionado')
+    } catch (err) {
+      console.error(err)
+      message.error('Erro ao adicionar jogador')
+    } finally {
+      setAddingLoanedPlayer(false)
+    }
+  }
+
+  async function removeLoanedPlayer(name: string) {
+    if (!id || !match || !isActiveSeason || !isAdmin) return
+
+    try {
+      const updatedLoaned = (match.loanedPlayers || []).filter(n => n !== name)
+      const updatedMatch = await updateMatch(id, { loanedPlayers: updatedLoaned })
+      setMatch(updatedMatch)
+      message.success('Jogador emprestado removido')
+    } catch (err) {
+      console.error(err)
+      message.error('Erro ao remover jogador')
+    }
+  }
+
 
   const presentCount = presences.filter((p) => p.present).length
   const totalPlayers = presences.length
 
   const sortedPresences = [...presences].sort((a, b) => {
     // Ordem alfabetica
-    const nameA = (a.player.nickname || a.player.name).toLowerCase()
-    const nameB = (b.player.nickname || b.player.name).toLowerCase()
+    const nameA = (a.player?.nickname || a.player?.name || 'Jogador').toLowerCase()
+    const nameB = (b.player?.nickname || b.player?.name || 'Jogador').toLowerCase()
     return nameA.localeCompare(nameB, 'pt-BR')
   })
 
   const filteredPresences = sortedPresences.filter(p => {
     const search = presenceFilter.toLowerCase()
     return (
-      p.player.name.toLowerCase().includes(search) ||
-      (p.player.nickname?.toLowerCase().includes(search) ?? false)
+      p.player?.name.toLowerCase().includes(search) ||
+      (p.player?.nickname?.toLowerCase().includes(search) ?? false)
     )
   })
 
-  const presentPlayersOptions = presences
-    .filter((p) => p.present)
-    .map((p) => ({
-      value: p.playerId,
-      label: p.player.nickname || p.player.name,
-    }))
-    .sort((a, b) => a.label.localeCompare(b.label))
+  const presentPlayersOptions = [
+    ...presences
+      .filter((p) => p.present)
+      .map((p) => ({
+        value: p.playerId,
+        label: p.player?.nickname || p.player?.name || 'Jogador',
+      })),
+    ...(match?.loanedPlayers || []).map((name) => ({
+      value: `loaned:${name}`,
+      label: `${name} (emprestado)`,
+    })),
+  ].sort((a, b) => a.label.localeCompare(b.label))
 
   async function onCreateGoal(data: {
     playerId?: string
@@ -150,8 +212,13 @@ export function MatchDetailsPage() {
 
     try {
       setCreatingGoal(true)
+      const isLoaned = data.playerId?.startsWith('loaned:')
+      const playerId = isLoaned ? null : data.playerId
+      const loanedPlayerName = isLoaned ? data.playerId?.replace('loaned:', '') : null
+
       await createGoals(id, {
-        playerId: data.playerId,
+        playerId,
+        loanedPlayerName,
         goals: data.goals,
       })
       const count = data.goals.length
@@ -322,7 +389,7 @@ export function MatchDetailsPage() {
                     : token.colorSuccess
               const playerName = g.ownGoal
                 ? 'Gol contra'
-                : g.player?.nickname || g.player?.name || 'Sem jogador'
+                : g.player?.nickname || g.player?.name || g.loanedPlayerName || 'Sem jogador'
               const playerSub = g.ownGoal
                 ? 'Adversário'
                 : g.player?.nickname
@@ -471,6 +538,94 @@ export function MatchDetailsPage() {
             )}
           </div>
         )}
+      </div>
+
+      {/* Loaned Players Section */}
+      <div
+        style={{
+          background: token.colorBgContainer,
+          border: `1px solid ${token.colorBorderSecondary}`,
+          borderRadius: 16,
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ padding: '16px 20px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: token.colorTextSecondary }}>
+            Jogadores Emprestados
+          </Text>
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            {(match?.loanedPlayers || []).length}
+          </Text>
+        </div>
+
+        <div>
+          {isActiveSeason && isAdmin && (
+            <div style={{ padding: '0 20px 12px' }}>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <AutoComplete
+                  style={{ flex: 1 }}
+                  options={loanedPlayersOptions}
+                  value={newLoanedPlayer}
+                  onChange={setNewLoanedPlayer}
+                  placeholder="Nome do jogador"
+                  onSelect={(val) => addLoanedPlayer(val)}
+                  filterOption={(inputValue, option) =>
+                    option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                  }
+                />
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => addLoanedPlayer(newLoanedPlayer)}
+                  loading={addingLoanedPlayer}
+                />
+              </div>
+            </div>
+          )}
+
+          {(match?.loanedPlayers || []).length === 0 ? (
+            <div style={{ padding: '8px 20px 20px' }}>
+              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum jogador emprestado" />
+            </div>
+          ) : (
+            <div>
+              {(match?.loanedPlayers || []).map((name, i) => (
+                <div
+                  key={name}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '12px 20px',
+                    borderBottom: i < (match?.loanedPlayers || []).length - 1 ? `1px solid ${token.colorFillQuaternary}` : 'none',
+                  }}
+                >
+                  <div style={{ minWidth: 0, flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <Avatar size={34}>
+                      {name[0].toUpperCase()}
+                    </Avatar>
+                    <div style={{ minWidth: 0 }}>
+                      <Text strong style={{ display: 'block' }}>
+                        {name}
+                      </Text>
+                      <Tag color="orange" style={{ margin: 0, fontSize: 10, lineHeight: '14px', height: 16 }}>
+                        Emprestado
+                      </Tag>
+                    </div>
+                  </div>
+                  {isActiveSeason && isAdmin && (
+                    <Button
+                      type="text"
+                      danger
+                      icon={<CloseOutlined />}
+                      onClick={() => removeLoanedPlayer(name)}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <AddGoalModal

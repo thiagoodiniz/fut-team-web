@@ -38,11 +38,11 @@ if (currentVersion !== STORAGE_VERSION) {
 }
 
 if (POSTHOG_KEY) {
-  posthog.init(POSTHOG_KEY, {
-    api_host: POSTHOG_HOST,
-    person_profiles: 'identified_only',
-    capture_pageview: false, // We will track manually or via router
-  })
+  // posthog.init(POSTHOG_KEY, {
+  //   api_host: POSTHOG_HOST,
+  //   person_profiles: 'identified_only',
+  //   capture_pageview: false, // We will track manually or via router
+  // })
   applyAnalyticsPreferenceFromStorage()
 }
 

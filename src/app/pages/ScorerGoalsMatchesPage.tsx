@@ -55,7 +55,7 @@ export function ScorerGoalsMatchesPage() {
 
   if (!data) return <Empty description="Jogador não encontrado" />
 
-  const playerName = data.player.nickname || data.player.name
+  const playerName = data?.player?.nickname || data?.player?.name || 'Jogador'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -71,13 +71,16 @@ export function ScorerGoalsMatchesPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Avatar
             size={48}
-            src={data.player.photo ?? undefined}
-            icon={!data.player.photo ? <UserOutlined /> : undefined}
+            src={data.player?.photo ?? undefined}
+            icon={!data.player?.photo ? <UserOutlined /> : undefined}
           />
           <div>
-            <Title level={5} style={{ margin: 0 }}>
-              Gols de {playerName}
-            </Title>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Title level={5} style={{ margin: 0 }}>
+                {playerName}
+              </Title>
+              {data.player?.isLoaned && <Tag color="blue" style={{ margin: 0, fontSize: 10, borderRadius: 4 }}>emprestado</Tag>}
+            </div>
             <Text type="secondary" style={{ fontSize: 12 }}>
               {data.matches.length} {data.matches.length === 1 ? 'jogo' : 'jogos'} com gols na
               temporada
@@ -192,7 +195,7 @@ export function ScorerGoalsMatchesPage() {
                       <div style={{ marginTop: 6, fontSize: 12, color: token.colorTextSecondary }}>
                         {match.scorers.map((s, idx) => {
                           const name = s.nickname || s.name
-                          const isSelected = s.playerId === data.player.id
+                          const isSelected = s.playerId === data.player?.id
                           return (
                             <React.Fragment key={`${match.id}-${idx}-${s.playerId}`}>
                               {idx > 0 ? ', ' : ''}

@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Avatar, Typography, Empty, theme, FloatButton, Skeleton } from 'antd'
+import { Avatar, Typography, Empty, theme, FloatButton, Skeleton, Tag } from 'antd'
 import { CalendarOutlined, RightOutlined } from '@ant-design/icons'
 import posthog from 'posthog-js'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
@@ -131,9 +131,12 @@ export function AttendanceTotalPage() {
                                     </Avatar>
 
                                     <div style={{ flex: 1, minWidth: 0 }}>
-                                        <Text strong style={{ fontSize: 15, display: 'block' }}>
-                                            {item.nickname || item.name}
-                                        </Text>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <Text strong style={{ fontSize: 15, display: 'block' }}>
+                                                {item.nickname || item.name}
+                                            </Text>
+                                            {(item as any).isLoaned && <Tag color="blue" style={{ margin: 0, fontSize: 10, borderRadius: 4 }}>emprestado</Tag>}
+                                        </div>
                                         <div
                                             style={{
                                                 display: 'flex',

@@ -4,6 +4,7 @@ export type GoalDTO = {
   id: string
   matchId: string
   playerId: string | null
+  loanedPlayerName: string | null
   minute: number | null
   ownGoal: boolean
   freeKick: boolean
@@ -24,12 +25,14 @@ export async function listMatchGoals(matchId: string) {
 export async function createGoals(
   matchId: string,
   data: {
-    playerId?: string
+    playerId?: string | null
+    loanedPlayerName?: string | null
     goals: { minute?: number | null; ownGoal?: boolean; freeKick?: boolean; penalty?: boolean }[]
   },
 ) {
   const res = await api.post(`/matches/${matchId}/goals`, {
     playerId: data.playerId,
+    loanedPlayerName: data.loanedPlayerName,
     goals: data.goals,
   })
 

@@ -61,10 +61,10 @@ export function AttendancePlayerMatchesPage() {
 
   if (!data) return <Empty description="Jogador não encontrado" />
 
-  const playerName = data.player.nickname || data.player.name
+  const playerName = data?.player?.nickname || data?.player?.name || 'Jogador'
   const pct =
-    data.stats.totalMatches > 0
-      ? Math.round((data.stats.presentCount / data.stats.totalMatches) * 100)
+    (data?.stats?.totalMatches || 0) > 0
+      ? Math.round(((data?.stats?.presentCount || 0) / (data?.stats?.totalMatches || 1)) * 100)
       : 0
   const pctColor =
     pct >= 70 ? token.colorSuccess : pct >= 40 ? token.colorWarning : token.colorError
@@ -83,15 +83,18 @@ export function AttendancePlayerMatchesPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Avatar
             size={48}
-            src={data.player.photo ?? undefined}
-            icon={!data.player.photo ? <UserOutlined /> : undefined}
+            src={data.player?.photo ?? undefined}
+            icon={!data.player?.photo ? <UserOutlined /> : undefined}
           />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <Title level={5} style={{ margin: 0 }}>
-              Presenças de {playerName}
-            </Title>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Title level={5} style={{ margin: 0 }}>
+                {playerName}
+              </Title>
+              {data.player?.isLoaned && <Tag color="blue" style={{ margin: 0, fontSize: 10, borderRadius: 4 }}>emprestado</Tag>}
+            </div>
             <Text type="secondary" style={{ fontSize: 12 }}>
-              {data.stats.presentCount} de {data.stats.totalMatches} jogos
+              {data.stats?.presentCount || 0} de {data.stats?.totalMatches || 0} jogos
             </Text>
           </div>
           <div style={{ textAlign: 'right', flexShrink: 0 }}>
@@ -231,7 +234,7 @@ export function AttendancePlayerMatchesPage() {
                       <div style={{ marginTop: 6, fontSize: 12, color: token.colorTextSecondary }}>
                         {match.scorers.map((s, idx) => {
                           const name = s.nickname || s.name
-                          const isSelected = s.playerId === data.player.id
+                          const isSelected = s.playerId === data.player?.id
                           return (
                             <React.Fragment key={`${match.id}-${idx}-${s.playerId}`}>
                               {idx > 0 ? ', ' : ''}

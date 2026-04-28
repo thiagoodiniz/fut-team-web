@@ -17,8 +17,8 @@ import * as Sentry from '@sentry/react'
 import { useEffect, useState } from 'react'
 
 const POSTHOG_KEY = import.meta.env.VITE_PUBLIC_POSTHOG_KEY
-const POSTHOG_HOST =
-  import.meta.env.VITE_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com'
+// const POSTHOG_HOST =
+//   import.meta.env.VITE_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com'
 const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN
 
 // Auto-purge old storage structure — must run BEFORE PostHog init

@@ -91,7 +91,7 @@ export function AttendancePlayerMatchesPage() {
               <Title level={5} style={{ margin: 0 }}>
                 {playerName}
               </Title>
-              {data.player?.isLoaned && <Tag color="blue" style={{ margin: 0, fontSize: 10, borderRadius: 4 }}>emprestado</Tag>}
+              {(data.player as any)?.isLoaned && <Tag color="blue" style={{ margin: 0, fontSize: 10, borderRadius: 4 }}>emprestado</Tag>}
             </div>
             <Text type="secondary" style={{ fontSize: 12 }}>
               {data.stats?.presentCount || 0} de {data.stats?.totalMatches || 0} jogos

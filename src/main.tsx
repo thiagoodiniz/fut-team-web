@@ -17,8 +17,8 @@ import * as Sentry from '@sentry/react'
 import { useEffect, useState } from 'react'
 
 const POSTHOG_KEY = import.meta.env.VITE_PUBLIC_POSTHOG_KEY
-// const POSTHOG_HOST =
-//   import.meta.env.VITE_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com'
+const POSTHOG_HOST =
+  import.meta.env.VITE_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com'
 const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN
 
 // Auto-purge old storage structure — must run BEFORE PostHog init
@@ -38,11 +38,12 @@ if (currentVersion !== STORAGE_VERSION) {
 }
 
 if (POSTHOG_KEY) {
-  // posthog.init(POSTHOG_KEY, {
-  //   api_host: POSTHOG_HOST,
-  //   person_profiles: 'identified_only',
-  //   capture_pageview: false, // We will track manually or via router
-  // })
+  posthog.init(POSTHOG_KEY, {
+    api_host: POSTHOG_HOST,
+    ui_host: 'https://us.posthog.com',
+    person_profiles: 'identified_only',
+    capture_pageview: false, // We will track manually or via router
+  })
   applyAnalyticsPreferenceFromStorage()
 }
 

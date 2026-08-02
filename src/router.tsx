@@ -9,6 +9,7 @@ import { MatchesPage } from './app/pages/MatchesPage'
 import { MatchDetailsPage } from './app/pages/MatchDetailsPage'
 import { PlayersPage } from './app/pages/PlayersPage'
 import { TeamPage } from './app/pages/TeamPage'
+import { TeamSettingsPage } from './app/pages/TeamSettingsPage'
 import { TeamMembersPage } from './app/pages/TeamMembersPage'
 import { ScorersTotalPage } from './app/pages/ScorersTotalPage'
 import { ScorerGoalsMatchesPage } from './app/pages/ScorerGoalsMatchesPage'
@@ -53,6 +54,7 @@ export const router = createBrowserRouter([
           { path: 'matches/:id', element: <MatchDetailsPage /> },
           { path: 'players', element: <PlayersPage /> },
           { path: 'team', element: <TeamPage /> },
+          { path: 'team/settings', element: <TeamSettingsPage /> },
           { path: 'team/members', element: <TeamMembersPage /> },
           { path: 'ranking/scorers', element: <ScorersTotalPage /> },
           { path: 'ranking/scorers/:playerId/goals', element: <ScorerGoalsMatchesPage /> },

@@ -1,248 +1,235 @@
-import { useState, useEffect } from 'react'
-import { Card, Form, Input, Button, Upload, message, Space, Typography, theme, ColorPicker } from 'antd'
-import { CameraOutlined, DeleteOutlined, SaveOutlined, UserOutlined } from '@ant-design/icons'
-import { updateMyTeam } from '../../services/teams.service'
-import { useTeam } from '../contexts/TeamContext'
+import { useEffect, useState } from 'react'
+import { Card, Typography, theme, Row, Col, Avatar, Button, Spin, Empty, Statistic, Collapse, Space } from 'antd'
+import { SettingOutlined, TrophyOutlined, TeamOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import posthog from 'posthog-js'
+import { useTeam } from '../contexts/TeamContext'
+import { useAppHeader } from '../hooks/useAppHeader'
+import { getTeamHistoricalStats, type TeamHistoricalStats } from '../../services/teamStats.service'
 
 const { Title, Text } = Typography
 
-const MAX_SIZE = 120 // px
-const QUALITY = 0.3 // JPEG quality
-
-function compressImage(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const img = new Image()
-        const reader = new FileReader()
-
-        reader.onload = () => {
-            img.src = reader.result as string
-        }
-        reader.onerror = reject
-        reader.readAsDataURL(file)
-
-        img.onload = () => {
-            const canvas = document.createElement('canvas')
-            let { width, height } = img
-
-            if (width > height) {
-                if (width > MAX_SIZE) {
-                    height = Math.round((height * MAX_SIZE) / width)
-                    width = MAX_SIZE
-                }
-            } else {
-                if (height > MAX_SIZE) {
-                    width = Math.round((width * MAX_SIZE) / height)
-                    height = MAX_SIZE
-                }
-            }
-
-            canvas.width = width
-            canvas.height = height
-
-            const ctx = canvas.getContext('2d')!
-            ctx.drawImage(img, 0, 0, width, height)
-
-            const base64 = canvas.toDataURL('image/jpeg', QUALITY)
-            resolve(base64)
-        }
-        img.onerror = reject
-    })
-}
-
 export function TeamPage() {
-    const { team, refreshTeam, loading: teamLoading, isAdmin } = useTeam()
+    const { team, isAdmin } = useTeam()
     const { token } = theme.useToken()
-    const [form] = Form.useForm()
-    const [saving, setSaving] = useState(false)
-    const [logoBase64, setLogoBase64] = useState<string | null>(null)
     const navigate = useNavigate()
+    const [stats, setStats] = useState<TeamHistoricalStats | null>(null)
+    const [loading, setLoading] = useState(true)
+
+    useAppHeader('Meu Clube', false)
 
     useEffect(() => {
-        if (team) {
-            form.resetFields()
-            setLogoBase64(team.logo)
-        }
-    }, [team, form])
-
-    async function handleSubmit() {
-        try {
-            const values = await form.validateFields()
-            setSaving(true)
-
-            const payload = {
-                name: values.name,
-                logo: logoBase64,
-                primaryColor: typeof values.primaryColor === 'string' ? values.primaryColor : values.primaryColor.toHexString(),
-                secondaryColor: typeof values.secondaryColor === 'string' ? values.secondaryColor : values.secondaryColor.toHexString(),
+        if (!team) return
+        async function fetchStats() {
+            try {
+                const data = await getTeamHistoricalStats()
+                setStats(data)
+            } catch (err) {
+                console.error(err)
+            } finally {
+                setLoading(false)
             }
-
-            await updateMyTeam(payload)
-            await refreshTeam()
-            message.success('Informações do time atualizadas!')
-        } catch (err) {
-            console.error(err)
-            message.error('Erro ao salvar informações')
-        } finally {
-            setSaving(false)
         }
-    }
+        fetchStats()
+    }, [team])
 
-    async function handleLogoChange(file: File) {
-        try {
-            const compressed = await compressImage(file)
-            setLogoBase64(compressed)
-        } catch {
-            message.error('Erro ao processar imagem')
-        }
-        return false
-    }
-
-    if (teamLoading && !team) {
-        return <Card loading />
+    if (loading || !team) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+                <Spin size="large" />
+            </div>
+        )
     }
 
     return (
         <Space direction="vertical" size={24} style={{ width: '100%' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                <Title level={4} style={{ margin: 0 }}>Meu time</Title>
-                <Space wrap>
+            {/* Header Hero */}
+            <Card
+                style={{ 
+                    borderRadius: 16, 
+                    background: `linear-gradient(135deg, ${team.primaryColor || token.colorPrimary} 0%, ${team.secondaryColor || token.colorInfo} 100%)`,
+                    border: 'none',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}
+                bodyStyle={{ padding: 24, display: 'flex', alignItems: 'center', gap: 20 }}
+            >
+                {isAdmin && (
                     <Button
-                        onClick={() => {
-                            posthog.capture('switch_team_clicked')
-                            navigate('/onboarding')
+                        type="text"
+                        icon={<SettingOutlined />}
+                        onClick={() => navigate('/app/team/settings')}
+                        style={{
+                            position: 'absolute',
+                            top: 12,
+                            right: 12,
+                            color: 'white',
+                            background: 'rgba(0,0,0,0.2)',
+                            borderRadius: '50%'
                         }}
-                    >
-                        Trocar de Time
-                    </Button>
-                    {isAdmin && (
-                        <Button
-                            icon={<UserOutlined />}
-                            onClick={() => {
-                                posthog.capture('manage_members_clicked')
-                                navigate('/app/team/members')
-                            }}
-                        >
-                            Gerenciar Membros
-                        </Button>
-                    )}
-                </Space>
-            </div>
-
-            <Card style={{ borderRadius: 16 }}>
-                <Form
-                    form={form}
-                    layout="vertical"
-                    onFinish={handleSubmit}
-                    disabled={!isAdmin}
-                    initialValues={{
-                        name: team?.name,
-                        primaryColor: team?.primaryColor || '#16a34a',
-                        secondaryColor: team?.secondaryColor || '#64748b',
+                    />
+                )}
+                <Avatar 
+                    src={team.logo} 
+                    size={80} 
+                    shape="square" 
+                    style={{ 
+                        borderRadius: 16, 
+                        background: 'white', 
+                        padding: team.logo ? 4 : 0,
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                     }}
                 >
-                    {/* Logo Upload */}
-                    <div style={{ textAlign: 'center', marginBottom: 24 }}>
-                        <div
-                            style={{
-                                position: 'relative',
-                                display: 'inline-block',
-                                width: 100,
-                                height: 100,
-                                borderRadius: 16,
-                                overflow: 'hidden',
-                                background: token.colorFillSecondary,
-                                border: `2px dashed ${token.colorBorder}`,
-                            }}
-                        >
-                            {logoBase64 ? (
-                                <img
-                                    src={logoBase64}
-                                    alt="Logo"
-                                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                                />
-                            ) : (
-                                <div
-                                    style={{
-                                        width: '100%',
-                                        height: '100%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        color: token.colorTextQuaternary,
-                                        fontSize: 32,
-                                    }}
-                                >
-                                    <CameraOutlined />
-                                </div>
-                            )}
-                        </div>
-
-                        {isAdmin && (
-                            <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 8 }}>
-                                <Upload
-                                    beforeUpload={handleLogoChange}
-                                    showUploadList={false}
-                                    accept="image/*"
-                                >
-                                    <Button size="small" icon={<CameraOutlined />}>
-                                        {logoBase64 ? 'Trocar Escudo' : 'Adicionar Escudo'}
-                                    </Button>
-                                </Upload>
-                                {logoBase64 && (
-                                    <Button
-                                        size="small"
-                                        danger
-                                        icon={<DeleteOutlined />}
-                                        onClick={() => setLogoBase64(null)}
-                                    >
-                                        Remover
-                                    </Button>
-                                )}
-                            </div>
-                        )}
-                    </div>
-
-                    <Form.Item
-                        label="Nome do Time"
-                        name="name"
-                        rules={[{ required: true, message: 'O nome é obrigatório' }]}
-                    >
-                        <Input size="large" placeholder="Ex: Galáticos FC" />
-                    </Form.Item>
-
-                    <Space size={24} style={{ width: '100%', display: 'flex' }} align="start">
-                        <Form.Item label="Cor Primária" name="primaryColor">
-                            <ColorPicker showText disabledAlpha />
-                        </Form.Item>
-
-                        <Form.Item label="Cor Secundária" name="secondaryColor">
-                            <ColorPicker showText disabledAlpha />
-                        </Form.Item>
-                    </Space>
-
-                    <div style={{ marginTop: 8 }}>
-                        <Text type="secondary" style={{ fontSize: 13 }}>
-                            As cores selecionadas serão aplicadas em todo o aplicativo (botões, ícones, tags, etc).
-                        </Text>
-                    </div>
-
-                    {isAdmin && (
-                        <Button
-                            type="primary"
-                            htmlType="submit"
-                            icon={<SaveOutlined />}
-                            loading={saving}
-                            size="large"
-                            block
-                            style={{ marginTop: 24 }}
-                        >
-                            Salvar Alterações
-                        </Button>
-                    )}
-                </Form>
+                    {!team.logo && <span style={{ fontSize: 32, color: token.colorPrimary, fontWeight: 800 }}>FT</span>}
+                </Avatar>
+                <div>
+                    <Title level={3} style={{ margin: 0, color: 'white' }}>{team.name}</Title>
+                    <Text style={{ color: 'rgba(255,255,255,0.9)' }}>
+                        {stats ? (
+                            stats.summary.minYear === stats.summary.maxYear 
+                                ? `Temporada ${stats.summary.minYear}`
+                                : `Temporadas ${stats.summary.minYear}-${stats.summary.maxYear}`
+                        ) : 'Estatísticas Históricas'}
+                    </Text>
+                </div>
             </Card>
+
+            {stats && (
+                <>
+                    {/* Resumo Histórico */}
+                    <Title level={5} style={{ margin: '0 0 -8px 0' }}>Resumo Geral</Title>
+                    <Row gutter={[16, 16]}>
+                        <Col span={12}>
+                            <Card style={{ borderRadius: 12 }} bodyStyle={{ padding: 16, textAlign: 'center' }}>
+                                <Statistic title="Jogos" value={stats.summary.totalMatches} />
+                            </Card>
+                        </Col>
+                        <Col span={12}>
+                            <Card style={{ borderRadius: 12 }} bodyStyle={{ padding: 16, textAlign: 'center' }}>
+                                <Statistic title="Aproveitamento" value={`${stats.summary.winRate}%`} valueStyle={{ color: stats.summary.winRate >= 50 ? token.colorSuccess : token.colorWarning }} />
+                            </Card>
+                        </Col>
+                        <Col span={12}>
+                            <Card style={{ borderRadius: 12 }} bodyStyle={{ padding: 16, textAlign: 'center' }}>
+                                <Text type="secondary" style={{ display: 'block', marginBottom: 4 }}>Resultados</Text>
+                                <Space size={8}>
+                                    <Text strong style={{ color: token.colorSuccess }}>{stats.summary.wins}V</Text>
+                                    <Text strong style={{ color: token.colorTextSecondary }}>{stats.summary.draws}E</Text>
+                                    <Text strong style={{ color: token.colorError }}>{stats.summary.losses}D</Text>
+                                </Space>
+                            </Card>
+                        </Col>
+                        <Col span={12}>
+                            <Card style={{ borderRadius: 12 }} bodyStyle={{ padding: 16, textAlign: 'center' }}>
+                                <Text type="secondary" style={{ display: 'block', marginBottom: 4 }}>Gols</Text>
+                                <Space size={8}>
+                                    <Text strong style={{ color: token.colorSuccess }}>{stats.summary.goalsScored}</Text>
+                                    <Text>-</Text>
+                                    <Text strong style={{ color: token.colorError }}>{stats.summary.goalsAgainst}</Text>
+                                </Space>
+                            </Card>
+                        </Col>
+                    </Row>
+
+                    {/* Artilharia e Mais Jogos */}
+                    <Row gutter={[16, 16]}>
+                        <Col span={24}>
+                            <Card 
+                                title={<><TrophyOutlined style={{ color: '#faad14', marginRight: 8 }}/> Artilharia Histórica (Top 5)</>}
+                                style={{ borderRadius: 12 }} 
+                                bodyStyle={{ padding: '16px 24px' }}
+                            >
+                                {stats.topScorers.length > 0 ? (
+                                    <Space direction="vertical" style={{ width: '100%' }} size={16}>
+                                        {stats.topScorers.map((s, idx) => (
+                                            <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                <div style={{ width: 20, fontWeight: 700, color: token.colorTextSecondary, textAlign: 'center' }}>{idx + 1}º</div>
+                                                <Avatar src={s.photo || `https://api.dicebear.com/7.x/initials/svg?seed=${s.name}`} size={32} />
+                                                <div style={{ flex: 1, overflow: 'hidden' }}>
+                                                    <Text strong ellipsis style={{ display: 'block' }}>{s.nickname || s.name}</Text>
+                                                </div>
+                                                <Text strong style={{ fontSize: 16 }}>{s.goals}</Text>
+                                            </div>
+                                        ))}
+                                    </Space>
+                                ) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum gol registrado" />}
+                            </Card>
+                        </Col>
+
+                        <Col span={24}>
+                            <Card 
+                                title={<><TeamOutlined style={{ color: token.colorPrimary, marginRight: 8 }}/> Mais Jogos (Top 5)</>}
+                                style={{ borderRadius: 12 }} 
+                                bodyStyle={{ padding: '16px 24px' }}
+                            >
+                                {stats.topAttendance.length > 0 ? (
+                                    <Space direction="vertical" style={{ width: '100%' }} size={16}>
+                                        {stats.topAttendance.map((s, idx) => (
+                                            <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                <div style={{ width: 20, fontWeight: 700, color: token.colorTextSecondary, textAlign: 'center' }}>{idx + 1}º</div>
+                                                <Avatar src={s.photo || `https://api.dicebear.com/7.x/initials/svg?seed=${s.name}`} size={32} />
+                                                <div style={{ flex: 1, overflow: 'hidden' }}>
+                                                    <Text strong ellipsis style={{ display: 'block' }}>{s.nickname || s.name}</Text>
+                                                </div>
+                                                <Text strong style={{ fontSize: 16 }}>{s.matches}</Text>
+                                            </div>
+                                        ))}
+                                    </Space>
+                                ) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhuma presença registrada" />}
+                            </Card>
+                        </Col>
+                    </Row>
+
+                    {/* Histórico de Confrontos */}
+                    {/* Histórico de Confrontos */}
+                    <Title level={5} style={{ margin: '8px 0 -8px 0' }}>Histórico de Confrontos</Title>
+                    <Row gutter={[16, 16]}>
+                        <Col span={24}>
+                            <Card style={{ borderRadius: 12 }} bodyStyle={{ padding: 16 }}>
+                                <Text strong style={{ display: 'block', marginBottom: 12 }}>Mais Enfrentados</Text>
+                                {stats.topOpponents.slice(0, 3).map((o, idx) => (
+                                    <div key={o.opponent} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: idx !== 2 ? 12 : 0 }}>
+                                        <div style={{ flex: 1 }}>
+                                            <Text strong>{o.opponent}</Text>
+                                            <br/>
+                                            <Text type="secondary" style={{ fontSize: 12 }}>
+                                                {o.matches} jogos • {o.wins}V {o.draws}E {o.losses}D
+                                            </Text>
+                                        </div>
+                                    </div>
+                                ))}
+                                {stats.topOpponents.length === 0 && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum adversário" />}
+                            </Card>
+                        </Col>
+                        
+                        <Col span={24}>
+                            <Card style={{ borderRadius: 12 }} bodyStyle={{ padding: 16 }}>
+                                <Text strong style={{ display: 'block', marginBottom: 12, color: token.colorSuccess }}>Maiores Vítimas (Gols Pró)</Text>
+                                {stats.topScoringOpponents.slice(0, 3).map((o, idx) => (
+                                    <div key={o.opponent} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: idx !== 2 ? 12 : 0 }}>
+                                        <Text>{o.opponent}</Text>
+                                        <Text strong>{o.goalsScored} gols</Text>
+                                    </div>
+                                ))}
+                                {stats.topScoringOpponents.length === 0 && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum adversário" />}
+                            </Card>
+                        </Col>
+
+                        <Col span={24}>
+                            <Card style={{ borderRadius: 12 }} bodyStyle={{ padding: 16 }}>
+                                <Text strong style={{ display: 'block', marginBottom: 12, color: token.colorError }}>Mais Difíceis (Gols Contra)</Text>
+                                {stats.topConcedingOpponents.slice(0, 3).map((o, idx) => (
+                                    <div key={o.opponent} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: idx !== 2 ? 12 : 0 }}>
+                                        <Text>{o.opponent}</Text>
+                                        <Text strong>{o.goalsAgainst} gols</Text>
+                                    </div>
+                                ))}
+                                {stats.topConcedingOpponents.length === 0 && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum adversário" />}
+                            </Card>
+                        </Col>
+                    </Row>
+                    <div style={{ height: 20 }} />
+                </>
+            )}
         </Space>
     )
 }

@@ -5,7 +5,7 @@ import {
   HomeOutlined,
   CalendarOutlined,
   TeamOutlined,
-  SettingOutlined,
+  TrophyOutlined,
 } from '@ant-design/icons'
 import posthog from 'posthog-js'
 
@@ -97,8 +97,8 @@ function BottomTabs({
     >
       <TabButton active={activeTab === 'home'} icon={<HomeOutlined />} label="Início" onClick={() => onTabClick('home')} />
       <TabButton active={activeTab === 'matches'} icon={<CalendarOutlined />} label="Jogos" onClick={() => onTabClick('matches')} />
-      <TabButton active={activeTab === 'players'} icon={<TeamOutlined />} label="Jogadores" onClick={() => onTabClick('players')} />
-      <TabButton active={activeTab === 'team'} icon={<SettingOutlined />} label="Meu time" onClick={() => onTabClick('team')} />
+      <TabButton active={activeTab === 'players'} icon={<TeamOutlined />} label="Elenco" onClick={() => onTabClick('players')} />
+      <TabButton active={activeTab === 'team'} icon={<TrophyOutlined />} label="Clube" onClick={() => onTabClick('team')} />
     </nav>
   )
 }

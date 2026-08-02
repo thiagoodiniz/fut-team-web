@@ -1,10 +1,11 @@
-import { ArrowLeftOutlined, LogoutOutlined, MoreOutlined } from '@ant-design/icons'
-import { Button, Dropdown, Layout, theme, Typography, Select } from 'antd'
+import { ArrowLeftOutlined, LogoutOutlined, MoreOutlined, SwapOutlined } from '@ant-design/icons'
+import { Button, Dropdown, Layout, theme, Typography, Select, Avatar, Tag } from 'antd'
 import type { MenuProps } from 'antd'
 import { useNavigate } from 'react-router-dom'
 
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
+import posthog from 'posthog-js'
 
 const { Header } = Layout
 const { Title } = Typography
@@ -17,22 +18,67 @@ type AppHeaderProps = {
 export function AppHeader({ title, showBack = false }: AppHeaderProps) {
   const navigate = useNavigate()
   const { token } = theme.useToken()
-  const { season, seasons, setSeasonId } = useSeason()
+  const { season, seasons, setSeasonId, isActiveSeason } = useSeason()
   const { team } = useTeam()
+
+  // Ler os dados do usuário salvos no localStorage no login
+  const authData = localStorage.getItem('auth')
+  const user = authData ? JSON.parse(authData) : null
 
   function handleLogout() {
     localStorage.removeItem('token')
+    localStorage.removeItem('auth')
     navigate('/login', { replace: true })
   }
 
   const items: MenuProps['items'] = [
     {
+      key: 'user-info',
+      label: (
+        <div style={{ padding: '4px 0' }}>
+          <Typography.Text strong style={{ display: 'block' }}>
+            {user?.name || 'Usuário'}
+          </Typography.Text>
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            {user?.email || ''}
+          </Typography.Text>
+        </div>
+      ),
+      disabled: true,
+    },
+    { type: 'divider' },
+    {
+      key: 'switch-team',
+      label: 'Trocar de Time',
+      icon: <SwapOutlined />,
+      onClick: () => {
+        posthog.capture('switch_team_clicked')
+        navigate('/onboarding')
+      }
+    },
+    {
       key: 'logout',
       label: 'Sair',
       icon: <LogoutOutlined />,
+      danger: true,
       onClick: handleLogout,
     },
   ]
+
+  // Para renderizar custom label no select
+  const selectOptions = seasons.map((s) => ({
+    label: (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        {s.isActive && (
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: token.colorSuccess }} />
+        )}
+        {s.year}
+      </div>
+    ),
+    value: s.id,
+    year: s.year,
+    isActive: s.isActive
+  }))
 
   return (
     <Header
@@ -106,30 +152,45 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
       </div>
 
       {/* RIGHT */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {season && !season.isActive && (
+          <Tag color="error" style={{ margin: 0, border: 0 }}>Encerrada</Tag>
+        )}
         <Select
           value={season?.id}
           onChange={setSeasonId}
-          options={seasons.map((s) => ({
-            label: s.year.toString(),
-            value: s.id,
-          }))}
+          options={selectOptions}
           size="small"
-          style={{ width: 80 }}
+          style={{ width: 90 }}
           variant="filled"
+          labelRender={(props) => {
+            const opt = selectOptions.find((o) => o.value === props.value)
+            return (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                {opt?.isActive && (
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: token.colorSuccess }} />
+                )}
+                <span style={{ fontWeight: 600 }}>{opt?.year}</span>
+              </div>
+            )
+          }}
         />
 
         <Dropdown menu={{ items }} trigger={['click']} placement="bottomRight">
-          <Button
-            type="text"
-            icon={<MoreOutlined />}
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 12,
-              color: token.colorTextSecondary,
-            }}
-          />
+          <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+            <Avatar 
+              src={user?.avatarUrl} 
+              size={36} 
+              style={{ 
+                backgroundColor: token.colorPrimary, 
+                fontWeight: 600,
+                fontSize: 14,
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+              }}
+            >
+              {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+            </Avatar>
+          </div>
         </Dropdown>
       </div>
     </Header>

@@ -14,7 +14,13 @@ export function ThemeProvider({ children }: Props) {
     ...appTheme,
     token: {
       ...appTheme.token,
-      ...(team?.primaryColor ? { colorPrimary: team.primaryColor, colorInfo: team.primaryColor, colorLink: team.primaryColor } : {}),
+      ...(team?.primaryColor
+        ? {
+            colorPrimary: team.primaryColor,
+            colorInfo: team.primaryColor,
+            colorLink: team.primaryColor,
+          }
+        : {}),
     },
   }
 

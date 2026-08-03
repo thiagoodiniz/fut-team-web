@@ -59,7 +59,10 @@ export type PlayerStats = {
   goals: number
 }
 
-export async function getPlayerStats(playerId: string, seasonId?: string): Promise<PlayerStats> {
+export async function getPlayerStats(
+  playerId: string,
+  seasonId?: string,
+): Promise<PlayerStats> {
   const response = await api.get<{ stats: PlayerStats }>(`/players/${playerId}/stats`, {
     params: { seasonId },
   })
@@ -95,10 +98,16 @@ export type PlayerGoalMatchesResponse = {
   }
 }
 
-export async function getPlayerGoalMatches(playerId: string, seasonId?: string): Promise<PlayerGoalMatchesResponse> {
-  const response = await api.get<PlayerGoalMatchesResponse>(`/players/${playerId}/goal-matches`, {
-    params: { seasonId },
-  })
+export async function getPlayerGoalMatches(
+  playerId: string,
+  seasonId?: string,
+): Promise<PlayerGoalMatchesResponse> {
+  const response = await api.get<PlayerGoalMatchesResponse>(
+    `/players/${playerId}/goal-matches`,
+    {
+      params: { seasonId },
+    },
+  )
   return response.data
 }
 
@@ -134,9 +143,15 @@ export type PlayerPresenceMatchesResponse = {
   }
 }
 
-export async function getPlayerPresenceMatches(playerId: string, seasonId?: string): Promise<PlayerPresenceMatchesResponse> {
-  const response = await api.get<PlayerPresenceMatchesResponse>(`/players/${playerId}/presence-matches`, {
-    params: { seasonId },
-  })
+export async function getPlayerPresenceMatches(
+  playerId: string,
+  seasonId?: string,
+): Promise<PlayerPresenceMatchesResponse> {
+  const response = await api.get<PlayerPresenceMatchesResponse>(
+    `/players/${playerId}/presence-matches`,
+    {
+      params: { seasonId },
+    },
+  )
   return response.data
 }

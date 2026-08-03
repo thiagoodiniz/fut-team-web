@@ -114,13 +114,18 @@ export function ScorersTotalPage() {
               item.penaltyGoals > 0 ||
               item.currentStreak >= 2
             const avg =
-              item.matchesPlayed > 0 ? (item.goals / item.matchesPlayed).toFixed(2) : '0.00'
+              item.matchesPlayed > 0
+                ? (item.goals / item.matchesPlayed).toFixed(2)
+                : '0.00'
 
             return (
               <div
                 key={item.id}
                 onClick={() => {
-                  posthog.capture('scorer_item_clicked', { player_id: item.id, name: item.name })
+                  posthog.capture('scorer_item_clicked', {
+                    player_id: item.id,
+                    name: item.name,
+                  })
                   navigate(`/app/ranking/scorers/${item.id}/goals`)
                 }}
                 style={{
@@ -167,7 +172,14 @@ export function ScorersTotalPage() {
                       <Text strong style={{ fontSize: 15, display: 'block' }}>
                         {item.nickname || item.name}
                       </Text>
-                      {(item as any).isLoaned && <Tag color="blue" style={{ margin: 0, fontSize: 10, borderRadius: 4 }}>emprestado</Tag>}
+                      {(item as any).isLoaned && (
+                        <Tag
+                          color="blue"
+                          style={{ margin: 0, fontSize: 10, borderRadius: 4 }}
+                        >
+                          emprestado
+                        </Tag>
+                      )}
                     </div>
                     <Text type="secondary" style={{ fontSize: 12 }}>
                       {avg} gols/jogo
@@ -186,10 +198,16 @@ export function ScorersTotalPage() {
                     >
                       {item.goals}
                     </Text>
-                    <Text type="secondary" style={{ fontSize: 11, display: 'block', marginTop: 2 }}>
+                    <Text
+                      type="secondary"
+                      style={{ fontSize: 11, display: 'block', marginTop: 2 }}
+                    >
                       gols
                     </Text>
-                    <Text type="secondary" style={{ fontSize: 11, display: 'block', marginTop: 1 }}>
+                    <Text
+                      type="secondary"
+                      style={{ fontSize: 11, display: 'block', marginTop: 1 }}
+                    >
                       {item.matchesPlayed} jogos
                     </Text>
                   </div>

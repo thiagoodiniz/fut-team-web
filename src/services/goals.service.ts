@@ -27,7 +27,12 @@ export async function createGoals(
   data: {
     playerId?: string | null
     loanedPlayerName?: string | null
-    goals: { minute?: number | null; ownGoal?: boolean; freeKick?: boolean; penalty?: boolean }[]
+    goals: {
+      minute?: number | null
+      ownGoal?: boolean
+      freeKick?: boolean
+      penalty?: boolean
+    }[]
   },
 ) {
   const res = await api.post(`/matches/${matchId}/goals`, {

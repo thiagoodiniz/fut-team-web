@@ -1,9 +1,17 @@
 import React from 'react'
 import { Avatar, Empty, Tag, Typography, theme, Skeleton } from 'antd'
-import { CalendarOutlined, EnvironmentOutlined, FireFilled, UserOutlined } from '@ant-design/icons'
+import {
+  CalendarOutlined,
+  EnvironmentOutlined,
+  FireFilled,
+  UserOutlined,
+} from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
 import { useSeason } from '../contexts/SeasonContext'
-import { getPlayerGoalMatches, type PlayerGoalMatchesResponse } from '../../services/players.service'
+import {
+  getPlayerGoalMatches,
+  type PlayerGoalMatchesResponse,
+} from '../../services/players.service'
 
 const { Text, Title } = Typography
 
@@ -79,11 +87,15 @@ export function ScorerGoalsMatchesPage() {
               <Title level={5} style={{ margin: 0 }}>
                 {playerName}
               </Title>
-              {(data.player as any)?.isLoaned && <Tag color="blue" style={{ margin: 0, fontSize: 10, borderRadius: 4 }}>emprestado</Tag>}
+              {(data.player as any)?.isLoaned && (
+                <Tag color="blue" style={{ margin: 0, fontSize: 10, borderRadius: 4 }}>
+                  emprestado
+                </Tag>
+              )}
             </div>
             <Text type="secondary" style={{ fontSize: 12 }}>
-              {data.matches.length} {data.matches.length === 1 ? 'jogo' : 'jogos'} com gols na
-              temporada
+              {data.matches.length} {data.matches.length === 1 ? 'jogo' : 'jogos'} com
+              gols na temporada
             </Text>
           </div>
         </div>
@@ -170,7 +182,9 @@ export function ScorerGoalsMatchesPage() {
                       {match.opponent || 'Sem adversário'}
                     </Text>
 
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
+                    <div
+                      style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}
+                    >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         <CalendarOutlined
                           style={{ fontSize: 11, color: token.colorTextSecondary }}
@@ -192,7 +206,13 @@ export function ScorerGoalsMatchesPage() {
                     </div>
 
                     {match.scorers.length > 0 && (
-                      <div style={{ marginTop: 6, fontSize: 12, color: token.colorTextSecondary }}>
+                      <div
+                        style={{
+                          marginTop: 6,
+                          fontSize: 12,
+                          color: token.colorTextSecondary,
+                        }}
+                      >
                         {match.scorers.map((s, idx) => {
                           const name = s.nickname || s.name
                           const isSelected = s.playerId === data.player?.id
@@ -200,7 +220,10 @@ export function ScorerGoalsMatchesPage() {
                             <React.Fragment key={`${match.id}-${idx}-${s.playerId}`}>
                               {idx > 0 ? ', ' : ''}
                               {isSelected ? (
-                                <Text strong style={{ fontSize: 12, color: token.colorPrimary }}>
+                                <Text
+                                  strong
+                                  style={{ fontSize: 12, color: token.colorPrimary }}
+                                >
                                   {name}
                                 </Text>
                               ) : (

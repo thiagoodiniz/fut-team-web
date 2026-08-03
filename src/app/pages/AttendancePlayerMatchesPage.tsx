@@ -9,7 +9,10 @@ import {
 } from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
 import { useSeason } from '../contexts/SeasonContext'
-import { getPlayerPresenceMatches, type PlayerPresenceMatchesResponse } from '../../services/players.service'
+import {
+  getPlayerPresenceMatches,
+  type PlayerPresenceMatchesResponse,
+} from '../../services/players.service'
 
 const { Text, Title } = Typography
 
@@ -64,7 +67,9 @@ export function AttendancePlayerMatchesPage() {
   const playerName = data?.player?.nickname || data?.player?.name || 'Jogador'
   const pct =
     (data?.stats?.totalMatches || 0) > 0
-      ? Math.round(((data?.stats?.presentCount || 0) / (data?.stats?.totalMatches || 1)) * 100)
+      ? Math.round(
+          ((data?.stats?.presentCount || 0) / (data?.stats?.totalMatches || 1)) * 100,
+        )
       : 0
   const pctColor =
     pct >= 70 ? token.colorSuccess : pct >= 40 ? token.colorWarning : token.colorError
@@ -91,7 +96,11 @@ export function AttendancePlayerMatchesPage() {
               <Title level={5} style={{ margin: 0 }}>
                 {playerName}
               </Title>
-              {(data.player as any)?.isLoaned && <Tag color="blue" style={{ margin: 0, fontSize: 10, borderRadius: 4 }}>emprestado</Tag>}
+              {(data.player as any)?.isLoaned && (
+                <Tag color="blue" style={{ margin: 0, fontSize: 10, borderRadius: 4 }}>
+                  emprestado
+                </Tag>
+              )}
             </div>
             <Text type="secondary" style={{ fontSize: 12 }}>
               {data.stats?.presentCount || 0} de {data.stats?.totalMatches || 0} jogos
@@ -120,7 +129,12 @@ export function AttendancePlayerMatchesPage() {
           }}
         >
           <div
-            style={{ height: '100%', width: `${pct}%`, background: pctColor, borderRadius: 99 }}
+            style={{
+              height: '100%',
+              width: `${pct}%`,
+              background: pctColor,
+              borderRadius: 99,
+            }}
           />
         </div>
       </div>
@@ -154,7 +168,9 @@ export function AttendancePlayerMatchesPage() {
                 : match.ourScore < match.theirScore
                   ? 'error'
                   : 'warning'
-            const presenceAccent = isPresent ? token.colorSuccess : token.colorFillTertiary
+            const presenceAccent = isPresent
+              ? token.colorSuccess
+              : token.colorFillTertiary
 
             return (
               <div
@@ -191,7 +207,9 @@ export function AttendancePlayerMatchesPage() {
                       </Text>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         {isPresent ? (
-                          <CheckCircleFilled style={{ fontSize: 13, color: token.colorSuccess }} />
+                          <CheckCircleFilled
+                            style={{ fontSize: 13, color: token.colorSuccess }}
+                          />
                         ) : (
                           <CloseCircleFilled
                             style={{ fontSize: 13, color: token.colorTextTertiary }}
@@ -200,7 +218,9 @@ export function AttendancePlayerMatchesPage() {
                         <Text
                           style={{
                             fontSize: 11,
-                            color: isPresent ? token.colorSuccess : token.colorTextTertiary,
+                            color: isPresent
+                              ? token.colorSuccess
+                              : token.colorTextTertiary,
                             fontWeight: 500,
                           }}
                         >
@@ -231,7 +251,13 @@ export function AttendancePlayerMatchesPage() {
                     </div>
 
                     {match.scorers.length > 0 && (
-                      <div style={{ marginTop: 6, fontSize: 12, color: token.colorTextSecondary }}>
+                      <div
+                        style={{
+                          marginTop: 6,
+                          fontSize: 12,
+                          color: token.colorTextSecondary,
+                        }}
+                      >
                         {match.scorers.map((s, idx) => {
                           const name = s.nickname || s.name
                           const isSelected = s.playerId === data.player?.id
@@ -239,7 +265,10 @@ export function AttendancePlayerMatchesPage() {
                             <React.Fragment key={`${match.id}-${idx}-${s.playerId}`}>
                               {idx > 0 ? ', ' : ''}
                               {isSelected ? (
-                                <Text strong style={{ fontSize: 12, color: token.colorPrimary }}>
+                                <Text
+                                  strong
+                                  style={{ fontSize: 12, color: token.colorPrimary }}
+                                >
                                   {name}
                                 </Text>
                               ) : (

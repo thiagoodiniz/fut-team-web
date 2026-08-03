@@ -1,4 +1,14 @@
-import { Button, Card, Form, Input, Space, Typography, message, Divider, theme } from 'antd'
+import {
+  Button,
+  Card,
+  Form,
+  Input,
+  Space,
+  Typography,
+  message,
+  Divider,
+  theme,
+} from 'antd'
 import { MailOutlined, LockOutlined } from '@ant-design/icons'
 import { useEffect, useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
@@ -39,7 +49,9 @@ export function LoginPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('update') === '1') {
-      message.info('Aplicativo atualizado! Por favor, faça login novamente para continuar.')
+      message.info(
+        'Aplicativo atualizado! Por favor, faça login novamente para continuar.',
+      )
       // Limpa os parâmetros da URL sem recarregar a página
       window.history.replaceState({}, document.title, window.location.pathname)
     }
@@ -51,14 +63,17 @@ export function LoginPage() {
   async function handleLoginSuccess(data: LoginResponse) {
     localStorage.setItem('token', data.token)
     localStorage.setItem('storage_version', '2')
-    localStorage.setItem('auth', JSON.stringify({
-      userId: data.user.id,
-      teamId: data.team?.id,
-      name: data.user.name,
-      email: data.user.email,
-      role: data.team?.role,
-      isManager: data.isManager ?? false,
-    }))
+    localStorage.setItem(
+      'auth',
+      JSON.stringify({
+        userId: data.user.id,
+        teamId: data.team?.id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.team?.role,
+        isManager: data.isManager ?? false,
+      }),
+    )
 
     const isBlocked = applyAnalyticsPreferenceByEmail(data.user.email)
     if (!isBlocked) {
@@ -77,7 +92,10 @@ export function LoginPage() {
     }
 
     if (data.onboarding || !data.team) {
-      navigate('/onboarding', { replace: true, state: { pendingRequest: data.pendingRequest } })
+      navigate('/onboarding', {
+        replace: true,
+        state: { pendingRequest: data.pendingRequest },
+      })
       return
     }
 
@@ -109,7 +127,11 @@ export function LoginPage() {
       })
       await handleLoginSuccess(data)
     } catch (err: any) {
-      message.error(err?.response?.data?.error === 'INVALID_CREDENTIALS' ? 'Email ou senha incorretos' : 'Erro ao fazer login')
+      message.error(
+        err?.response?.data?.error === 'INVALID_CREDENTIALS'
+          ? 'Email ou senha incorretos'
+          : 'Erro ao fazer login',
+      )
     } finally {
       setLoading(false)
     }
@@ -136,7 +158,8 @@ export function LoginPage() {
           right: '-5%',
           width: '50%',
           height: '50%',
-          background: 'radial-gradient(circle, rgba(22, 163, 74, 0.05) 0%, transparent 70%)',
+          background:
+            'radial-gradient(circle, rgba(22, 163, 74, 0.05) 0%, transparent 70%)',
           filter: 'blur(100px)',
           borderRadius: '50%',
         }}
@@ -148,7 +171,8 @@ export function LoginPage() {
           left: '-5%',
           width: '50%',
           height: '50%',
-          background: 'radial-gradient(circle, rgba(37, 99, 235, 0.05) 0%, transparent 70%)',
+          background:
+            'radial-gradient(circle, rgba(37, 99, 235, 0.05) 0%, transparent 70%)',
           filter: 'blur(100px)',
           borderRadius: '50%',
         }}
@@ -183,7 +207,16 @@ export function LoginPage() {
           >
             ⚽
           </div>
-          <Title level={1} style={{ margin: 0, color: '#0f172a', fontSize: 42, fontWeight: 800, letterSpacing: -1.5 }}>
+          <Title
+            level={1}
+            style={{
+              margin: 0,
+              color: '#0f172a',
+              fontSize: 42,
+              fontWeight: 800,
+              letterSpacing: -1.5,
+            }}
+          >
             Fut<span style={{ color: antdToken.colorSuccess }}>Team</span>
           </Title>
           <Text style={{ color: '#64748b', fontSize: 16, fontWeight: 500 }}>
@@ -205,7 +238,15 @@ export function LoginPage() {
         >
           <Space direction="vertical" size={32} style={{ width: '100%' }}>
             <div style={{ textAlign: 'center' }}>
-              <Title level={3} style={{ color: '#0f172a', margin: '0 0 4px 0', fontSize: 24, fontWeight: 700 }}>
+              <Title
+                level={3}
+                style={{
+                  color: '#0f172a',
+                  margin: '0 0 4px 0',
+                  fontSize: 24,
+                  fontWeight: 700,
+                }}
+              >
                 Seja bem-vindo
               </Title>
               <Text style={{ color: '#94a3b8', fontSize: 14 }}>
@@ -213,7 +254,12 @@ export function LoginPage() {
               </Text>
             </div>
 
-            <Form layout="vertical" onFinish={onLoginFinish} requiredMark={false} size="large">
+            <Form
+              layout="vertical"
+              onFinish={onLoginFinish}
+              requiredMark={false}
+              size="large"
+            >
               <Form.Item
                 name="email"
                 rules={[
@@ -272,7 +318,16 @@ export function LoginPage() {
             </Form>
 
             <Divider style={{ borderColor: '#f1f5f9', margin: '4px 0' }}>
-              <Text style={{ color: '#cbd5e1', fontSize: 12, fontWeight: 600, letterSpacing: 0.5 }}>OU</Text>
+              <Text
+                style={{
+                  color: '#cbd5e1',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  letterSpacing: 0.5,
+                }}
+              >
+                OU
+              </Text>
             </Divider>
 
             <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>

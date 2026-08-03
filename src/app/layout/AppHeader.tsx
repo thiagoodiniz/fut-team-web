@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined, LogoutOutlined, MoreOutlined, SwapOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, LogoutOutlined, SwapOutlined } from '@ant-design/icons'
 import { Button, Dropdown, Layout, theme, Typography, Select, Avatar, Tag } from 'antd'
 import type { MenuProps } from 'antd'
 import { useNavigate } from 'react-router-dom'
@@ -18,7 +18,7 @@ type AppHeaderProps = {
 export function AppHeader({ title, showBack = false }: AppHeaderProps) {
   const navigate = useNavigate()
   const { token } = theme.useToken()
-  const { season, seasons, setSeasonId, isActiveSeason } = useSeason()
+  const { season, seasons, setSeasonId } = useSeason()
   const { team } = useTeam()
 
   // Ler os dados do usuário salvos no localStorage no login
@@ -54,7 +54,7 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
       onClick: () => {
         posthog.capture('switch_team_clicked')
         navigate('/onboarding')
-      }
+      },
     },
     {
       key: 'logout',
@@ -70,14 +70,21 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
     label: (
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         {s.isActive && (
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: token.colorSuccess }} />
+          <div
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              background: token.colorSuccess,
+            }}
+          />
         )}
         {s.year}
       </div>
     ),
     value: s.id,
     year: s.year,
-    isActive: s.isActive
+    isActive: s.isActive,
   }))
 
   return (
@@ -131,7 +138,16 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
             }}
           >
             {team?.logo ? (
-              <img src={team.logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 2 }} />
+              <img
+                src={team.logo}
+                alt="Logo"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  padding: 2,
+                }}
+              />
             ) : (
               <span style={{ fontSize: 16 }}>FT</span>
             )}
@@ -154,7 +170,9 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
       {/* RIGHT */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         {season && !season.isActive && (
-          <Tag color="error" style={{ margin: 0, border: 0 }}>Encerrada</Tag>
+          <Tag color="error" style={{ margin: 0, border: 0 }}>
+            Encerrada
+          </Tag>
         )}
         <Select
           value={season?.id}
@@ -168,7 +186,14 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
             return (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 {opt?.isActive && (
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: token.colorSuccess }} />
+                  <div
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      background: token.colorSuccess,
+                    }}
+                  />
                 )}
                 <span style={{ fontWeight: 600 }}>{opt?.year}</span>
               </div>
@@ -178,14 +203,14 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
 
         <Dropdown menu={{ items }} trigger={['click']} placement="bottomRight">
           <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-            <Avatar 
-              src={user?.avatarUrl} 
-              size={36} 
-              style={{ 
-                backgroundColor: token.colorPrimary, 
+            <Avatar
+              src={user?.avatarUrl}
+              size={36}
+              style={{
+                backgroundColor: token.colorPrimary,
                 fontWeight: 600,
                 fontSize: 14,
-                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
               }}
             >
               {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}

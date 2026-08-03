@@ -6,7 +6,7 @@ export const appTheme: ThemeConfig = {
     colorPrimary: '#16a34a', // green-600
     colorInfo: '#16a34a',
     colorSuccess: '#22c55e', // green-500
-    colorError: '#ef4444',   // red-500
+    colorError: '#ef4444', // red-500
     colorWarning: '#eab308', // yellow-500
     colorLink: '#16a34a',
 

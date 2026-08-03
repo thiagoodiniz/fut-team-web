@@ -14,11 +14,7 @@ import {
 import { PlusOutlined, SearchOutlined, RightOutlined } from '@ant-design/icons'
 import posthog from 'posthog-js'
 
-import {
-  listPlayers,
-  updatePlayer,
-  type PlayerDTO,
-} from '../../services/players.service'
+import { listPlayers, updatePlayer, type PlayerDTO } from '../../services/players.service'
 import { AddPlayerModal } from '../components/AddPlayerModal'
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
@@ -86,7 +82,9 @@ export function PlayersPage() {
       {/* Search + count */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
         <Input
-          prefix={<SearchOutlined style={{ color: token.colorTextSecondary, fontSize: 14 }} />}
+          prefix={
+            <SearchOutlined style={{ color: token.colorTextSecondary, fontSize: 14 }} />
+          }
           placeholder="Filtrar por nome ou apelido"
           allowClear
           onChange={(e) => setFilter(e.target.value)}
@@ -102,7 +100,9 @@ export function PlayersPage() {
           }}
         >
           <Text style={{ fontSize: 13, fontWeight: 600 }}>{activeCount}</Text>
-          <Text type="secondary" style={{ fontSize: 13 }}>/{players.length}</Text>
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            /{players.length}
+          </Text>
         </div>
       </div>
 
@@ -135,7 +135,10 @@ export function PlayersPage() {
             <div
               key={player.id}
               onClick={() => {
-                posthog.capture('player_item_clicked', { player_id: player.id, name: player.name })
+                posthog.capture('player_item_clicked', {
+                  player_id: player.id,
+                  name: player.name,
+                })
                 setEditingPlayer(player)
                 setModalOpen(true)
               }}
@@ -158,7 +161,14 @@ export function PlayersPage() {
               </Avatar>
 
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    flexWrap: 'wrap',
+                  }}
+                >
                   <Text strong style={{ fontSize: 14 }}>
                     {player.nickname || player.name}
                   </Text>
@@ -168,7 +178,10 @@ export function PlayersPage() {
                     </Tag>
                   )}
                   {!player.active && (
-                    <Tag color="default" style={{ margin: 0, fontSize: 11, borderRadius: 6 }}>
+                    <Tag
+                      color="default"
+                      style={{ margin: 0, fontSize: 11, borderRadius: 6 }}
+                    >
                       Inativo
                     </Tag>
                   )}
@@ -181,7 +194,15 @@ export function PlayersPage() {
               </div>
 
               {isActiveSeason && isAdmin ? (
-                <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+                <div
+                  style={{
+                    flexShrink: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-end',
+                    gap: 8,
+                  }}
+                >
                   <span onClick={(e) => e.stopPropagation()}>
                     <Switch
                       checked={player.active}
@@ -190,12 +211,26 @@ export function PlayersPage() {
                       size="small"
                     />
                   </span>
-                  <Text type="secondary" style={{ fontSize: 10 }}>Clique para ver detalhes</Text>
+                  <Text type="secondary" style={{ fontSize: 10 }}>
+                    Clique para ver detalhes
+                  </Text>
                 </div>
               ) : (
-                <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
-                  <RightOutlined style={{ fontSize: 12, color: token.colorTextSecondary }} />
-                  <Text type="secondary" style={{ fontSize: 10 }}>Clique para ver detalhes</Text>
+                <div
+                  style={{
+                    flexShrink: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-end',
+                    gap: 8,
+                  }}
+                >
+                  <RightOutlined
+                    style={{ fontSize: 12, color: token.colorTextSecondary }}
+                  />
+                  <Text type="secondary" style={{ fontSize: 10 }}>
+                    Clique para ver detalhes
+                  </Text>
                 </div>
               )}
             </div>
@@ -229,4 +264,3 @@ export function PlayersPage() {
     </div>
   )
 }
-

@@ -17,6 +17,8 @@ function getHeaderTitle(pathname: string) {
   if (pathname.startsWith('/app/ranking/scorers')) return 'Artilharia Completa'
   if (pathname.startsWith('/app/ranking/attendance')) return 'Presença Completa'
   if (pathname.startsWith('/app/team/members')) return 'Gerenciar Membros'
+  if (pathname.startsWith('/app/team/settings')) return 'Configurações do Time'
+  if (pathname.startsWith('/app/team')) return 'Meu Clube'
   return 'Home'
 }
 
@@ -24,5 +26,6 @@ function shouldShowBack(pathname: string) {
   if (pathname.startsWith('/app/matches/')) return true
   if (pathname.startsWith('/app/ranking/')) return true
   if (pathname.startsWith('/app/team/members')) return true
+  if (pathname.startsWith('/app/team/settings')) return true
   return false
 }

@@ -1,5 +1,15 @@
 import React from 'react'
-import { Button, Checkbox, Form, InputNumber, Modal, Select, Typography, theme, Tag } from 'antd'
+import {
+  Button,
+  Checkbox,
+  Form,
+  InputNumber,
+  Modal,
+  Select,
+  Typography,
+  theme,
+  Tag,
+} from 'antd'
 import { MinusCircleOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons'
 
 const { Text } = Typography
@@ -9,7 +19,12 @@ type PlayerOption = {
   label: string
 }
 
-type GoalEntry = { minute?: number | null; ownGoal?: boolean; freeKick?: boolean; penalty?: boolean }
+type GoalEntry = {
+  minute?: number | null
+  ownGoal?: boolean
+  freeKick?: boolean
+  penalty?: boolean
+}
 
 type Props = {
   open: boolean
@@ -21,10 +36,19 @@ type Props = {
   onSubmit: (data: { playerId?: string; goals: GoalEntry[] }) => void
 }
 
-export function AddGoalModal({ open, loading, players, maxGoals, currentGoalsCount = 0, onCancel, onSubmit }: Props) {
+export function AddGoalModal({
+  open,
+  loading,
+  players,
+  maxGoals,
+  currentGoalsCount = 0,
+  onCancel,
+  onSubmit,
+}: Props) {
   const [form] = Form.useForm()
   const { token } = theme.useToken()
-  const isOwnGoalChecked = (Form.useWatch('isOwnGoal', form) as boolean | undefined) ?? false
+  const isOwnGoalChecked =
+    (Form.useWatch('isOwnGoal', form) as boolean | undefined) ?? false
 
   const remainingGoals = maxGoals !== undefined ? maxGoals - currentGoalsCount : 10
   const hasNonOwnGoals = !isOwnGoalChecked
@@ -78,7 +102,11 @@ export function AddGoalModal({ open, loading, players, maxGoals, currentGoalsCou
   return (
     <Modal
       open={open}
-      title={<Text strong style={{ fontSize: 15 }}>Adicionar gol</Text>}
+      title={
+        <Text strong style={{ fontSize: 15 }}>
+          Adicionar gol
+        </Text>
+      }
       onCancel={onCancel}
       footer={null}
       destroyOnHidden
@@ -99,7 +127,9 @@ export function AddGoalModal({ open, loading, players, maxGoals, currentGoalsCou
             marginBottom: 20,
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}
+          >
             <UserOutlined style={{ fontSize: 13, color: token.colorTextSecondary }} />
             <Text
               style={{
@@ -129,7 +159,9 @@ export function AddGoalModal({ open, loading, players, maxGoals, currentGoalsCou
             ]}
           >
             <Select
-              placeholder={hasNonOwnGoals ? 'Selecione o jogador' : 'Não se aplica para gol contra'}
+              placeholder={
+                hasNonOwnGoals ? 'Selecione o jogador' : 'Não se aplica para gol contra'
+              }
               options={players}
               showSearch
               optionFilterProp="label"
@@ -146,7 +178,14 @@ export function AddGoalModal({ open, loading, players, maxGoals, currentGoalsCou
         </div>
 
         {/* Goals list */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 10,
+          }}
+        >
           <Text
             style={{
               fontSize: 11,
@@ -159,7 +198,9 @@ export function AddGoalModal({ open, loading, players, maxGoals, currentGoalsCou
             Gols
           </Text>
           {remainingGoals <= 0 ? (
-            <Tag color="error" style={{ margin: 0, fontSize: 11 }}>Placar já atribuído</Tag>
+            <Tag color="error" style={{ margin: 0, fontSize: 11 }}>
+              Placar já atribuído
+            </Tag>
           ) : maxGoals !== undefined ? (
             <Text type="secondary" style={{ fontSize: 12 }}>
               {currentGoalsCount} / {maxGoals} atribuídos
@@ -182,7 +223,14 @@ export function AddGoalModal({ open, loading, players, maxGoals, currentGoalsCou
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <Text style={{ minWidth: 24, fontWeight: 700, fontSize: 13, color: token.colorTextSecondary }}>
+                    <Text
+                      style={{
+                        minWidth: 24,
+                        fontWeight: 700,
+                        fontSize: 13,
+                        color: token.colorTextSecondary,
+                      }}
+                    >
                       #{index + 1}
                     </Text>
 
@@ -202,14 +250,27 @@ export function AddGoalModal({ open, loading, players, maxGoals, currentGoalsCou
 
                     {fields.length > 1 && (
                       <MinusCircleOutlined
-                        style={{ color: token.colorError, fontSize: 18, cursor: 'pointer', flexShrink: 0 }}
+                        style={{
+                          color: token.colorError,
+                          fontSize: 18,
+                          cursor: 'pointer',
+                          flexShrink: 0,
+                        }}
                         onClick={() => remove(field.name)}
                       />
                     )}
                   </div>
 
                   {!isOwnGoalChecked && (
-                    <div style={{ display: 'flex', gap: 16, marginTop: 10, paddingLeft: 34, flexWrap: 'wrap' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: 16,
+                        marginTop: 10,
+                        paddingLeft: 34,
+                        flexWrap: 'wrap',
+                      }}
+                    >
                       <Form.Item
                         {...field}
                         name={[field.name, 'freeKick']}
@@ -263,7 +324,9 @@ export function AddGoalModal({ open, loading, players, maxGoals, currentGoalsCou
           )}
         </Form.List>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
+        <div
+          style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}
+        >
           <Button onClick={onCancel}>Cancelar</Button>
           <Button type="primary" loading={loading} onClick={handleOk}>
             Salvar

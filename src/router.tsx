@@ -35,9 +35,7 @@ export const router = createBrowserRouter([
   {
     path: '/onboarding',
     element: <ProtectedRoute />,
-    children: [
-      { path: '', element: <JoinTeamPage /> }
-    ]
+    children: [{ path: '', element: <JoinTeamPage /> }],
   },
 
   // 🔒 rota protegida
@@ -57,9 +55,15 @@ export const router = createBrowserRouter([
           { path: 'team/settings', element: <TeamSettingsPage /> },
           { path: 'team/members', element: <TeamMembersPage /> },
           { path: 'ranking/scorers', element: <ScorersTotalPage /> },
-          { path: 'ranking/scorers/:playerId/goals', element: <ScorerGoalsMatchesPage /> },
+          {
+            path: 'ranking/scorers/:playerId/goals',
+            element: <ScorerGoalsMatchesPage />,
+          },
           { path: 'ranking/attendance', element: <AttendanceTotalPage /> },
-          { path: 'ranking/attendance/:playerId/matches', element: <AttendancePlayerMatchesPage /> },
+          {
+            path: 'ranking/attendance/:playerId/matches',
+            element: <AttendancePlayerMatchesPage />,
+          },
         ],
       },
     ],

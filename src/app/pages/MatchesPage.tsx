@@ -39,7 +39,10 @@ export function MatchesPage() {
   const [filter, setFilter] = React.useState('')
   const [createModalOpen, setCreateModalOpen] = React.useState(false)
   const [summaryModalOpen, setSummaryModalOpen] = React.useState(false)
-  const [selectedMonthGroup, setSelectedMonthGroup] = React.useState<{ monthYear: string; data: MatchDTO[] } | null>(null)
+  const [selectedMonthGroup, setSelectedMonthGroup] = React.useState<{
+    monthYear: string
+    data: MatchDTO[]
+  } | null>(null)
 
   async function load() {
     if (!season) return
@@ -58,10 +61,12 @@ export function MatchesPage() {
   }, [season])
 
   const sortedMatches = React.useMemo(() => {
-    return [...matches].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    return [...matches].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    )
   }, [matches])
 
-  const filteredMatches = sortedMatches.filter(match => {
+  const filteredMatches = sortedMatches.filter((match) => {
     const search = filter.toLowerCase()
     if (!search) return true
 
@@ -75,12 +80,12 @@ export function MatchesPage() {
   const groupedMatches = React.useMemo(() => {
     const groups: { monthYear: string; data: MatchDTO[] }[] = []
 
-    filteredMatches.forEach(match => {
+    filteredMatches.forEach((match) => {
       const date = new Date(match.date)
       const label = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
       const monthYear = label.charAt(0).toUpperCase() + label.slice(1)
 
-      const existingGroup = groups.find(g => g.monthYear === monthYear)
+      const existingGroup = groups.find((g) => g.monthYear === monthYear)
       if (existingGroup) {
         existingGroup.data.push(match)
       } else {
@@ -93,17 +98,20 @@ export function MatchesPage() {
 
   // Calculate summary stats based on ALL matches in the season
   const stats = React.useMemo(() => {
-    return matches.reduce((acc, m) => {
-      acc.total++
-      acc.gf += m.ourScore
-      acc.ga += m.theirScore
+    return matches.reduce(
+      (acc, m) => {
+        acc.total++
+        acc.gf += m.ourScore
+        acc.ga += m.theirScore
 
-      if (m.ourScore > m.theirScore) acc.w++
-      else if (m.ourScore === m.theirScore) acc.d++
-      else acc.l++
+        if (m.ourScore > m.theirScore) acc.w++
+        else if (m.ourScore === m.theirScore) acc.d++
+        else acc.l++
 
-      return acc
-    }, { total: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0 })
+        return acc
+      },
+      { total: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0 },
+    )
   }, [matches])
 
   function getResultColor(our: number, their: number) {
@@ -120,7 +128,9 @@ export function MatchesPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingBottom: 40 }}>
-      <Title level={4} style={{ margin: 0 }}>Jogos</Title>
+      <Title level={4} style={{ margin: 0 }}>
+        Jogos
+      </Title>
 
       {/* Summary Stats */}
       <div
@@ -137,56 +147,104 @@ export function MatchesPage() {
         <div style={{ textAlign: 'center' }}>
           <Text
             strong
-            style={{ fontSize: 11, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorTextSecondary }}
+            style={{
+              fontSize: 11,
+              display: 'block',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              color: token.colorTextSecondary,
+            }}
           >
             Jogos
           </Text>
-          <Text strong style={{ fontSize: 22 }}>{stats.total}</Text>
+          <Text strong style={{ fontSize: 22 }}>
+            {stats.total}
+          </Text>
         </div>
         <div style={{ textAlign: 'center' }}>
           <Text
             strong
-            style={{ fontSize: 11, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorSuccessText }}
+            style={{
+              fontSize: 11,
+              display: 'block',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              color: token.colorSuccessText,
+            }}
           >
             Vitórias
           </Text>
-          <Text strong style={{ fontSize: 22, color: token.colorSuccessText }}>{stats.w}</Text>
+          <Text strong style={{ fontSize: 22, color: token.colorSuccessText }}>
+            {stats.w}
+          </Text>
         </div>
         <div style={{ textAlign: 'center' }}>
           <Text
             strong
-            style={{ fontSize: 11, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorWarning }}
+            style={{
+              fontSize: 11,
+              display: 'block',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              color: token.colorWarning,
+            }}
           >
             Empates
           </Text>
-          <Text strong style={{ fontSize: 22, color: token.colorWarning }}>{stats.d}</Text>
+          <Text strong style={{ fontSize: 22, color: token.colorWarning }}>
+            {stats.d}
+          </Text>
         </div>
         <div style={{ textAlign: 'center' }}>
           <Text
             strong
-            style={{ fontSize: 11, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorErrorText }}
+            style={{
+              fontSize: 11,
+              display: 'block',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              color: token.colorErrorText,
+            }}
           >
             Derrotas
           </Text>
-          <Text strong style={{ fontSize: 22, color: token.colorErrorText }}>{stats.l}</Text>
+          <Text strong style={{ fontSize: 22, color: token.colorErrorText }}>
+            {stats.l}
+          </Text>
         </div>
         <div style={{ textAlign: 'center' }}>
           <Text
             strong
-            style={{ fontSize: 11, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorTextSecondary }}
+            style={{
+              fontSize: 11,
+              display: 'block',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              color: token.colorTextSecondary,
+            }}
           >
             Gols Pró
           </Text>
-          <Text strong style={{ fontSize: 22, color: token.colorPrimary }}>{stats.gf}</Text>
+          <Text strong style={{ fontSize: 22, color: token.colorPrimary }}>
+            {stats.gf}
+          </Text>
         </div>
         <div style={{ textAlign: 'center' }}>
           <Text
             strong
-            style={{ fontSize: 11, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorTextSecondary }}
+            style={{
+              fontSize: 11,
+              display: 'block',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              color: token.colorTextSecondary,
+            }}
           >
             Gols Sofr.
           </Text>
-          <Text strong style={{ fontSize: 22, color: token.colorErrorText }}>{stats.ga}</Text>
+          <Text strong style={{ fontSize: 22, color: token.colorErrorText }}>
+            {stats.ga}
+          </Text>
         </div>
       </div>
 
@@ -210,13 +268,16 @@ export function MatchesPage() {
               textAlign: 'center',
             }}
           >
-            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum jogo cadastrado ainda" />
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="Nenhum jogo cadastrado ainda"
+            />
           </div>
         ) : (
           groupedMatches.map((group) => {
-            const wins = group.data.filter(m => m.ourScore > m.theirScore).length
-            const losses = group.data.filter(m => m.ourScore < m.theirScore).length
-            const draws = group.data.filter(m => m.ourScore === m.theirScore).length
+            const wins = group.data.filter((m) => m.ourScore > m.theirScore).length
+            const losses = group.data.filter((m) => m.ourScore < m.theirScore).length
+            const draws = group.data.filter((m) => m.ourScore === m.theirScore).length
             const goalsFor = group.data.reduce((acc, m) => acc + m.ourScore, 0)
             const goalsAgainst = group.data.reduce((acc, m) => acc + m.theirScore, 0)
 
@@ -284,9 +345,17 @@ export function MatchesPage() {
                   }}
                 >
                   <Tag style={{ margin: 0, fontSize: 11 }}>{group.data.length} jogos</Tag>
-                  <Tag color="success" style={{ margin: 0, fontSize: 11 }}>{wins}V</Tag>
-                  {draws > 0 && <Tag color="warning" style={{ margin: 0, fontSize: 11 }}>{draws}E</Tag>}
-                  <Tag color="error" style={{ margin: 0, fontSize: 11 }}>{losses}D</Tag>
+                  <Tag color="success" style={{ margin: 0, fontSize: 11 }}>
+                    {wins}V
+                  </Tag>
+                  {draws > 0 && (
+                    <Tag color="warning" style={{ margin: 0, fontSize: 11 }}>
+                      {draws}E
+                    </Tag>
+                  )}
+                  <Tag color="error" style={{ margin: 0, fontSize: 11 }}>
+                    {losses}D
+                  </Tag>
                   <div
                     style={{
                       marginLeft: 4,
@@ -295,9 +364,27 @@ export function MatchesPage() {
                       gap: 4,
                     }}
                   >
-                    <Text style={{ fontSize: 11, color: token.colorSuccessText, fontWeight: 600 }}>{goalsFor}</Text>
-                    <Text type="secondary" style={{ fontSize: 11 }}>×</Text>
-                    <Text style={{ fontSize: 11, color: token.colorErrorText, fontWeight: 600 }}>{goalsAgainst}</Text>
+                    <Text
+                      style={{
+                        fontSize: 11,
+                        color: token.colorSuccessText,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {goalsFor}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: 11 }}>
+                      ×
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 11,
+                        color: token.colorErrorText,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {goalsAgainst}
+                    </Text>
                   </div>
                 </div>
 
@@ -321,7 +408,10 @@ export function MatchesPage() {
                         key={match.id}
                         style={{
                           padding: '12px 16px',
-                          borderBottom: idx < group.data.length - 1 ? `1px solid ${token.colorFillQuaternary}` : undefined,
+                          borderBottom:
+                            idx < group.data.length - 1
+                              ? `1px solid ${token.colorFillQuaternary}`
+                              : undefined,
                           borderLeft: `3px solid ${accentColor}`,
                           cursor: 'pointer',
                           display: 'flex',
@@ -331,7 +421,10 @@ export function MatchesPage() {
                           transition: 'background 0.15s',
                         }}
                         onClick={() => {
-                          posthog.capture('match_list_item_clicked', { match_id: match.id, opponent: match.opponent })
+                          posthog.capture('match_list_item_clicked', {
+                            match_id: match.id,
+                            opponent: match.opponent,
+                          })
                           navigate(`/app/matches/${match.id}`)
                         }}
                       >
@@ -349,32 +442,71 @@ export function MatchesPage() {
                           >
                             {opponent}
                           </Text>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                              <CalendarOutlined style={{ fontSize: 10, color: token.colorTextSecondary }} />
-                              <Text type="secondary" style={{ fontSize: 11 }}>{dateLabel}</Text>
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 8,
+                              marginTop: 4,
+                            }}
+                          >
+                            <div
+                              style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                            >
+                              <CalendarOutlined
+                                style={{ fontSize: 10, color: token.colorTextSecondary }}
+                              />
+                              <Text type="secondary" style={{ fontSize: 11 }}>
+                                {dateLabel}
+                              </Text>
                             </div>
                             {match.location && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                <EnvironmentOutlined style={{ fontSize: 10, color: token.colorTextSecondary }} />
+                              <div
+                                style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                              >
+                                <EnvironmentOutlined
+                                  style={{
+                                    fontSize: 10,
+                                    color: token.colorTextSecondary,
+                                  }}
+                                />
                                 <Text
                                   type="secondary"
-                                  style={{ fontSize: 11, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}
+                                  style={{
+                                    fontSize: 11,
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    maxWidth: 120,
+                                  }}
                                 >
                                   {match.location}
                                 </Text>
                               </div>
                             )}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                              <UserOutlined style={{ fontSize: 10, color: token.colorTextSecondary }} />
+                            <div
+                              style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                            >
+                              <UserOutlined
+                                style={{ fontSize: 10, color: token.colorTextSecondary }}
+                              />
                               <Text type="secondary" style={{ fontSize: 11 }}>
-                                {(match.presences?.length || 0) + (match.loanedPlayers?.length || 0)}
+                                {(match.presences?.length || 0) +
+                                  (match.loanedPlayers?.length || 0)}
                               </Text>
                             </div>
                           </div>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-end',
+                            gap: 4,
+                            flexShrink: 0,
+                          }}
+                        >
                           <Tag
                             color={resultColor}
                             style={{
@@ -389,7 +521,13 @@ export function MatchesPage() {
                           >
                             {match.ourScore} x {match.theirScore}
                           </Tag>
-                          <Text style={{ fontSize: 11, color: token.colorPrimary, opacity: 0.8 }}>
+                          <Text
+                            style={{
+                              fontSize: 11,
+                              color: token.colorPrimary,
+                              opacity: 0.8,
+                            }}
+                          >
                             ver detalhes
                           </Text>
                         </div>

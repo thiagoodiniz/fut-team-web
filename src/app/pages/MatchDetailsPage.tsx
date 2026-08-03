@@ -24,7 +24,13 @@ import {
   CloseOutlined,
 } from '@ant-design/icons'
 
-import { getMatchById, deleteMatch, updateMatch, listMatches, type MatchDTO } from '../../services/matches.service'
+import {
+  getMatchById,
+  deleteMatch,
+  updateMatch,
+  listMatches,
+  type MatchDTO,
+} from '../../services/matches.service'
 import {
   listMatchGoals,
   type GoalDTO,
@@ -74,7 +80,9 @@ export function MatchDetailsPage() {
   const [editMatchModalOpen, setEditMatchModalOpen] = React.useState(false)
 
   const [creatingGoal, setCreatingGoal] = React.useState(false)
-  const [loanedPlayersOptions, setLoanedPlayersOptions] = React.useState<{ value: string }[]>([])
+  const [loanedPlayersOptions, setLoanedPlayersOptions] = React.useState<
+    { value: string }[]
+  >([])
   const [newLoanedPlayer, setNewLoanedPlayer] = React.useState('')
   const [addingLoanedPlayer, setAddingLoanedPlayer] = React.useState(false)
 
@@ -104,14 +112,18 @@ export function MatchDetailsPage() {
 
   React.useEffect(() => {
     if (match?.seasonId) {
-      listMatches(match.seasonId).then(matches => {
-        const uniqueLoaned = Array.from(new Set(
-          matches
-            .flatMap(m => m.loanedPlayers || [])
-            .filter((name): name is string => !!name)
-        ))
-        setLoanedPlayersOptions(uniqueLoaned.map(name => ({ value: name })))
-      }).catch(console.error)
+      listMatches(match.seasonId)
+        .then((matches) => {
+          const uniqueLoaned = Array.from(
+            new Set(
+              matches
+                .flatMap((m) => m.loanedPlayers || [])
+                .filter((name): name is string => !!name),
+            ),
+          )
+          setLoanedPlayersOptions(uniqueLoaned.map((name) => ({ value: name })))
+        })
+        .catch(console.error)
     }
   }, [match?.seasonId])
 
@@ -162,7 +174,7 @@ export function MatchDetailsPage() {
     if (!id || !match || !isActiveSeason || !isAdmin) return
 
     try {
-      const updatedLoaned = (match.loanedPlayers || []).filter(n => n !== name)
+      const updatedLoaned = (match.loanedPlayers || []).filter((n) => n !== name)
       const updatedMatch = await updateMatch(id, { loanedPlayers: updatedLoaned })
       setMatch(updatedMatch)
       message.success('Jogador emprestado removido')
@@ -171,7 +183,6 @@ export function MatchDetailsPage() {
       message.error('Erro ao remover jogador')
     }
   }
-
 
   const presentCount = presences.filter((p) => p.present).length
   const totalPlayers = presences.length
@@ -183,7 +194,7 @@ export function MatchDetailsPage() {
     return nameA.localeCompare(nameB, 'pt-BR')
   })
 
-  const filteredPresences = sortedPresences.filter(p => {
+  const filteredPresences = sortedPresences.filter((p) => {
     const search = presenceFilter.toLowerCase()
     return (
       p.player?.name.toLowerCase().includes(search) ||
@@ -206,7 +217,12 @@ export function MatchDetailsPage() {
 
   async function onCreateGoal(data: {
     playerId?: string
-    goals: { minute?: number | null; ownGoal?: boolean; freeKick?: boolean; penalty?: boolean }[]
+    goals: {
+      minute?: number | null
+      ownGoal?: boolean
+      freeKick?: boolean
+      penalty?: boolean
+    }[]
   }) {
     if (!id || !isActiveSeason || !isAdmin) return
 
@@ -244,10 +260,24 @@ export function MatchDetailsPage() {
   if (loading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div style={{ background: token.colorBgContainer, borderRadius: 16, border: `1px solid ${token.colorBorderSecondary}`, padding: '20px 24px' }}>
+        <div
+          style={{
+            background: token.colorBgContainer,
+            borderRadius: 16,
+            border: `1px solid ${token.colorBorderSecondary}`,
+            padding: '20px 24px',
+          }}
+        >
           <Skeleton active paragraph={{ rows: 3 }} />
         </div>
-        <div style={{ background: token.colorBgContainer, borderRadius: 16, border: `1px solid ${token.colorBorderSecondary}`, padding: '20px 24px' }}>
+        <div
+          style={{
+            background: token.colorBgContainer,
+            borderRadius: 16,
+            border: `1px solid ${token.colorBorderSecondary}`,
+            padding: '20px 24px',
+          }}
+        >
           <Skeleton active paragraph={{ rows: 4 }} />
         </div>
       </div>
@@ -281,8 +311,25 @@ export function MatchDetailsPage() {
       >
         <div style={{ height: 4, background: resultColor }} />
         <div style={{ padding: '20px 24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <Title level={4} style={{ margin: 0, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 16,
+            }}
+          >
+            <Title
+              level={4}
+              style={{
+                margin: 0,
+                flex: 1,
+                minWidth: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {opponent}
             </Title>
             {isActiveSeason && isAdmin && (
@@ -299,19 +346,64 @@ export function MatchDetailsPage() {
 
           {/* Score */}
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 16,
+              }}
+            >
               <div>
-                <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block', marginBottom: 2 }}>
+                <Text
+                  type="secondary"
+                  style={{
+                    fontSize: 11,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.07em',
+                    display: 'block',
+                    marginBottom: 2,
+                  }}
+                >
                   Nós
                 </Text>
-                <Text style={{ fontSize: 48, fontWeight: 800, lineHeight: 1, color: resultColor }}>{match.ourScore}</Text>
+                <Text
+                  style={{
+                    fontSize: 48,
+                    fontWeight: 800,
+                    lineHeight: 1,
+                    color: resultColor,
+                  }}
+                >
+                  {match.ourScore}
+                </Text>
               </div>
-              <Text type="secondary" style={{ fontSize: 24, fontWeight: 300 }}>×</Text>
+              <Text type="secondary" style={{ fontSize: 24, fontWeight: 300 }}>
+                ×
+              </Text>
               <div>
-                <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block', marginBottom: 2 }}>
+                <Text
+                  type="secondary"
+                  style={{
+                    fontSize: 11,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.07em',
+                    display: 'block',
+                    marginBottom: 2,
+                  }}
+                >
                   Eles
                 </Text>
-                <Text style={{ fontSize: 48, fontWeight: 800, lineHeight: 1, color: token.colorTextSecondary }}>{match.theirScore}</Text>
+                <Text
+                  style={{
+                    fontSize: 48,
+                    fontWeight: 800,
+                    lineHeight: 1,
+                    color: token.colorTextSecondary,
+                  }}
+                >
+                  {match.theirScore}
+                </Text>
               </div>
             </div>
           </div>
@@ -319,19 +411,34 @@ export function MatchDetailsPage() {
           {/* Date + Location */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <CalendarOutlined style={{ fontSize: 13, color: token.colorTextSecondary, flexShrink: 0 }} />
-              <Text type="secondary" style={{ fontSize: 13 }}>{dateLabel}</Text>
+              <CalendarOutlined
+                style={{ fontSize: 13, color: token.colorTextSecondary, flexShrink: 0 }}
+              />
+              <Text type="secondary" style={{ fontSize: 13 }}>
+                {dateLabel}
+              </Text>
             </div>
             {match.location ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <EnvironmentOutlined style={{ fontSize: 13, color: token.colorTextSecondary, flexShrink: 0 }} />
-                <Text type="secondary" style={{ fontSize: 13 }}>{match.location}</Text>
+                <EnvironmentOutlined
+                  style={{ fontSize: 13, color: token.colorTextSecondary, flexShrink: 0 }}
+                />
+                <Text type="secondary" style={{ fontSize: 13 }}>
+                  {match.location}
+                </Text>
               </div>
             ) : null}
           </div>
 
           {match.notes ? (
-            <div style={{ marginTop: 12, padding: 12, background: token.colorFillQuaternary, borderRadius: 8 }}>
+            <div
+              style={{
+                marginTop: 12,
+                padding: 12,
+                background: token.colorFillQuaternary,
+                borderRadius: 8,
+              }}
+            >
               <Text>{match.notes}</Text>
             </div>
           ) : null}
@@ -347,8 +454,23 @@ export function MatchDetailsPage() {
           overflow: 'hidden',
         }}
       >
-        <div style={{ padding: '16px 20px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: token.colorTextSecondary }}>
+        <div
+          style={{
+            padding: '16px 20px 12px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.07em',
+              color: token.colorTextSecondary,
+            }}
+          >
             Gols
           </Text>
           <Text type="secondary" style={{ fontSize: 13 }}>
@@ -375,7 +497,10 @@ export function MatchDetailsPage() {
 
         {goals.length === 0 ? (
           <div style={{ padding: '8px 20px 20px' }}>
-            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum gol registrado" />
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="Nenhum gol registrado"
+            />
           </div>
         ) : (
           <div>
@@ -389,7 +514,10 @@ export function MatchDetailsPage() {
                     : token.colorSuccess
               const playerName = g.ownGoal
                 ? 'Gol contra'
-                : g.player?.nickname || g.player?.name || g.loanedPlayerName || 'Sem jogador'
+                : g.player?.nickname ||
+                  g.player?.name ||
+                  g.loanedPlayerName ||
+                  'Sem jogador'
               const playerSub = g.ownGoal
                 ? 'Adversário'
                 : g.player?.nickname
@@ -403,25 +531,49 @@ export function MatchDetailsPage() {
                     alignItems: 'center',
                     gap: 12,
                     padding: '12px 20px',
-                    borderBottom: i < goals.length - 1 ? `1px solid ${token.colorFillQuaternary}` : 'none',
+                    borderBottom:
+                      i < goals.length - 1
+                        ? `1px solid ${token.colorFillQuaternary}`
+                        : 'none',
                     borderLeft: `3px solid ${accent}`,
                   }}
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <Text strong style={{ display: 'block' }}>{playerName}</Text>
+                    <Text strong style={{ display: 'block' }}>
+                      {playerName}
+                    </Text>
                     {playerSub && (
-                      <Text type="secondary" style={{ fontSize: 12 }}>{playerSub}</Text>
+                      <Text type="secondary" style={{ fontSize: 12 }}>
+                        {playerSub}
+                      </Text>
                     )}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      flexShrink: 0,
+                    }}
+                  >
                     {g.ownGoal && (
-                      <Tag color="red" style={{ margin: 0, fontSize: 11 }}>Gol contra</Tag>
+                      <Tag color="red" style={{ margin: 0, fontSize: 11 }}>
+                        Gol contra
+                      </Tag>
                     )}
                     {!g.ownGoal && g.freeKick && (
-                      <Tag color="blue" icon={<AimOutlined />} style={{ margin: 0, fontSize: 11 }}>Falta</Tag>
+                      <Tag
+                        color="blue"
+                        icon={<AimOutlined />}
+                        style={{ margin: 0, fontSize: 11 }}
+                      >
+                        Falta
+                      </Tag>
                     )}
                     {!g.ownGoal && g.penalty && (
-                      <Tag color="purple" style={{ margin: 0, fontSize: 11 }}>Pênalti</Tag>
+                      <Tag color="purple" style={{ margin: 0, fontSize: 11 }}>
+                        Pênalti
+                      </Tag>
                     )}
                     <Tag style={{ margin: 0, borderRadius: 999, fontWeight: 600 }}>
                       {g.minute !== null ? `${g.minute}'` : '—'}
@@ -466,16 +618,36 @@ export function MatchDetailsPage() {
           overflow: 'hidden',
         }}
       >
-        <div style={{ padding: '16px 20px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: token.colorTextSecondary }}>
+        <div
+          style={{
+            padding: '16px 20px 12px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.07em',
+              color: token.colorTextSecondary,
+            }}
+          >
             Presenças
           </Text>
-          <Text type="secondary" style={{ fontSize: 13 }}>{presentCount}/{totalPlayers}</Text>
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            {presentCount}/{totalPlayers}
+          </Text>
         </div>
 
         {presences.length === 0 ? (
           <div style={{ padding: '8px 20px 20px' }}>
-            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhuma presença registrada" />
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="Nenhuma presença registrada"
+            />
           </div>
         ) : (
           <div>
@@ -498,7 +670,10 @@ export function MatchDetailsPage() {
                   key={p.playerId}
                   onClick={() => {
                     if (!isActiveSeason || !isAdmin) return
-                    posthog.capture('toggle_presence_clicked', { player_id: p.playerId, present: !p.present })
+                    posthog.capture('toggle_presence_clicked', {
+                      player_id: p.playerId,
+                      present: !p.present,
+                    })
                     togglePresence(p.playerId, !p.present)
                   }}
                   style={{
@@ -506,13 +681,24 @@ export function MatchDetailsPage() {
                     alignItems: 'center',
                     gap: 12,
                     padding: '12px 20px',
-                    borderBottom: i < filteredPresences.length - 1 ? `1px solid ${token.colorFillQuaternary}` : 'none',
+                    borderBottom:
+                      i < filteredPresences.length - 1
+                        ? `1px solid ${token.colorFillQuaternary}`
+                        : 'none',
                     opacity: p.present ? 1 : 0.6,
                     cursor: isActiveSeason && isAdmin ? 'pointer' : 'default',
                     transition: 'opacity 0.2s',
                   }}
                 >
-                  <div style={{ minWidth: 0, flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div
+                    style={{
+                      minWidth: 0,
+                      flex: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                    }}
+                  >
                     <Avatar size={34} src={p.player.photo ?? undefined}>
                       {(p.player.nickname || p.player.name)?.[0]}
                     </Avatar>
@@ -549,8 +735,23 @@ export function MatchDetailsPage() {
           overflow: 'hidden',
         }}
       >
-        <div style={{ padding: '16px 20px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: token.colorTextSecondary }}>
+        <div
+          style={{
+            padding: '16px 20px 12px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.07em',
+              color: token.colorTextSecondary,
+            }}
+          >
             Jogadores Emprestados
           </Text>
           <Text type="secondary" style={{ fontSize: 13 }}>
@@ -585,7 +786,10 @@ export function MatchDetailsPage() {
 
           {(match?.loanedPlayers || []).length === 0 ? (
             <div style={{ padding: '8px 20px 20px' }}>
-              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Nenhum jogador emprestado" />
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description="Nenhum jogador emprestado"
+              />
             </div>
           ) : (
             <div>
@@ -597,18 +801,35 @@ export function MatchDetailsPage() {
                     alignItems: 'center',
                     gap: 12,
                     padding: '12px 20px',
-                    borderBottom: i < (match?.loanedPlayers || []).length - 1 ? `1px solid ${token.colorFillQuaternary}` : 'none',
+                    borderBottom:
+                      i < (match?.loanedPlayers || []).length - 1
+                        ? `1px solid ${token.colorFillQuaternary}`
+                        : 'none',
                   }}
                 >
-                  <div style={{ minWidth: 0, flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <Avatar size={34}>
-                      {name[0].toUpperCase()}
-                    </Avatar>
+                  <div
+                    style={{
+                      minWidth: 0,
+                      flex: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                    }}
+                  >
+                    <Avatar size={34}>{name[0].toUpperCase()}</Avatar>
                     <div style={{ minWidth: 0 }}>
                       <Text strong style={{ display: 'block' }}>
                         {name}
                       </Text>
-                      <Tag color="orange" style={{ margin: 0, fontSize: 10, lineHeight: '14px', height: 16 }}>
+                      <Tag
+                        color="orange"
+                        style={{
+                          margin: 0,
+                          fontSize: 10,
+                          lineHeight: '14px',
+                          height: 16,
+                        }}
+                      >
                         Emprestado
                       </Tag>
                     </div>
@@ -665,4 +886,3 @@ export function MatchDetailsPage() {
     </div>
   )
 }
-

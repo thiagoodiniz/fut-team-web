@@ -1,6 +1,24 @@
 import React from 'react'
-import { Modal, Form, Input, InputNumber, Select, Button, Upload, message, theme, Typography, Skeleton } from 'antd'
-import { CameraOutlined, DeleteOutlined, TrophyOutlined, TeamOutlined, FireOutlined } from '@ant-design/icons'
+import {
+  Modal,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Button,
+  Upload,
+  message,
+  theme,
+  Typography,
+  Skeleton,
+} from 'antd'
+import {
+  CameraOutlined,
+  DeleteOutlined,
+  TrophyOutlined,
+  TeamOutlined,
+  FireOutlined,
+} from '@ant-design/icons'
 import { Link } from 'react-router-dom'
 import {
   createPlayer,
@@ -143,7 +161,11 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
       open={open}
       title={
         <Text strong style={{ fontSize: 15 }}>
-          {player ? (isReadOnly ? 'Detalhes do jogador' : 'Editar jogador') : 'Adicionar jogador'}
+          {player
+            ? isReadOnly
+              ? 'Detalhes do jogador'
+              : 'Editar jogador'
+            : 'Adicionar jogador'}
         </Text>
       }
       onCancel={onClose}
@@ -163,38 +185,100 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
           {loadingStats ? (
             <Skeleton active paragraph={{ rows: 1 }} title={false} />
           ) : stats ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            <div
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}
+            >
               {/* Presenças */}
               <div style={{ textAlign: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginBottom: 2 }}>
-                  <TeamOutlined style={{ fontSize: 12, color: token.colorTextSecondary }} />
-                  <Text style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorTextSecondary, fontWeight: 600 }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 4,
+                    marginBottom: 2,
+                  }}
+                >
+                  <TeamOutlined
+                    style={{ fontSize: 12, color: token.colorTextSecondary }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 10,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      color: token.colorTextSecondary,
+                      fontWeight: 600,
+                    }}
+                  >
                     Presenças
                   </Text>
                 </div>
-                <Text strong style={{ fontSize: 20 }}>{stats.presences}</Text>
-                <Text type="secondary" style={{ fontSize: 12 }}>/{stats.totalMatches}</Text>
+                <Text strong style={{ fontSize: 20 }}>
+                  {stats.presences}
+                </Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  /{stats.totalMatches}
+                </Text>
                 <div style={{ marginTop: 2 }}>
-                  <Link to={`/app/ranking/attendance/${player.id}/matches`} onClick={onClose} style={{ fontSize: 11 }}>
+                  <Link
+                    to={`/app/ranking/attendance/${player.id}/matches`}
+                    onClick={onClose}
+                    style={{ fontSize: 11 }}
+                  >
                     ver todas
                   </Link>
                 </div>
               </div>
 
               {/* Gols */}
-              <div style={{ textAlign: 'center', borderLeft: `1px solid ${token.colorBorderSecondary}`, borderRight: `1px solid ${token.colorBorderSecondary}` }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginBottom: 2 }}>
-                  <FireOutlined style={{ fontSize: 12, color: token.colorTextSecondary }} />
-                  <Text style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorTextSecondary, fontWeight: 600 }}>
+              <div
+                style={{
+                  textAlign: 'center',
+                  borderLeft: `1px solid ${token.colorBorderSecondary}`,
+                  borderRight: `1px solid ${token.colorBorderSecondary}`,
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 4,
+                    marginBottom: 2,
+                  }}
+                >
+                  <FireOutlined
+                    style={{ fontSize: 12, color: token.colorTextSecondary }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 10,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      color: token.colorTextSecondary,
+                      fontWeight: 600,
+                    }}
+                  >
                     Gols
                   </Text>
                 </div>
-                <Text strong style={{ fontSize: 20, color: stats.goals > 0 ? token.colorPrimary : undefined }}>
+                <Text
+                  strong
+                  style={{
+                    fontSize: 20,
+                    color: stats.goals > 0 ? token.colorPrimary : undefined,
+                  }}
+                >
                   {stats.goals}
                 </Text>
                 {stats.goals > 0 && (
                   <div style={{ marginTop: 2 }}>
-                    <Link to={`/app/ranking/scorers/${player.id}/goals`} onClick={onClose} style={{ fontSize: 11 }}>
+                    <Link
+                      to={`/app/ranking/scorers/${player.id}/goals`}
+                      onClick={onClose}
+                      style={{ fontSize: 11 }}
+                    >
                       ver todos
                     </Link>
                   </div>
@@ -203,9 +287,27 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
 
               {/* Frequência */}
               <div style={{ textAlign: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginBottom: 2 }}>
-                  <TrophyOutlined style={{ fontSize: 12, color: token.colorTextSecondary }} />
-                  <Text style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.05em', color: token.colorTextSecondary, fontWeight: 600 }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 4,
+                    marginBottom: 2,
+                  }}
+                >
+                  <TrophyOutlined
+                    style={{ fontSize: 12, color: token.colorTextSecondary }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 10,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      color: token.colorTextSecondary,
+                      fontWeight: 600,
+                    }}
+                  >
                     Frequência
                   </Text>
                 </div>
@@ -214,14 +316,19 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
                   style={{
                     fontSize: 20,
                     color:
-                      stats.totalMatches > 0 && stats.presences / stats.totalMatches >= 0.7
+                      stats.totalMatches > 0 &&
+                      stats.presences / stats.totalMatches >= 0.7
                         ? token.colorSuccess
-                        : stats.totalMatches > 0 && stats.presences / stats.totalMatches >= 0.4
+                        : stats.totalMatches > 0 &&
+                            stats.presences / stats.totalMatches >= 0.4
                           ? token.colorWarning
                           : token.colorError,
                   }}
                 >
-                  {stats.totalMatches > 0 ? Math.round((stats.presences / stats.totalMatches) * 100) : 0}%
+                  {stats.totalMatches > 0
+                    ? Math.round((stats.presences / stats.totalMatches) * 100)
+                    : 0}
+                  %
                 </Text>
               </div>
             </div>
@@ -268,8 +375,14 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
           </div>
 
           {!isReadOnly && (
-            <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center', gap: 8 }}>
-              <Upload beforeUpload={handlePhotoChange} showUploadList={false} accept="image/*">
+            <div
+              style={{ marginTop: 8, display: 'flex', justifyContent: 'center', gap: 8 }}
+            >
+              <Upload
+                beforeUpload={handlePhotoChange}
+                showUploadList={false}
+                accept="image/*"
+              >
                 <Button size="small" icon={<CameraOutlined />}>
                   {photoBase64 ? 'Trocar foto' : 'Adicionar foto'}
                 </Button>
@@ -317,7 +430,9 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
       {/* Footer */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
         {isReadOnly ? (
-          <Button type="primary" onClick={onClose}>Fechar</Button>
+          <Button type="primary" onClick={onClose}>
+            Fechar
+          </Button>
         ) : (
           <>
             <Button onClick={onClose}>Cancelar</Button>

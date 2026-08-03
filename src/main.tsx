@@ -100,14 +100,7 @@ function ApiHealthGate({ children }: { children: React.ReactNode }) {
   if (!isApiReady) {
     return (
       <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-        <Modal
-          open
-          centered
-          footer={null}
-          closable={false}
-          keyboard={false}
-          width={460}
-        >
+        <Modal open centered footer={null} closable={false} keyboard={false} width={460}>
           <div style={{ textAlign: 'center', padding: '16px 8px' }}>
             <Spin size="large" />
             <Typography.Title level={4} style={{ marginTop: 20, marginBottom: 8 }}>

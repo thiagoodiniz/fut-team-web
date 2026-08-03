@@ -58,7 +58,11 @@ export function AppShell() {
           <PostHogPageviewTracker />
           <Layout style={{ minHeight: '100dvh', background: token.colorBgLayout }}>
             <AppHeader title={title} showBack={showBack} />
-            <Content style={{ padding: '74px 14px calc(76px + env(safe-area-inset-bottom)) 14px' }}>
+            <Content
+              style={{
+                padding: '74px 14px calc(76px + env(safe-area-inset-bottom)) 14px',
+              }}
+            >
               <Outlet />
             </Content>
             <BottomTabs activeTab={activeTab} onTabClick={onTabClick} />
@@ -95,10 +99,30 @@ function BottomTabs({
         backdropFilter: 'blur(12px)',
       }}
     >
-      <TabButton active={activeTab === 'home'} icon={<HomeOutlined />} label="Início" onClick={() => onTabClick('home')} />
-      <TabButton active={activeTab === 'matches'} icon={<CalendarOutlined />} label="Jogos" onClick={() => onTabClick('matches')} />
-      <TabButton active={activeTab === 'players'} icon={<TeamOutlined />} label="Elenco" onClick={() => onTabClick('players')} />
-      <TabButton active={activeTab === 'team'} icon={<TrophyOutlined />} label="Clube" onClick={() => onTabClick('team')} />
+      <TabButton
+        active={activeTab === 'home'}
+        icon={<HomeOutlined />}
+        label="Início"
+        onClick={() => onTabClick('home')}
+      />
+      <TabButton
+        active={activeTab === 'matches'}
+        icon={<CalendarOutlined />}
+        label="Jogos"
+        onClick={() => onTabClick('matches')}
+      />
+      <TabButton
+        active={activeTab === 'players'}
+        icon={<TeamOutlined />}
+        label="Elenco"
+        onClick={() => onTabClick('players')}
+      />
+      <TabButton
+        active={activeTab === 'team'}
+        icon={<TrophyOutlined />}
+        label="Clube"
+        onClick={() => onTabClick('team')}
+      />
     </nav>
   )
 }
@@ -157,4 +181,3 @@ function TabButton({
     </button>
   )
 }
-

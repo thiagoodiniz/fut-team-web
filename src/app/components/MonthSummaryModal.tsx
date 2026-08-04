@@ -1,11 +1,12 @@
 import React from 'react'
-import { Modal, Typography, Avatar, theme } from 'antd'
+import { Modal, Typography, theme } from 'antd'
 import {
   TrophyOutlined,
   UserOutlined,
   ArrowUpOutlined,
   ArrowDownOutlined,
 } from '@ant-design/icons'
+import { PlayerAvatar } from './PlayerAvatar'
 import type { MatchDTO } from '../../services/matches.service'
 
 const { Text } = Typography
@@ -38,7 +39,7 @@ export function MonthSummaryModal({
     // Ranking Scorer
     const scorerMap = new Map<
       string,
-      { count: number; name: string; nickname: string | null; photo: string | null }
+      { count: number; id: string; name: string; nickname: string | null }
     >()
     matches.forEach((m) => {
       m.goals?.forEach((g) => {
@@ -46,9 +47,9 @@ export function MonthSummaryModal({
           const id = g.playerId
           const current = scorerMap.get(id) || {
             count: 0,
+            id: id,
             name: g.player.name,
             nickname: g.player.nickname,
-            photo: (g.player as any).photo || null,
           }
           scorerMap.set(id, { ...current, count: current.count + 1 })
         }
@@ -58,18 +59,18 @@ export function MonthSummaryModal({
     const sortedScorers = [...scorerMap.values()].sort((a, b) => b.count - a.count)
     const scorerRanking: {
       count: number
-      players: { name: string; nickname: string | null; photo: string | null }[]
+      players: { id: string; name: string; nickname: string | null }[]
     }[] = []
 
     for (const s of sortedScorers) {
       const last = scorerRanking[scorerRanking.length - 1]
       if (last && last.count === s.count) {
-        last.players.push({ name: s.name, nickname: s.nickname, photo: s.photo })
+        last.players.push({ id: s.id, name: s.name, nickname: s.nickname })
       } else {
         if (scorerRanking.length >= 3) break
         scorerRanking.push({
           count: s.count,
-          players: [{ name: s.name, nickname: s.nickname, photo: s.photo }],
+          players: [{ id: s.id, name: s.name, nickname: s.nickname }],
         })
       }
     }
@@ -77,7 +78,7 @@ export function MonthSummaryModal({
     // Ranking Presence
     const presenceMap = new Map<
       string,
-      { count: number; name: string; nickname: string | null; photo: string | null }
+      { count: number; id: string; name: string; nickname: string | null }
     >()
     matches.forEach((m) => {
       m.presences?.forEach((p) => {
@@ -85,9 +86,9 @@ export function MonthSummaryModal({
           const id = p.playerId
           const current = presenceMap.get(id) || {
             count: 0,
+            id: id,
             name: p.player.name,
             nickname: p.player.nickname,
-            photo: p.player.photo,
           }
           presenceMap.set(id, { ...current, count: current.count + 1 })
         }
@@ -97,18 +98,18 @@ export function MonthSummaryModal({
     const sortedPresences = [...presenceMap.values()].sort((a, b) => b.count - a.count)
     const presenceRanking: {
       count: number
-      players: { name: string; nickname: string | null; photo: string | null }[]
+      players: { id: string; name: string; nickname: string | null }[]
     }[] = []
 
     for (const p of sortedPresences) {
       const last = presenceRanking[presenceRanking.length - 1]
       if (last && last.count === p.count) {
-        last.players.push({ name: p.name, nickname: p.nickname, photo: p.photo })
+        last.players.push({ id: p.id, name: p.name, nickname: p.nickname })
       } else {
         if (presenceRanking.length >= 3) break
         presenceRanking.push({
           count: p.count,
-          players: [{ name: p.name, nickname: p.nickname, photo: p.photo }],
+          players: [{ id: p.id, name: p.name, nickname: p.nickname }],
         })
       }
     }
@@ -164,13 +165,11 @@ export function MonthSummaryModal({
                   borderRadius: 20,
                 }}
               >
-                <Avatar
+                <PlayerAvatar
+                  playerId={player.id}
+                  name={player.nickname || player.name}
                   size="small"
-                  src={player.photo ?? undefined}
-                  icon={<UserOutlined />}
-                >
-                  {player.nickname?.[0] || player.name[0]}
-                </Avatar>
+                />
                 <Text style={{ fontSize: 13, fontWeight: 500 }}>
                   {player.nickname || player.name}
                 </Text>

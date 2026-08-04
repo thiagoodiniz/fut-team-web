@@ -4,6 +4,7 @@ import type { MenuProps } from 'antd'
 import { useNavigate } from 'react-router-dom'
 
 import { useSeason } from '../contexts/SeasonContext'
+import { TeamLogo } from '../components/TeamLogo'
 import { useTeam } from '../contexts/TeamContext'
 import posthog from 'posthog-js'
 
@@ -121,8 +122,10 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
               color: token.colorText,
             }}
           />
-        ) : (
-          <div
+        ) : team ? (
+          <TeamLogo
+            teamId={team.id}
+            name={team.name}
             style={{
               width: 38,
               height: 38,
@@ -136,23 +139,8 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
               overflow: 'hidden',
               boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.05)',
             }}
-          >
-            {team?.logo ? (
-              <img
-                src={team.logo}
-                alt="Logo"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                  padding: 2,
-                }}
-              />
-            ) : (
-              <span style={{ fontSize: 16 }}>FT</span>
-            )}
-          </div>
-        )}
+          />
+        ) : null}
 
         <Title
           level={5}

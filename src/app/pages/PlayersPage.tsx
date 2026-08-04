@@ -6,7 +6,6 @@ import {
   Input,
   message,
   FloatButton,
-  Avatar,
   Skeleton,
   theme,
   Tag,
@@ -16,6 +15,7 @@ import posthog from 'posthog-js'
 
 import { listPlayers, updatePlayer, type PlayerDTO } from '../../services/players.service'
 import { AddPlayerModal } from '../components/AddPlayerModal'
+import { PlayerAvatar } from '../components/PlayerAvatar'
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
 
@@ -156,9 +156,11 @@ export function PlayersPage() {
                 transition: 'background 0.15s',
               }}
             >
-              <Avatar src={player.photo ?? undefined} size={44}>
-                {!player.photo && (player.nickname?.[0] || player.name[0])}
-              </Avatar>
+              <PlayerAvatar
+                playerId={player.id}
+                name={player.nickname || player.name}
+                size={44}
+              />
 
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div

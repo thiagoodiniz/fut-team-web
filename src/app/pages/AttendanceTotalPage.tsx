@@ -1,9 +1,10 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Avatar, Typography, Empty, theme, FloatButton, Skeleton, Tag } from 'antd'
+import { Typography, Empty, theme, FloatButton, Skeleton, Tag } from 'antd'
 import { CalendarOutlined, RightOutlined } from '@ant-design/icons'
 import posthog from 'posthog-js'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
+import { PlayerAvatar } from '../components/PlayerAvatar'
 import { useSeason } from '../contexts/SeasonContext'
 
 const { Text } = Typography
@@ -129,9 +130,11 @@ export function AttendanceTotalPage() {
                     {index + 1}
                   </div>
 
-                  <Avatar size={44} src={item.photo ?? undefined}>
-                    {item.nickname?.[0] || item.name[0]}
-                  </Avatar>
+                  <PlayerAvatar
+                    playerId={item.id}
+                    name={item.nickname || item.name}
+                    size={44}
+                  />
 
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

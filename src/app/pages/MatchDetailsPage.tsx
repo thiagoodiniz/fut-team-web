@@ -43,6 +43,7 @@ import {
   type PresenceDTO,
 } from '../../services/presences.service'
 import { AddGoalModal } from '../components/AddGoalModal'
+import { PlayerAvatar } from '../components/PlayerAvatar'
 import { EditMatchModal } from '../components/EditMatchModal'
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
@@ -699,9 +700,11 @@ export function MatchDetailsPage() {
                       gap: 10,
                     }}
                   >
-                    <Avatar size={34} src={p.player.photo ?? undefined}>
-                      {(p.player.nickname || p.player.name)?.[0]}
-                    </Avatar>
+                    <PlayerAvatar
+                      playerId={p.player.id}
+                      name={p.player.nickname || p.player.name}
+                      size={34}
+                    />
                     <div style={{ minWidth: 0 }}>
                       <Text strong style={{ display: 'block' }}>
                         {p.player.nickname || p.player.name}

@@ -1,11 +1,10 @@
 import React from 'react'
-import { Avatar, Empty, Tag, Typography, theme, Skeleton } from 'antd'
+import { Empty, Tag, Typography, theme, Skeleton } from 'antd'
 import {
   CalendarOutlined,
   CheckCircleFilled,
   CloseCircleFilled,
   EnvironmentOutlined,
-  UserOutlined,
 } from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
 import { useSeason } from '../contexts/SeasonContext'
@@ -13,6 +12,7 @@ import {
   getPlayerPresenceMatches,
   type PlayerPresenceMatchesResponse,
 } from '../../services/players.service'
+import { PlayerAvatar } from '../components/PlayerAvatar'
 
 const { Text, Title } = Typography
 
@@ -86,10 +86,10 @@ export function AttendancePlayerMatchesPage() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Avatar
+          <PlayerAvatar
+            playerId={data.player.id}
+            name={data.player.nickname || data.player.name}
             size={48}
-            src={data.player?.photo ?? undefined}
-            icon={!data.player?.photo ? <UserOutlined /> : undefined}
           />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -160,7 +160,7 @@ export function AttendancePlayerMatchesPage() {
             overflow: 'hidden',
           }}
         >
-          {data.matches.map((match, i) => {
+          {data.matches.map((match: any, i: number) => {
             const isPresent = match.present
             const resultTag =
               match.ourScore > match.theirScore
@@ -258,7 +258,7 @@ export function AttendancePlayerMatchesPage() {
                           color: token.colorTextSecondary,
                         }}
                       >
-                        {match.scorers.map((s, idx) => {
+                        {match.scorers.map((s: any, idx: number) => {
                           const name = s.nickname || s.name
                           const isSelected = s.playerId === data.player?.id
                           return (

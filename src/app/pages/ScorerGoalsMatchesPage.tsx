@@ -1,17 +1,13 @@
 import React from 'react'
-import { Avatar, Empty, Tag, Typography, theme, Skeleton } from 'antd'
-import {
-  CalendarOutlined,
-  EnvironmentOutlined,
-  FireFilled,
-  UserOutlined,
-} from '@ant-design/icons'
+import { Empty, Tag, Typography, theme, Skeleton } from 'antd'
+import { CalendarOutlined, EnvironmentOutlined, FireFilled } from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
 import { useSeason } from '../contexts/SeasonContext'
 import {
   getPlayerGoalMatches,
   type PlayerGoalMatchesResponse,
 } from '../../services/players.service'
+import { PlayerAvatar } from '../components/PlayerAvatar'
 
 const { Text, Title } = Typography
 
@@ -77,10 +73,10 @@ export function ScorerGoalsMatchesPage() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Avatar
+          <PlayerAvatar
+            playerId={data.player.id}
+            name={data.player.nickname || data.player.name}
             size={48}
-            src={data.player?.photo ?? undefined}
-            icon={!data.player?.photo ? <UserOutlined /> : undefined}
           />
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -144,7 +140,7 @@ export function ScorerGoalsMatchesPage() {
             overflow: 'hidden',
           }}
         >
-          {data.matches.map((match, i) => {
+          {data.matches.map((match: any, i: number) => {
             const accent =
               match.ourScore > match.theirScore
                 ? token.colorSuccess
@@ -213,7 +209,7 @@ export function ScorerGoalsMatchesPage() {
                           color: token.colorTextSecondary,
                         }}
                       >
-                        {match.scorers.map((s, idx) => {
+                        {match.scorers.map((s: any, idx: number) => {
                           const name = s.nickname || s.name
                           const isSelected = s.playerId === data.player?.id
                           return (

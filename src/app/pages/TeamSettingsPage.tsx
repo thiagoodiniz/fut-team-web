@@ -18,6 +18,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons'
 import { updateMyTeam } from '../../services/teams.service'
+import { getTeamLogo, clearTeamLogoCache } from '../../services/image.service'
 import { useTeam } from '../contexts/TeamContext'
 import { useNavigate } from 'react-router-dom'
 import posthog from 'posthog-js'
@@ -81,7 +82,9 @@ export function TeamSettingsPage() {
   useEffect(() => {
     if (team) {
       form.resetFields()
-      setLogoBase64(team.logo)
+      getTeamLogo(team.id).then((res) => {
+        setLogoBase64(res)
+      })
     }
   }, [team, form])
 
@@ -104,6 +107,9 @@ export function TeamSettingsPage() {
       }
 
       await updateMyTeam(payload)
+      if (team) {
+        clearTeamLogoCache(team.id)
+      }
       await refreshTeam()
       message.success('Informações do time atualizadas!')
     } catch (err) {

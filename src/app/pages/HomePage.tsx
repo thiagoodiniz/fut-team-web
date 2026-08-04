@@ -8,7 +8,6 @@ import {
   Tag,
   Typography,
   theme,
-  Avatar,
   Button,
   FloatButton,
 } from 'antd'
@@ -24,6 +23,7 @@ import {
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
+import { PlayerAvatar } from '../components/PlayerAvatar'
 import posthog from 'posthog-js'
 
 const { Title, Text } = Typography
@@ -628,8 +628,9 @@ export function HomePage() {
                         index < 4 ? `1px solid ${token.colorFillQuaternary}` : undefined,
                     }}
                   >
-                    <Avatar
-                      src={item.photo ?? undefined}
+                    <PlayerAvatar
+                      playerId={item.id}
+                      name={item.nickname || item.name}
                       size={36}
                       style={{
                         backgroundColor: rankColor(index),
@@ -638,9 +639,7 @@ export function HomePage() {
                         fontSize: 13,
                         fontWeight: 600,
                       }}
-                    >
-                      {!item.photo && (item.nickname?.[0] || item.name[0])}
-                    </Avatar>
+                    />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <Text
@@ -749,19 +748,17 @@ export function HomePage() {
                             : undefined,
                       }}
                     >
-                      <Avatar
-                        src={item.photo ?? undefined}
-                        size={36}
+                      <PlayerAvatar
+                        playerId={item.id}
+                        name={item.nickname || item.name}
+                        size={34}
                         style={{
                           backgroundColor: rankColor(index),
                           color: rankTextColor(index),
-                          flexShrink: 0,
-                          fontSize: 13,
+                          fontSize: 12,
                           fontWeight: 600,
                         }}
-                      >
-                        {!item.photo && (item.nickname?.[0] || item.name[0])}
-                      </Avatar>
+                      />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <Text

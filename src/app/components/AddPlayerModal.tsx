@@ -27,6 +27,7 @@ import {
   type PlayerDTO,
   type PlayerStats,
 } from '../../services/players.service'
+import { clearPlayerPhotoCache } from '../../services/image.service'
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
 
@@ -130,6 +131,7 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
 
       if (player) {
         await updatePlayer(player.id, payload)
+        clearPlayerPhotoCache(player.id)
         message.success('Jogador atualizado!')
       } else {
         await createPlayer(payload)

@@ -5,7 +5,6 @@ import {
   theme,
   Row,
   Col,
-  Avatar,
   Button,
   Spin,
   Empty,
@@ -16,6 +15,8 @@ import { SettingOutlined, TrophyOutlined, TeamOutlined } from '@ant-design/icons
 import { useNavigate } from 'react-router-dom'
 import { useTeam } from '../contexts/TeamContext'
 import { useAppHeader } from '../hooks/useAppHeader'
+import { TeamLogo } from '../components/TeamLogo'
+import { PlayerAvatar } from '../components/PlayerAvatar'
 import {
   getTeamHistoricalStats,
   type TeamHistoricalStats,
@@ -83,8 +84,9 @@ export function TeamPage() {
             }}
           />
         )}
-        <Avatar
-          src={team.logo}
+        <TeamLogo
+          teamId={team.id}
+          name={team.name}
           size={80}
           shape="square"
           style={{
@@ -93,13 +95,7 @@ export function TeamPage() {
             padding: team.logo ? 4 : 0,
             boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           }}
-        >
-          {!team.logo && (
-            <span style={{ fontSize: 32, color: token.colorPrimary, fontWeight: 800 }}>
-              FT
-            </span>
-          )}
-        </Avatar>
+        />
         <div>
           <Title level={3} style={{ margin: 0, color: 'white' }}>
             {team.name}
@@ -218,11 +214,9 @@ export function TeamPage() {
                         >
                           {idx + 1}º
                         </div>
-                        <Avatar
-                          src={
-                            s.photo ||
-                            `https://api.dicebear.com/7.x/initials/svg?seed=${s.name}`
-                          }
+                        <PlayerAvatar
+                          playerId={s.id}
+                          name={s.nickname || s.name}
                           size={32}
                         />
                         <div style={{ flex: 1, overflow: 'hidden' }}>
@@ -273,11 +267,9 @@ export function TeamPage() {
                         >
                           {idx + 1}º
                         </div>
-                        <Avatar
-                          src={
-                            s.photo ||
-                            `https://api.dicebear.com/7.x/initials/svg?seed=${s.name}`
-                          }
+                        <PlayerAvatar
+                          playerId={s.id}
+                          name={s.nickname || s.name}
                           size={32}
                         />
                         <div style={{ flex: 1, overflow: 'hidden' }}>

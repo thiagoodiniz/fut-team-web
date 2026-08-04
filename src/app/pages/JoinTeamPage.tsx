@@ -8,7 +8,6 @@ import {
   Space,
   theme,
   message,
-  Avatar,
   Empty,
   Form,
   Modal,
@@ -20,6 +19,7 @@ import {
   ClockCircleOutlined,
 } from '@ant-design/icons'
 import { api } from '../../services/api'
+import { TeamLogo } from '../components/TeamLogo'
 import { useLocation, useNavigate } from 'react-router-dom'
 import posthog from 'posthog-js'
 
@@ -265,13 +265,12 @@ export function JoinTeamPage() {
                 >
                   <List.Item.Meta
                     avatar={
-                      <Avatar
+                      <TeamLogo
+                        teamId={team.id}
+                        name={team.name}
                         size={56}
-                        src={team.logo}
                         style={{ backgroundColor: token.colorPrimary }}
-                      >
-                        {team.name[0]}
-                      </Avatar>
+                      />
                     }
                     title={
                       <Text strong style={{ fontSize: 17 }}>

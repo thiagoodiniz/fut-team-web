@@ -901,7 +901,7 @@ export function HomePage() {
         style={{
           right: '50%',
           transform: 'translateX(50%)',
-          bottom: 92,
+          bottom: 124,
         }}
       />
     </div>

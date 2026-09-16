@@ -60,7 +60,7 @@ export function AppShell() {
             <AppHeader title={title} showBack={showBack} />
             <Content
               style={{
-                padding: '74px 14px calc(76px + env(safe-area-inset-bottom)) 14px',
+                padding: '74px 14px calc(108px + env(safe-area-inset-bottom)) 14px',
               }}
             >
               <Outlet />
@@ -89,8 +89,8 @@ function BottomTabs({
         left: 0,
         right: 0,
         bottom: 0,
-        height: 'calc(60px + env(safe-area-inset-bottom))',
-        paddingBottom: 'env(safe-area-inset-bottom)',
+        height: 'calc(92px + env(safe-area-inset-bottom))',
+        paddingBottom: 'calc(32px + env(safe-area-inset-bottom))',
         zIndex: 1000,
         display: 'grid',
         gridTemplateColumns: 'repeat(4, 1fr)',

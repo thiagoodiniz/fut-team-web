@@ -9,11 +9,12 @@ import {
 } from '@ant-design/icons'
 import posthog from 'posthog-js'
 
+import { useEffect } from 'react'
 import { PostHogPageviewTracker } from '../../components/PostHogPageviewTracker'
 import { AppHeader } from './AppHeader'
 import { useAppHeader } from '../hooks/useAppHeader'
 import { SeasonProvider } from '../contexts/SeasonContext'
-import { TeamProvider } from '../contexts/TeamContext'
+import { TeamProvider, useTeam } from '../contexts/TeamContext'
 import { ThemeProvider } from '../../theme/ThemeProvider'
 
 const { Content } = Layout
@@ -53,6 +54,7 @@ export function AppShell() {
 
   return (
     <TeamProvider>
+      <DynamicPwaManifest />
       <ThemeProvider>
         <SeasonProvider>
           <PostHogPageviewTracker />
@@ -180,4 +182,58 @@ function TabButton({
       <span style={{ lineHeight: 1 }}>{label}</span>
     </button>
   )
+}
+
+function DynamicPwaManifest() {
+  const { team } = useTeam()
+
+  useEffect(() => {
+    if (!team) return
+
+    const manifest = {
+      name: team.name || 'Fut Team',
+      short_name: team.name || 'FutTeam',
+      description: `Aplicativo do time ${team.name || 'Fut Team'}`,
+      start_url: '/',
+      display: 'standalone',
+      background_color: '#ffffff',
+      theme_color: team.primaryColor || '#ffffff',
+      icons: team.logo
+        ? [
+            {
+              src: team.logo,
+              sizes: '192x192 512x512',
+              type: 'image/png',
+              purpose: 'any maskable',
+            },
+          ]
+        : [
+            {
+              src: '/icon.svg',
+              sizes: '192x192 512x512',
+              type: 'image/svg+xml',
+              purpose: 'any maskable',
+            },
+          ],
+    }
+
+    const stringManifest = JSON.stringify(manifest)
+    const blob = new Blob([stringManifest], { type: 'application/json' })
+    const manifestUrl = URL.createObjectURL(blob)
+
+    let link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]')
+    if (!link) {
+      link = document.createElement('link')
+      link.rel = 'manifest'
+      document.head.appendChild(link)
+    }
+
+    if (link.href.startsWith('blob:')) {
+      URL.revokeObjectURL(link.href)
+    }
+
+    link.href = manifestUrl
+  }, [team])
+
+  return null
 }

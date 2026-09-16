@@ -192,6 +192,8 @@ function DynamicPwaManifest() {
   const { team } = useTeam()
 
   useEffect(() => {
+    const iconUrl = team?.logo || '/icon.svg'
+
     const manifest = {
       name: team?.name || 'Fut Team',
       short_name: team?.name || 'FutTeam',
@@ -200,41 +202,55 @@ function DynamicPwaManifest() {
       display: 'standalone',
       background_color: '#ffffff',
       theme_color: team?.primaryColor || '#ffffff',
-      icons: team?.logo
-        ? [
-            {
-              src: team.logo,
-              sizes: '192x192',
-              purpose: 'any maskable',
-            },
-            {
-              src: team.logo,
-              sizes: '512x512',
-              purpose: 'any maskable',
-            }
-          ]
-        : [
-            {
-              src: '/icon.svg',
-              sizes: '192x192 512x512',
-              type: 'image/svg+xml',
-              purpose: 'any maskable',
-            },
-          ],
+      icons: [
+        {
+          src: iconUrl,
+          sizes: '192x192',
+          purpose: 'any',
+        },
+        {
+          src: iconUrl,
+          sizes: '512x512',
+          purpose: 'any',
+        }
+      ]
     }
 
     const stringManifest = JSON.stringify(manifest)
-    const manifestUrl = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(stringManifest)
+    const base64Manifest = btoa(unescape(encodeURIComponent(stringManifest)))
+    const manifestUrl = 'data:application/manifest+json;base64,' + base64Manifest
 
+    // Update Manifest
     let link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]')
     if (!link) {
       link = document.createElement('link')
       link.rel = 'manifest'
       document.head.appendChild(link)
     }
-
     if (link.href !== manifestUrl) {
       link.href = manifestUrl
+    }
+
+    // Update Apple Touch Icon
+    let appleLink = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]')
+    if (!appleLink) {
+      appleLink = document.createElement('link')
+      appleLink.rel = 'apple-touch-icon'
+      document.head.appendChild(appleLink)
+    }
+    if (appleLink.href !== iconUrl) {
+      appleLink.href = iconUrl
+    }
+
+    // Update regular Favicon
+    let iconLink = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+    if (!iconLink) {
+      iconLink = document.createElement('link')
+      iconLink.rel = 'icon'
+      document.head.appendChild(iconLink)
+    }
+    if (iconLink.href !== iconUrl) {
+      iconLink.href = iconUrl
     }
   }, [team])
 

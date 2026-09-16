@@ -1,5 +1,5 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   Card,
   Col,
@@ -23,6 +23,9 @@ import {
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
+import { getPublicDashboard } from '../../services/public.service'
+import { useAuthGate } from '../hooks/useAuthGate'
+import { AuthGateModal } from '../components/AuthGateModal'
 import { PlayerAvatar } from '../components/PlayerAvatar'
 import { useIsPWA } from '../hooks/useIsPWA'
 import { useAppTheme } from '../../theme/ThemeProvider'
@@ -50,6 +53,8 @@ function DoubleBallIcon() {
 
 export function HomePage() {
   const navigate = useNavigate()
+  const { slug } = useParams<{ slug: string }>()
+  const { requireAuth, isModalOpen, setIsModalOpen } = useAuthGate()
   const { token } = theme.useToken()
   const { season } = useSeason()
   const { team } = useTeam()
@@ -63,7 +68,9 @@ export function HomePage() {
     async function load() {
       try {
         setLoading(true)
-        const stats = await getDashboardStats(season?.id)
+        const stats = slug
+          ? await getPublicDashboard(slug, season?.id)
+          : await getDashboardStats(season?.id)
         setData(stats)
       } catch (err) {
         console.error(err)
@@ -72,7 +79,7 @@ export function HomePage() {
       }
     }
     load()
-  }, [season?.id])
+  }, [season?.id, slug])
 
   if (loading || !data) {
     return <Card loading />
@@ -182,7 +189,7 @@ export function HomePage() {
           role="button"
           onClick={() => {
             posthog.capture('next_match_card_clicked', { match_id: data.nextMatch?.id })
-            navigate(`/app/matches/${data.nextMatch?.id}`)
+            requireAuth(() => navigate(slug ? `/${slug}/matches/${data.nextMatch?.id}` : `/app/matches/${data.nextMatch?.id}`))
           }}
           style={{
             background: token.colorBgContainer,
@@ -304,7 +311,7 @@ export function HomePage() {
               role="button"
               onClick={() => {
                 posthog.capture('total_games_card_clicked')
-                navigate('/app/matches')
+                navigate(slug ? `/${slug}/matches` : '/app/matches')
               }}
               style={{
                 background: token.colorBgContainer,
@@ -453,7 +460,7 @@ export function HomePage() {
               role="button"
               onClick={() => {
                 posthog.capture('total_goals_card_clicked')
-                navigate('/app/ranking/scorers')
+                requireAuth(() => navigate(slug ? `/${slug}/scorers` : '/app/ranking/scorers'))
               }}
               style={{
                 background: token.colorBgContainer,
@@ -618,7 +625,7 @@ export function HomePage() {
             <SectionHeader
               label="Últimos Jogos"
               action="Ver todos"
-              onAction={() => navigate('/app/matches')}
+              onAction={() => navigate(slug ? `/${slug}/matches` : '/app/matches')}
             />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {lastMatches.map((item, index) => {
@@ -645,10 +652,10 @@ export function HomePage() {
                 return (
                   <div
                     key={index}
-                    onClick={() => {
-                      posthog.capture('last_match_card_clicked', { match_id: item.id })
-                      navigate(`/app/matches/${item.id}`)
-                    }}
+                      onClick={() => {
+                        posthog.capture('last_match_card_clicked', { match_id: item.id })
+                        requireAuth(() => navigate(slug ? `/${slug}/matches/${item.id}` : `/app/matches/${item.id}`))
+                      }}
                     style={{
                       background: token.colorBgContainer,
                       border: `1px solid ${token.colorBorderSecondary}`,
@@ -747,7 +754,7 @@ export function HomePage() {
               <SectionHeader
                 label="Frequência"
                 action="Ver mais"
-                onAction={() => navigate('/app/ranking/attendance')}
+                onAction={() => requireAuth(() => navigate(slug ? `/${slug}/ranking/attendance` : '/app/ranking/attendance'))}
               />
               <div
                 style={{
@@ -850,7 +857,7 @@ export function HomePage() {
               <SectionHeader
                 label="Artilharia"
                 action="Ver mais"
-                onAction={() => navigate('/app/ranking/scorers')}
+                onAction={() => requireAuth(() => navigate(slug ? `/${slug}/ranking/scorers` : '/app/ranking/scorers'))}
               />
               {data.topScorers.length === 0 ? (
                 <div
@@ -1045,6 +1052,8 @@ export function HomePage() {
           bottom: isPWA ? 124 : 92,
         }}
       />
+
+      <AuthGateModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   )
 }

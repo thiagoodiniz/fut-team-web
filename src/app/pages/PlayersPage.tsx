@@ -1,4 +1,7 @@
 import React from 'react'
+import { useParams } from 'react-router-dom'
+import { useAuthGate } from '../hooks/useAuthGate'
+import { AuthGateModal } from '../components/AuthGateModal'
 import {
   Empty,
   Switch,
@@ -14,6 +17,7 @@ import { PlusOutlined, SearchOutlined, RightOutlined } from '@ant-design/icons'
 import posthog from 'posthog-js'
 
 import { listPlayers, updatePlayer, type PlayerDTO } from '../../services/players.service'
+import { getPublicPlayers } from '../../services/public.service'
 import { AddPlayerModal } from '../components/AddPlayerModal'
 import { PlayerAvatar } from '../components/PlayerAvatar'
 import { useSeason } from '../contexts/SeasonContext'
@@ -35,11 +39,14 @@ export function PlayersPage() {
   const [updatingPlayerId, setUpdatingPlayerId] = React.useState<string | null>(null)
   const [filter, setFilter] = React.useState('')
 
+  const { slug } = useParams<{ slug: string }>()
+  const { requireAuth, isModalOpen, setIsModalOpen } = useAuthGate()
+
   async function loadPlayers() {
     if (!season) return
     try {
       setLoading(true)
-      const data = await listPlayers(season.id)
+      const data = slug ? await getPublicPlayers(slug, season.id) : await listPlayers(season.id)
       setPlayers(data)
     } finally {
       setLoading(false)
@@ -141,8 +148,10 @@ export function PlayersPage() {
                   player_id: player.id,
                   name: player.name,
                 })
-                setEditingPlayer(player)
-                setModalOpen(true)
+                requireAuth(() => {
+                  setEditingPlayer(player)
+                  setModalOpen(true)
+                })
               }}
               style={{
                 display: 'flex',
@@ -265,6 +274,8 @@ export function PlayersPage() {
       <FloatButton.BackTop
         style={{ right: '50%', transform: 'translateX(50%)', bottom: isPWA ? 124 : 92 }}
       />
+
+      <AuthGateModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   )
 }

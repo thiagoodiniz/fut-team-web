@@ -76,6 +76,9 @@ export function LoginPage() {
         isManager: data.isManager ?? false,
       }),
     )
+    if (data.team?.slug) {
+      localStorage.setItem('teamSlug', data.team.slug)
+    }
 
     const isBlocked = applyAnalyticsPreferenceByEmail(data.user.email)
     if (!isBlocked) {

@@ -12,7 +12,7 @@ import {
   Space,
 } from 'antd'
 import { SettingOutlined, TrophyOutlined, TeamOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useTeam } from '../contexts/TeamContext'
 import { useAppHeader } from '../hooks/useAppHeader'
 import { TeamLogo } from '../components/TeamLogo'
@@ -21,6 +21,7 @@ import {
   getTeamHistoricalStats,
   type TeamHistoricalStats,
 } from '../../services/teamStats.service'
+import { getPublicTeamStats } from '../../services/public.service'
 import { useAppTheme } from '../../theme/ThemeProvider'
 import { APP_COLORS } from '../../theme/theme'
 
@@ -34,13 +35,15 @@ export function TeamPage() {
   const [stats, setStats] = useState<TeamHistoricalStats | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const { slug } = useParams<{ slug: string }>()
+
   useAppHeader()
 
   useEffect(() => {
     if (!team) return
     async function fetchStats() {
       try {
-        const data = await getTeamHistoricalStats()
+        const data = slug ? await getPublicTeamStats(slug) : await getTeamHistoricalStats()
         setStats(data)
       } catch (err) {
         console.error(err)

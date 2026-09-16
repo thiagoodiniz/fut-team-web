@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { AppShell } from './app/layout/AppShell'
+import { PublicAppShell } from './app/layout/PublicAppShell'
 
 import { HomePage } from './app/pages/HomePage'
 import { MatchesPage } from './app/pages/MatchesPage'
@@ -17,11 +18,13 @@ import { AttendanceTotalPage } from './app/pages/AttendanceTotalPage'
 import { AttendancePlayerMatchesPage } from './app/pages/AttendancePlayerMatchesPage'
 import { JoinTeamPage } from './app/pages/JoinTeamPage'
 import { ProtectedRoute } from './routes/ProtectedRoute'
+import { PublicRoute } from './routes/PublicRoute'
+import { RootRedirect } from './routes/RootRedirect'
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to="/app/home" replace />,
+    element: <RootRedirect />,
   },
   {
     path: '/login',
@@ -34,8 +37,7 @@ export const router = createBrowserRouter([
 
   {
     path: '/onboarding',
-    element: <ProtectedRoute />,
-    children: [{ path: '', element: <JoinTeamPage /> }],
+    element: <JoinTeamPage />,
   },
 
   // 🔒 rota protegida
@@ -70,7 +72,22 @@ export const router = createBrowserRouter([
   },
 
   {
+    path: '/:slug',
+    element: <PublicRoute />,
+    children: [
+      {
+        element: <PublicAppShell />,
+        children: [
+          { index: true, element: <HomePage /> },
+          { path: 'matches', element: <MatchesPage /> },
+          { path: 'players', element: <PlayersPage /> },
+          { path: 'team', element: <TeamPage /> },
+        ],
+      },
+    ],
+  },
+  {
     path: '*',
-    element: <Navigate to="/app/home" replace />,
+    element: <RootRedirect />,
   },
 ])

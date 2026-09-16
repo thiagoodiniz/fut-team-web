@@ -15,7 +15,6 @@ import {
 import {
   SearchOutlined,
   PlusCircleOutlined,
-  CheckCircleOutlined,
   ClockCircleOutlined,
 } from '@ant-design/icons'
 import { api } from '../../services/api'
@@ -29,7 +28,6 @@ export function JoinTeamPage() {
   const [query, setQuery] = useState('')
   const [teams, setTeams] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
-  const [requesting, setRequesting] = useState<string | null>(null)
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [creating, setCreating] = useState(false)
   const [form] = Form.useForm()
@@ -49,52 +47,17 @@ export function JoinTeamPage() {
     handleSearch('')
   }, [])
 
-  async function handleSearch(val: string) {
+  async function handleSearch(term: string) {
     try {
       setLoading(true)
-      const { data } = await api.get('/teams/search', { params: { q: val } })
+      const { data } = await api.get('/teams/search', {
+        params: { q: term },
+      })
       setTeams(data.teams)
+    } catch {
+      message.error('Erro ao buscar times')
     } finally {
       setLoading(false)
-    }
-  }
-
-  async function handleJoin(teamId: string) {
-    try {
-      setRequesting(teamId)
-      const { data } = await api.post('/teams/join-direct', { teamId })
-
-      // Update localStorage so AppShell can navigate correctly
-      if (data.token) {
-        localStorage.setItem('token', data.token)
-        localStorage.setItem('storage_version', '2')
-        const authData = localStorage.getItem('auth')
-        const auth = authData ? JSON.parse(authData) : {}
-        localStorage.setItem(
-          'auth',
-          JSON.stringify({
-            ...auth,
-            userId: auth.userId || data.userId, // Ensure userId is never lost
-            teamId: data.teamId,
-            role: data.role,
-            isManager: auth.isManager ?? data.isManager ?? false,
-          }),
-        )
-
-        // Track team context in PostHog
-        posthog.group('team', data.teamId)
-        posthog.capture('team_joined', {
-          team_id: data.teamId,
-          role: data.role,
-        })
-      }
-
-      message.success('Você entrou no time com sucesso!')
-      window.location.href = '/app/home'
-    } catch (err: any) {
-      message.error(err?.response?.data?.error ?? 'Erro ao entrar no time')
-    } finally {
-      setRequesting(null)
     }
   }
 
@@ -202,9 +165,9 @@ export function JoinTeamPage() {
     <div style={{ minHeight: '100vh', background: token.colorBgLayout, padding: '60px 20px' }}>
       <div style={{ maxWidth: 640, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <Title style={{ margin: '0 0 8px 0', fontSize: 32 }}>Quase lá! 🎉</Title>
+          <Title style={{ margin: '0 0 8px 0', fontSize: 32 }}>Bem-vindo!</Title>
           <Text type="secondary" style={{ fontSize: 18 }}>
-            Para acessar o dashboard, você precisa entrar em um time.
+            Encontre seu time para acompanhar resultados, estatísticas e muito mais!
           </Text>
         </div>
 
@@ -212,7 +175,7 @@ export function JoinTeamPage() {
           <Card
             title={
               <Title level={4} style={{ margin: 0 }}>
-                Encontrar meu Time
+                Buscar Time
               </Title>
             }
             styles={{ body: { padding: '0 24px 24px 24px' } }}
@@ -253,12 +216,10 @@ export function JoinTeamPage() {
                   actions={[
                     <Button
                       type="primary"
-                      onClick={() => handleJoin(team.id)}
-                      loading={requesting === team.id}
-                      icon={<CheckCircleOutlined />}
+                      onClick={() => navigate(`/${team.slug}`)}
                       style={{ borderRadius: 8 }}
                     >
-                      Entrar no Time
+                      Acessar Time
                     </Button>,
                   ]}
                   style={{ borderBottom: `1px solid ${token.colorBorderSecondary}`, padding: '20px 0' }}

@@ -95,6 +95,7 @@ export function TeamSettingsPage() {
 
       const payload = {
         name: values.name,
+        slug: values.slug,
         logo: logoBase64,
         primaryColor:
           typeof values.primaryColor === 'string'
@@ -168,6 +169,7 @@ export function TeamSettingsPage() {
           disabled={!isAdmin}
           initialValues={{
             name: team?.name,
+            slug: team?.slug,
             primaryColor: team?.primaryColor || '#16a34a',
             secondaryColor: team?.secondaryColor || '#64748b',
           }}
@@ -242,11 +244,27 @@ export function TeamSettingsPage() {
           </div>
 
           <Form.Item
-            label="Nome do Time"
             name="name"
-            rules={[{ required: true, message: 'O nome é obrigatório' }]}
+            label="Nome do Time"
+            rules={[{ required: true, message: 'Digite o nome do time' }]}
           >
             <Input size="large" placeholder="Ex: Galáticos FC" />
+          </Form.Item>
+
+          <Form.Item
+            name="slug"
+            label="URL personalizada"
+            rules={[
+              { required: true, message: 'Digite a URL' },
+              {
+                pattern: /^[a-z0-9-]+$/,
+                message: 'Apenas letras minúsculas, números e hífens',
+              },
+              { min: 3, message: 'Mínimo de 3 caracteres' },
+            ]}
+            extra="O link público do seu time."
+          >
+            <Input size="large" addonBefore="fut-team-web.netlify.app/" />
           </Form.Item>
 
           <Space size={24} style={{ width: '100%', display: 'flex' }} align="start">

@@ -11,7 +11,7 @@ interface SeasonContextValue {
 
 const SeasonContext = React.createContext<SeasonContextValue>({} as SeasonContextValue)
 
-export function SeasonProvider({ children }: { children: React.ReactNode }) {
+export function SeasonProvider({ children, isPublic, publicSlug }: { children: React.ReactNode, isPublic?: boolean, publicSlug?: string }) {
   const [seasons, setSeasons] = React.useState<SeasonDTO[]>([])
   const [seasonId, setSeasonId] = React.useState<string | null>(
     localStorage.getItem('seasonId'),
@@ -21,7 +21,13 @@ export function SeasonProvider({ children }: { children: React.ReactNode }) {
   async function loadSeasons() {
     setLoading(true) // Set loading to true when refreshing
     try {
-      const data = await listSeasons()
+      let data
+      if (isPublic && publicSlug) {
+        const { getPublicSeasons } = await import('../../services/public.service')
+        data = await getPublicSeasons(publicSlug)
+      } else {
+        data = await listSeasons()
+      }
       // Sort by year desc
       const sorted = data.sort((a, b) => b.year - a.year)
       setSeasons(sorted)

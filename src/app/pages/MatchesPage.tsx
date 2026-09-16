@@ -1,5 +1,7 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useAuthGate } from '../hooks/useAuthGate'
+import { AuthGateModal } from '../components/AuthGateModal'
 import { Typography, Input, Card, theme, FloatButton, Tag, Empty } from 'antd'
 import posthog from 'posthog-js'
 import {
@@ -10,6 +12,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons'
 import { listMatches, type MatchDTO } from '../../services/matches.service'
+import { getPublicMatches } from '../../services/public.service'
 import { CreateMatchModal } from '../components/CreateMatchModal'
 import { MonthSummaryModal } from '../components/MonthSummaryModal'
 
@@ -34,6 +37,8 @@ import { withAlpha } from '../../theme/colorUtils'
 
 export function MatchesPage() {
   const navigate = useNavigate()
+  const { slug } = useParams<{ slug: string }>()
+  const { requireAuth, isModalOpen, setIsModalOpen } = useAuthGate()
   const { token } = theme.useToken()
   const { season, isActiveSeason } = useSeason()
   const { isAdmin } = useTeam()
@@ -55,7 +60,7 @@ export function MatchesPage() {
 
     try {
       setLoading(true)
-      const data = await listMatches(season.id)
+      const data = slug ? await getPublicMatches(slug, season.id) : await listMatches(season.id)
       setMatches(data)
     } finally {
       setLoading(false)
@@ -358,7 +363,7 @@ export function MatchesPage() {
                     }}
                     onClick={() => {
                       setSelectedMonthGroup(group)
-                      setSummaryModalOpen(true)
+                      requireAuth(() => setSummaryModalOpen(true))
                     }}
                   >
                     Ver resumo do mês <RightOutlined style={{ fontSize: 9 }} />
@@ -482,7 +487,7 @@ export function MatchesPage() {
                             match_id: match.id,
                             opponent: match.opponent,
                           })
-                          navigate(`/app/matches/${match.id}`)
+                          requireAuth(() => navigate(`/${slug || 'app'}/matches/${match.id}`))
                         }}
                       >
                         <div style={{ minWidth: 0, flex: 1 }}>
@@ -642,6 +647,8 @@ export function MatchesPage() {
           bottom: isPWA ? 124 : 92,
         }}
       />
+
+      <AuthGateModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   )
 }

@@ -10,7 +10,7 @@ interface TeamContextType {
   isManager: boolean
 }
 
-const TeamContext = createContext<TeamContextType | undefined>(undefined)
+export const TeamContext = createContext<TeamContextType | undefined>(undefined)
 
 export function TeamProvider({ children }: { children: ReactNode }) {
   const [team, setTeam] = useState<TeamDTO | null>(null)

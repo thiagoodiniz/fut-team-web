@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom'
+﻿import { useLocation } from 'react-router-dom'
 
 export function useAppHeader() {
   const { pathname } = useLocation()
@@ -10,22 +10,23 @@ export function useAppHeader() {
 }
 
 function getHeaderTitle(pathname: string) {
-  if (pathname.startsWith('/app/matches/')) return 'Detalhes do jogo'
-  if (pathname.startsWith('/app/matches')) return 'Jogos'
-  if (pathname.startsWith('/app/players')) return 'Jogadores'
-  if (pathname.startsWith('/app/seasons')) return 'Temporadas'
-  if (pathname.startsWith('/app/ranking/scorers')) return 'Artilharia Completa'
-  if (pathname.startsWith('/app/ranking/attendance')) return 'Presença Completa'
-  if (pathname.startsWith('/app/team/members')) return 'Gerenciar Membros'
-  if (pathname.startsWith('/app/team/settings')) return 'Configurações do Time'
-  if (pathname.startsWith('/app/team')) return 'Meu Clube'
+  if (/\/matches\/[^\/]+$/.test(pathname)) return 'Detalhes do jogo'
+  if (/\/matches/.test(pathname)) return 'Jogos'
+  if (/\/players/.test(pathname)) return 'Jogadores'
+  if (/\/seasons/.test(pathname)) return 'Temporadas'
+  if (/\/ranking\/scorers/.test(pathname)) return 'Artilharia Completa'
+  if (/\/ranking\/attendance/.test(pathname)) return 'Presença Completa'
+  if (/\/team\/members/.test(pathname)) return 'Gerenciar Membros'
+  if (/\/team\/settings/.test(pathname)) return 'Configurações do Time'
+  if (/\/team/.test(pathname)) return 'Meu Clube'
   return 'Home'
 }
 
 function shouldShowBack(pathname: string) {
-  if (pathname.startsWith('/app/matches/')) return true
-  if (pathname.startsWith('/app/ranking/')) return true
-  if (pathname.startsWith('/app/team/members')) return true
-  if (pathname.startsWith('/app/team/settings')) return true
+  if (/\/matches\/[^\/]+$/.test(pathname)) return true
+  if (/\/ranking\//.test(pathname)) return true
+  if (/\/team\/members/.test(pathname)) return true
+  if (/\/team\/settings/.test(pathname)) return true
   return false
 }
+

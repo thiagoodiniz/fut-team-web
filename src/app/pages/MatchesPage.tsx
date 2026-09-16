@@ -27,7 +27,6 @@ function formatMatchDate(iso: string) {
 
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
-import { MonthSummaryModal } from '../components/MonthSummaryModal'
 import { useIsPWA } from '../hooks/useIsPWA'
 
 export function MatchesPage() {

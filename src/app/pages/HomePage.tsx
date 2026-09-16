@@ -24,6 +24,7 @@ import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
 import { PlayerAvatar } from '../components/PlayerAvatar'
+import { useIsPWA } from '../hooks/useIsPWA'
 import posthog from 'posthog-js'
 
 const { Title, Text } = Typography
@@ -50,6 +51,7 @@ export function HomePage() {
   const { token } = theme.useToken()
   const { season } = useSeason()
   const { team } = useTeam()
+  const isPWA = useIsPWA()
 
   const [loading, setLoading] = React.useState(true)
   const [data, setData] = React.useState<DashboardStats | null>(null)
@@ -901,7 +903,7 @@ export function HomePage() {
         style={{
           right: '50%',
           transform: 'translateX(50%)',
-          bottom: 124,
+          bottom: isPWA ? 124 : 92,
         }}
       />
     </div>

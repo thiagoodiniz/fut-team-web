@@ -47,6 +47,7 @@ import { PlayerAvatar } from '../components/PlayerAvatar'
 import { EditMatchModal } from '../components/EditMatchModal'
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
+import { useIsPWA } from '../hooks/useIsPWA'
 
 const { Title, Text } = Typography
 
@@ -69,6 +70,7 @@ export function MatchDetailsPage() {
   const { token } = theme.useToken()
   const { isActiveSeason } = useSeason()
   const { isAdmin } = useTeam()
+  const isPWA = useIsPWA()
 
   const [loading, setLoading] = React.useState(true)
 
@@ -883,7 +885,7 @@ export function MatchDetailsPage() {
         style={{
           right: '50%',
           transform: 'translateX(50%)',
-          bottom: 124,
+          bottom: isPWA ? 124 : 92,
         }}
       />
     </div>

@@ -13,6 +13,7 @@ import { useEffect } from 'react'
 import { PostHogPageviewTracker } from '../../components/PostHogPageviewTracker'
 import { AppHeader } from './AppHeader'
 import { useAppHeader } from '../hooks/useAppHeader'
+import { useIsPWA } from '../hooks/useIsPWA'
 import { SeasonProvider } from '../contexts/SeasonContext'
 import { TeamProvider, useTeam } from '../contexts/TeamContext'
 import { ThemeProvider } from '../../theme/ThemeProvider'
@@ -33,6 +34,8 @@ export function AppShell() {
   const location = useLocation()
   const { title, showBack } = useAppHeader()
   const { token } = theme.useToken()
+
+  const isPWA = useIsPWA()
 
   const activeTab = getActiveTab(location.pathname)
 
@@ -62,7 +65,7 @@ export function AppShell() {
             <AppHeader title={title} showBack={showBack} />
             <Content
               style={{
-                padding: '74px 14px calc(108px + env(safe-area-inset-bottom)) 14px',
+                padding: `74px 14px calc(${isPWA ? 108 : 76}px + env(safe-area-inset-bottom)) 14px`,
               }}
             >
               <Outlet />
@@ -83,6 +86,7 @@ function BottomTabs({
   onTabClick: (key: TabKey) => void
 }) {
   const { token } = theme.useToken()
+  const isPWA = useIsPWA()
 
   return (
     <nav
@@ -91,8 +95,8 @@ function BottomTabs({
         left: 0,
         right: 0,
         bottom: 0,
-        height: 'calc(92px + env(safe-area-inset-bottom))',
-        paddingBottom: 'calc(32px + env(safe-area-inset-bottom))',
+        height: `calc(${isPWA ? 92 : 60}px + env(safe-area-inset-bottom))`,
+        paddingBottom: isPWA ? 'calc(32px + env(safe-area-inset-bottom))' : 'env(safe-area-inset-bottom)',
         zIndex: 1000,
         display: 'grid',
         gridTemplateColumns: 'repeat(4, 1fr)',

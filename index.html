@@ -2,33 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <script>
-      try {
-        var logo = localStorage.getItem('futteam_cached_logo');
-        var name = localStorage.getItem('futteam_cached_name');
-        if (logo) {
-          document.write('<link rel="apple-touch-icon" href="' + logo + '">');
-          document.write('<link rel="icon" href="' + logo + '">');
-          var manifest = {
-            name: name || 'Fut Team',
-            short_name: name || 'FutTeam',
-            start_url: '/',
-            display: 'standalone',
-            background_color: '#ffffff',
-            theme_color: '#ffffff',
-            icons: [
-              { src: logo, sizes: '192x192', purpose: 'any' },
-              { src: logo, sizes: '512x512', purpose: 'any' }
-            ]
-          };
-          var mUrl = 'data:application/manifest+json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(manifest))));
-          document.write('<link rel="manifest" href="' + mUrl + '">');
-        } else {
-          document.write('<link rel="apple-touch-icon" href="/icon.svg">');
-          document.write('<link rel="icon" type="image/svg+xml" href="/icon.svg">');
-        }
-      } catch(e) {}
-    </script>
+    <link rel="icon" type="image/png" href="/pwa-icon.png" />
+    <link rel="apple-touch-icon" href="/pwa-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#ffffff" />
     <title>FutTeam - Gestão de Elite</title>

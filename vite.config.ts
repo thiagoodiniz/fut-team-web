@@ -7,16 +7,37 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
-      manifest: false,
+      includeAssets: ['pwa-icon.png'],
+      manifest: {
+        name: 'Fut Team',
+        short_name: 'FutTeam',
+        description: 'Gestão de Futebol',
+        theme_color: '#ffffff',
+        background_color: '#ffffff',
+        display: 'standalone',
+        icons: [
+          {
+            src: 'pwa-icon.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: 'pwa-icon.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any',
+          },
+        ],
+      },
       devOptions: {
         enabled: true,
         type: 'module',
-      }
-    })
+      },
+    }),
   ],
   server: {
-    host: true, // ou host: '0.0.0.0'
-    port: 5173, // porta padrão, pode mudar
+    host: true,
+    port: 5173,
   },
 })

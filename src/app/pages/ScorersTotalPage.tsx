@@ -6,6 +6,7 @@ import posthog from 'posthog-js'
 import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
 import { PlayerAvatar } from '../components/PlayerAvatar'
 import { useSeason } from '../contexts/SeasonContext'
+import { useIsPWA } from '../hooks/useIsPWA'
 
 const { Text } = Typography
 
@@ -57,6 +58,7 @@ export function ScorersTotalPage() {
   const { token } = theme.useToken()
   const navigate = useNavigate()
   const { season } = useSeason()
+  const isPWA = useIsPWA()
   const [loading, setLoading] = React.useState(true)
   const [stats, setStats] = React.useState<DashboardStats | null>(null)
 
@@ -290,7 +292,7 @@ export function ScorersTotalPage() {
       </div>
 
       <FloatButton.BackTop
-        style={{ right: '50%', transform: 'translateX(50%)', bottom: 92 }}
+        style={{ right: '50%', transform: 'translateX(50%)', bottom: isPWA ? 124 : 92 }}
       />
     </div>
   )

@@ -27,12 +27,15 @@ function formatMatchDate(iso: string) {
 
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
+import { MonthSummaryModal } from '../components/MonthSummaryModal'
+import { useIsPWA } from '../hooks/useIsPWA'
 
 export function MatchesPage() {
   const navigate = useNavigate()
   const { token } = theme.useToken()
   const { season, isActiveSeason } = useSeason()
   const { isAdmin } = useTeam()
+  const isPWA = useIsPWA()
 
   const [loading, setLoading] = React.useState(false)
   const [matches, setMatches] = React.useState<MatchDTO[]>([])
@@ -550,7 +553,7 @@ export function MatchesPage() {
             setCreateModalOpen(true)
           }}
           style={{
-            bottom: 88,
+            bottom: isPWA ? 120 : 88,
             boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
           }}
         />
@@ -576,7 +579,7 @@ export function MatchesPage() {
         style={{
           right: '50%',
           transform: 'translateX(50%)',
-          bottom: 92,
+          bottom: isPWA ? 124 : 92,
         }}
       />
     </div>

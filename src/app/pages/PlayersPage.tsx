@@ -18,6 +18,7 @@ import { AddPlayerModal } from '../components/AddPlayerModal'
 import { PlayerAvatar } from '../components/PlayerAvatar'
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
+import { useIsPWA } from '../hooks/useIsPWA'
 
 const { Text } = Typography
 
@@ -25,6 +26,7 @@ export function PlayersPage() {
   const { season, isActiveSeason } = useSeason()
   const { isAdmin } = useTeam()
   const { token } = theme.useToken()
+  const isPWA = useIsPWA()
   const [players, setPlayers] = React.useState<PlayerDTO[]>([])
   const [loading, setLoading] = React.useState(false)
 
@@ -249,7 +251,7 @@ export function PlayersPage() {
             setEditingPlayer(null)
             setModalOpen(true)
           }}
-          style={{ bottom: 88, boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}
+          style={{ bottom: isPWA ? 120 : 88, boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}
         />
       )}
 
@@ -261,7 +263,7 @@ export function PlayersPage() {
       />
 
       <FloatButton.BackTop
-        style={{ right: '50%', transform: 'translateX(50%)', bottom: 92 }}
+        style={{ right: '50%', transform: 'translateX(50%)', bottom: isPWA ? 124 : 92 }}
       />
     </div>
   )

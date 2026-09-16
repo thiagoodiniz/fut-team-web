@@ -99,11 +99,11 @@ export function TeamMembersPage() {
         <div
           style={{
             padding: '20px',
-            background: '#fff',
+            background: token.colorBgContainer,
             marginBottom: 16,
             borderRadius: 16,
-            border: '1px solid #f0f0f0',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+            border: `1px solid ${token.colorBorderSecondary}`,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
           }}
         >
           <div
@@ -156,7 +156,7 @@ export function TeamMembersPage() {
               justifyContent: 'space-between',
               alignItems: 'center',
               paddingTop: isAdmin ? 16 : 0,
-              borderTop: isAdmin ? '1px solid #f8fafc' : 'none',
+              borderTop: isAdmin ? `1px solid ${token.colorBorderSecondary}` : 'none',
             }}
           >
             {isAdmin ? (
@@ -218,7 +218,7 @@ export function TeamMembersPage() {
         <div
           style={{
             padding: '20px',
-            background: '#fff',
+            background: token.colorBgContainer,
             marginBottom: 16,
             borderRadius: 16,
             border: `1px solid ${token.colorWarning}33`,
@@ -266,7 +266,7 @@ export function TeamMembersPage() {
               gridTemplateColumns: '1fr 1fr',
               gap: 12,
               paddingTop: 16,
-              borderTop: '1px solid #f8fafc',
+              borderTop: `1px solid ${token.colorBorderSecondary}`,
             }}
           >
             <Button

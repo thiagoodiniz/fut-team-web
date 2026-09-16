@@ -8,6 +8,8 @@ import {
   type PlayerGoalMatchesResponse,
 } from '../../services/players.service'
 import { PlayerAvatar } from '../components/PlayerAvatar'
+import { useAppTheme } from '../../theme/ThemeProvider'
+import { APP_COLORS } from '../../theme/theme'
 
 const { Text, Title } = Typography
 
@@ -22,6 +24,7 @@ function formatMatchDate(iso: string) {
 
 export function ScorerGoalsMatchesPage() {
   const { token } = theme.useToken()
+  const { isDark } = useAppTheme()
   const { season } = useSeason()
   const { playerId } = useParams()
 
@@ -103,15 +106,16 @@ export function ScorerGoalsMatchesPage() {
               display: 'flex',
               alignItems: 'center',
               gap: 8,
-              background: token.colorWarningBg,
+              background: isDark ? 'rgba(245, 158, 11, 0.15)' : '#fef3c7',
+              border: `1px solid ${isDark ? 'rgba(245, 158, 11, 0.3)' : '#fde68a'}`,
               borderRadius: 8,
               padding: '8px 12px',
             }}
           >
-            <FireFilled style={{ color: token.colorWarning }} />
-            <Text style={{ fontSize: 13 }}>
+            <FireFilled style={{ color: isDark ? '#fbbf24' : '#b45309' }} />
+            <Text style={{ fontSize: 13, color: isDark ? '#fef08a' : '#92400e' }}>
               Maior sequência:{' '}
-              <Text strong style={{ fontSize: 13 }}>
+              <Text strong style={{ fontSize: 13, color: isDark ? '#fef08a' : '#92400e' }}>
                 {data.stats.maxStreak} jogos seguidos
               </Text>
             </Text>
@@ -141,24 +145,25 @@ export function ScorerGoalsMatchesPage() {
           }}
         >
           {data.matches.map((match: any, i: number) => {
-            const accent =
-              match.ourScore > match.theirScore
-                ? token.colorSuccess
-                : match.ourScore < match.theirScore
-                  ? token.colorError
-                  : token.colorWarning
-            const resultTag =
-              match.ourScore > match.theirScore
-                ? 'success'
-                : match.ourScore < match.theirScore
-                  ? 'error'
-                  : 'warning'
+            const isWin = match.ourScore > match.theirScore
+            const isLoss = match.ourScore < match.theirScore
+            const accent = isWin
+              ? (isDark ? APP_COLORS.winDark : APP_COLORS.winLight)
+              : isLoss
+                ? (isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight)
+                : (isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight)
+
+            const scoreBg = isWin
+              ? (isDark ? 'rgba(34, 197, 94, 0.18)' : '#dcfce7')
+              : isLoss
+                ? (isDark ? 'rgba(239, 68, 68, 0.18)' : '#fee2e2')
+                : (isDark ? 'rgba(245, 158, 11, 0.18)' : '#fef3c7')
 
             return (
               <div
                 key={match.id}
                 style={{
-                  borderLeft: `3px solid ${accent}`,
+                  borderLeft: `4px solid ${accent}`,
                   borderBottom:
                     i < data.matches.length - 1
                       ? `1px solid ${token.colorFillQuaternary}`
@@ -232,19 +237,20 @@ export function ScorerGoalsMatchesPage() {
                     )}
                   </div>
 
-                  <Tag
-                    color={resultTag}
+                  <div
                     style={{
-                      margin: 0,
+                      background: scoreBg,
+                      color: accent,
                       fontWeight: 700,
                       fontSize: 13,
-                      padding: '2px 10px',
+                      padding: '3px 12px',
                       borderRadius: 999,
                       flexShrink: 0,
+                      border: `1px solid ${accent}30`,
                     }}
                   >
                     {match.ourScore} x {match.theirScore}
-                  </Tag>
+                  </div>
                 </div>
               </div>
             )

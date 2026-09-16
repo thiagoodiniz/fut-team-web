@@ -1,12 +1,35 @@
 html,
-body {
+body,
+#root {
   height: 100%;
 }
 
 body {
   margin: 0;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-#root {
-  height: 100%;
+html[data-theme='dark'],
+html[data-theme='dark'] body,
+html[data-theme='dark'] #root {
+  background-color: #0a0e17 !important;
+  color: #f1f5f9;
+}
+
+html[data-theme='light'],
+html[data-theme='light'] body,
+html[data-theme='light'] #root {
+  background-color: #f8fafc !important;
+  color: #0f172a;
+}
+
+/* Transição suave em containers principais quando alternar tema */
+.ant-layout,
+.ant-layout-header,
+.ant-layout-content,
+.ant-card,
+.ant-modal-content {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease !important;
 }

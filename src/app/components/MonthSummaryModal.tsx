@@ -8,6 +8,8 @@ import {
 } from '@ant-design/icons'
 import { PlayerAvatar } from './PlayerAvatar'
 import type { MatchDTO } from '../../services/matches.service'
+import { useAppTheme } from '../../theme/ThemeProvider'
+import { APP_COLORS } from '../../theme/theme'
 
 const { Text } = Typography
 
@@ -27,6 +29,7 @@ export function MonthSummaryModal({
   matches,
 }: MonthSummaryModalProps) {
   const { token } = theme.useToken()
+  const { isDark } = useAppTheme()
 
   const stats = React.useMemo(() => {
     const total = matches.length
@@ -242,7 +245,7 @@ export function MonthSummaryModal({
               >
                 Vitórias
               </Text>
-              <Text strong style={{ fontSize: 20, color: token.colorSuccess }}>
+              <Text strong style={{ fontSize: 20, color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight }}>
                 {stats.wins}
               </Text>
             </div>
@@ -258,7 +261,7 @@ export function MonthSummaryModal({
               >
                 Empates
               </Text>
-              <Text strong style={{ fontSize: 20, color: token.colorWarning }}>
+              <Text strong style={{ fontSize: 20, color: isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight }}>
                 {stats.draws}
               </Text>
             </div>
@@ -274,7 +277,7 @@ export function MonthSummaryModal({
               >
                 Derrotas
               </Text>
-              <Text strong style={{ fontSize: 20, color: token.colorError }}>
+              <Text strong style={{ fontSize: 20, color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight }}>
                 {stats.losses}
               </Text>
             </div>
@@ -296,7 +299,7 @@ export function MonthSummaryModal({
                 borderRight: `1px solid ${token.colorBorderSecondary}`,
               }}
             >
-              <ArrowUpOutlined style={{ color: token.colorSuccess, fontSize: 14 }} />
+              <ArrowUpOutlined style={{ color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight, fontSize: 14 }} />
               <Text
                 type="secondary"
                 style={{
@@ -314,7 +317,7 @@ export function MonthSummaryModal({
               </Text>
             </div>
             <div style={{ flex: 1, textAlign: 'center' }}>
-              <ArrowDownOutlined style={{ color: token.colorError, fontSize: 14 }} />
+              <ArrowDownOutlined style={{ color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight, fontSize: 14 }} />
               <Text
                 type="secondary"
                 style={{
@@ -339,7 +342,7 @@ export function MonthSummaryModal({
           <div
             style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}
           >
-            <TrophyOutlined style={{ color: '#fadb14', fontSize: 16 }} />
+            <TrophyOutlined style={{ color: APP_COLORS.gold, fontSize: 16 }} />
             <Text
               style={{
                 fontSize: 11,

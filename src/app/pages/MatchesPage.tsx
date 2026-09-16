@@ -28,12 +28,16 @@ function formatMatchDate(iso: string) {
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
 import { useIsPWA } from '../hooks/useIsPWA'
+import { useAppTheme } from '../../theme/ThemeProvider'
+import { APP_COLORS } from '../../theme/theme'
+import { withAlpha } from '../../theme/colorUtils'
 
 export function MatchesPage() {
   const navigate = useNavigate()
   const { token } = theme.useToken()
   const { season, isActiveSeason } = useSeason()
   const { isAdmin } = useTeam()
+  const { isDark, clubColors } = useAppTheme()
   const isPWA = useIsPWA()
 
   const [loading, setLoading] = React.useState(false)
@@ -116,16 +120,10 @@ export function MatchesPage() {
     )
   }, [matches])
 
-  function getResultColor(our: number, their: number) {
-    if (our > their) return 'success'
-    if (our < their) return 'error'
-    return 'warning'
-  }
-
   function getResultAccent(our: number, their: number) {
-    if (our > their) return token.colorSuccess
-    if (our < their) return token.colorError
-    return token.colorWarning
+    if (our > their) return isDark ? APP_COLORS.winDark : APP_COLORS.winLight
+    if (our < their) return isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight
+    return isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight
   }
 
   return (
@@ -139,11 +137,12 @@ export function MatchesPage() {
         style={{
           background: token.colorBgContainer,
           border: `1px solid ${token.colorBorderSecondary}`,
-          borderRadius: 12,
-          padding: '12px 16px',
+          borderRadius: 14,
+          padding: '14px 16px',
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '12px 8px',
+          gap: '14px 8px',
+          boxShadow: isDark ? '0 2px 10px rgba(0,0,0,0.2)' : '0 1px 4px rgba(0,0,0,0.02)',
         }}
       >
         <div style={{ textAlign: 'center' }}>
@@ -153,13 +152,14 @@ export function MatchesPage() {
               fontSize: 11,
               display: 'block',
               textTransform: 'uppercase',
-              letterSpacing: '0.05em',
+              letterSpacing: '0.06em',
               color: token.colorTextSecondary,
+              marginBottom: 2,
             }}
           >
             Jogos
           </Text>
-          <Text strong style={{ fontSize: 22 }}>
+          <Text strong style={{ fontSize: 22, color: token.colorTextBase }}>
             {stats.total}
           </Text>
         </div>
@@ -170,13 +170,20 @@ export function MatchesPage() {
               fontSize: 11,
               display: 'block',
               textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              color: token.colorSuccessText,
+              letterSpacing: '0.06em',
+              color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight,
+              marginBottom: 2,
             }}
           >
             Vitórias
           </Text>
-          <Text strong style={{ fontSize: 22, color: token.colorSuccessText }}>
+          <Text
+            strong
+            style={{
+              fontSize: 22,
+              color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight,
+            }}
+          >
             {stats.w}
           </Text>
         </div>
@@ -187,13 +194,20 @@ export function MatchesPage() {
               fontSize: 11,
               display: 'block',
               textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              color: token.colorWarning,
+              letterSpacing: '0.06em',
+              color: isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight,
+              marginBottom: 2,
             }}
           >
             Empates
           </Text>
-          <Text strong style={{ fontSize: 22, color: token.colorWarning }}>
+          <Text
+            strong
+            style={{
+              fontSize: 22,
+              color: isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight,
+            }}
+          >
             {stats.d}
           </Text>
         </div>
@@ -204,13 +218,20 @@ export function MatchesPage() {
               fontSize: 11,
               display: 'block',
               textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              color: token.colorErrorText,
+              letterSpacing: '0.06em',
+              color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight,
+              marginBottom: 2,
             }}
           >
             Derrotas
           </Text>
-          <Text strong style={{ fontSize: 22, color: token.colorErrorText }}>
+          <Text
+            strong
+            style={{
+              fontSize: 22,
+              color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight,
+            }}
+          >
             {stats.l}
           </Text>
         </div>
@@ -221,13 +242,14 @@ export function MatchesPage() {
               fontSize: 11,
               display: 'block',
               textTransform: 'uppercase',
-              letterSpacing: '0.05em',
+              letterSpacing: '0.06em',
               color: token.colorTextSecondary,
+              marginBottom: 2,
             }}
           >
             Gols Pró
           </Text>
-          <Text strong style={{ fontSize: 22, color: token.colorPrimary }}>
+          <Text strong style={{ fontSize: 22, color: clubColors.primary }}>
             {stats.gf}
           </Text>
         </div>
@@ -238,13 +260,20 @@ export function MatchesPage() {
               fontSize: 11,
               display: 'block',
               textTransform: 'uppercase',
-              letterSpacing: '0.05em',
+              letterSpacing: '0.06em',
               color: token.colorTextSecondary,
+              marginBottom: 2,
             }}
           >
             Gols Sofr.
           </Text>
-          <Text strong style={{ fontSize: 22, color: token.colorErrorText }}>
+          <Text
+            strong
+            style={{
+              fontSize: 22,
+              color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight,
+            }}
+          >
             {stats.ga}
           </Text>
         </div>
@@ -347,15 +376,42 @@ export function MatchesPage() {
                   }}
                 >
                   <Tag style={{ margin: 0, fontSize: 11 }}>{group.data.length} jogos</Tag>
-                  <Tag color="success" style={{ margin: 0, fontSize: 11 }}>
+                  <Tag
+                    style={{
+                      margin: 0,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight,
+                      background: isDark ? 'rgba(34, 197, 94, 0.15)' : '#dcfce7',
+                      borderColor: isDark ? 'rgba(34, 197, 94, 0.3)' : '#bbf7d0',
+                    }}
+                  >
                     {wins}V
                   </Tag>
                   {draws > 0 && (
-                    <Tag color="warning" style={{ margin: 0, fontSize: 11 }}>
+                    <Tag
+                      style={{
+                        margin: 0,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight,
+                        background: isDark ? 'rgba(250, 204, 21, 0.15)' : '#fef3c7',
+                        borderColor: isDark ? 'rgba(250, 204, 21, 0.3)' : '#fde68a',
+                      }}
+                    >
                       {draws}E
                     </Tag>
                   )}
-                  <Tag color="error" style={{ margin: 0, fontSize: 11 }}>
+                  <Tag
+                    style={{
+                      margin: 0,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight,
+                      background: isDark ? 'rgba(239, 68, 68, 0.15)' : '#fee2e2',
+                      borderColor: isDark ? 'rgba(239, 68, 68, 0.3)' : '#fecaca',
+                    }}
+                  >
                     {losses}D
                   </Tag>
                   <div
@@ -369,8 +425,8 @@ export function MatchesPage() {
                     <Text
                       style={{
                         fontSize: 11,
-                        color: token.colorSuccessText,
-                        fontWeight: 600,
+                        color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight,
+                        fontWeight: 700,
                       }}
                     >
                       {goalsFor}
@@ -381,8 +437,8 @@ export function MatchesPage() {
                     <Text
                       style={{
                         fontSize: 11,
-                        color: token.colorErrorText,
-                        fontWeight: 600,
+                        color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight,
+                        fontWeight: 700,
                       }}
                     >
                       {goalsAgainst}
@@ -402,7 +458,6 @@ export function MatchesPage() {
                   {group.data.map((match, idx) => {
                     const opponent = match.opponent?.trim() || 'Sem adversário'
                     const dateLabel = formatMatchDate(match.date)
-                    const resultColor = getResultColor(match.ourScore, match.theirScore)
                     const accentColor = getResultAccent(match.ourScore, match.theirScore)
 
                     return (
@@ -503,35 +558,41 @@ export function MatchesPage() {
                         <div
                           style={{
                             display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'flex-end',
-                            gap: 4,
+                            alignItems: 'center',
+                            gap: 10,
                             flexShrink: 0,
                           }}
                         >
-                          <Tag
-                            color={resultColor}
+                          <div
                             style={{
-                              margin: 0,
-                              fontWeight: 700,
+                              background:
+                                match.ourScore > match.theirScore
+                                  ? isDark
+                                    ? 'rgba(34, 197, 94, 0.15)'
+                                    : '#dcfce7'
+                                  : match.ourScore < match.theirScore
+                                    ? isDark
+                                      ? 'rgba(239, 68, 68, 0.15)'
+                                      : '#fee2e2'
+                                    : isDark
+                                      ? 'rgba(250, 204, 21, 0.15)'
+                                      : '#fef3c7',
+                              color: accentColor,
+                              border: `1px solid ${withAlpha(accentColor, 0.3)}`,
                               fontSize: 13,
+                              fontWeight: 700,
+                              lineHeight: '22px',
                               padding: '2px 10px',
-                              borderRadius: 999,
+                              borderRadius: 8,
                               minWidth: 54,
                               textAlign: 'center',
                             }}
                           >
-                            {match.ourScore} x {match.theirScore}
-                          </Tag>
-                          <Text
-                            style={{
-                              fontSize: 11,
-                              color: token.colorPrimary,
-                              opacity: 0.8,
-                            }}
-                          >
-                            ver detalhes
-                          </Text>
+                            {match.ourScore} × {match.theirScore}
+                          </div>
+                          <RightOutlined
+                            style={{ fontSize: 11, color: token.colorTextQuaternary }}
+                          />
                         </div>
                       </div>
                     )

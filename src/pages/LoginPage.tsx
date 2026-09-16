@@ -16,6 +16,7 @@ import { GoogleLogin } from '@react-oauth/google'
 import posthog from 'posthog-js'
 import { api } from '../services/api'
 import { applyAnalyticsPreferenceByEmail } from '../services/analytics.service'
+import { useAppTheme } from '../theme/ThemeProvider'
 
 const { Title, Text } = Typography
 
@@ -45,6 +46,7 @@ export function LoginPage() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const { token: antdToken } = theme.useToken()
+  const { isDark } = useAppTheme()
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -143,7 +145,9 @@ export function LoginPage() {
         minHeight: '100vh',
         display: 'flex',
         padding: '24px 16px',
-        background: 'linear-gradient(135deg, #f0f9ff 0%, #e2e8f0 100%)',
+        background: isDark
+          ? 'linear-gradient(135deg, #0a0e17 0%, #121826 100%)'
+          : 'linear-gradient(135deg, #f0f9ff 0%, #e2e8f0 100%)',
         position: 'relative',
         overflow: 'hidden',
         alignItems: 'center',
@@ -159,7 +163,7 @@ export function LoginPage() {
           width: '50%',
           height: '50%',
           background:
-            'radial-gradient(circle, rgba(22, 163, 74, 0.05) 0%, transparent 70%)',
+            'radial-gradient(circle, rgba(22, 163, 74, 0.08) 0%, transparent 70%)',
           filter: 'blur(100px)',
           borderRadius: '50%',
         }}
@@ -172,7 +176,7 @@ export function LoginPage() {
           width: '50%',
           height: '50%',
           background:
-            'radial-gradient(circle, rgba(37, 99, 235, 0.05) 0%, transparent 70%)',
+            'radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%)',
           filter: 'blur(100px)',
           borderRadius: '50%',
         }}
@@ -183,7 +187,7 @@ export function LoginPage() {
         style={{
           position: 'absolute',
           inset: 0,
-          backgroundImage: `radial-gradient(circle at 2px 2px, rgba(15, 23, 42, 0.02) 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 2px 2px, ${isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(15, 23, 42, 0.02)'} 1px, transparent 0)`,
           backgroundSize: '32px 32px',
           maskImage: 'radial-gradient(ellipse at center, black, transparent 90%)',
         }}
@@ -198,11 +202,13 @@ export function LoginPage() {
               justifyContent: 'center',
               width: 72,
               height: 72,
-              background: '#fff',
+              background: isDark ? '#1a2235' : '#fff',
               borderRadius: 20,
               marginBottom: 16,
               fontSize: 36,
-              boxShadow: '0 10px 25px rgba(0,0,0,0.05), 0 0 1px rgba(0,0,0,0.1)',
+              boxShadow: isDark
+                ? '0 10px 25px rgba(0,0,0,0.5)'
+                : '0 10px 25px rgba(0,0,0,0.05), 0 0 1px rgba(0,0,0,0.1)',
             }}
           >
             ⚽
@@ -211,7 +217,7 @@ export function LoginPage() {
             level={1}
             style={{
               margin: 0,
-              color: '#0f172a',
+              color: isDark ? '#f8fafc' : '#0f172a',
               fontSize: 42,
               fontWeight: 800,
               letterSpacing: -1.5,
@@ -219,7 +225,7 @@ export function LoginPage() {
           >
             Fut<span style={{ color: antdToken.colorSuccess }}>Team</span>
           </Title>
-          <Text style={{ color: '#64748b', fontSize: 16, fontWeight: 500 }}>
+          <Text style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 16, fontWeight: 500 }}>
             Gestão de elite para o futebol amador
           </Text>
         </div>
@@ -229,11 +235,13 @@ export function LoginPage() {
             body: { padding: '40px 32px' },
           }}
           style={{
-            background: 'rgba(255, 255, 255, 0.8)',
+            background: isDark ? 'rgba(18, 24, 38, 0.85)' : 'rgba(255, 255, 255, 0.8)',
             backdropFilter: 'blur(12px)',
-            border: '1px solid #fff',
+            border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.08)' : '#fff'}`,
             borderRadius: 32,
-            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.08)',
+            boxShadow: isDark
+              ? '0 25px 50px -12px rgba(0,0,0,0.5)'
+              : '0 25px 50px -12px rgba(0,0,0,0.08)',
           }}
         >
           <Space direction="vertical" size={32} style={{ width: '100%' }}>
@@ -241,7 +249,7 @@ export function LoginPage() {
               <Title
                 level={3}
                 style={{
-                  color: '#0f172a',
+                  color: isDark ? '#f8fafc' : '#0f172a',
                   margin: '0 0 4px 0',
                   fontSize: 24,
                   fontWeight: 700,
@@ -249,7 +257,7 @@ export function LoginPage() {
               >
                 Seja bem-vindo
               </Title>
-              <Text style={{ color: '#94a3b8', fontSize: 14 }}>
+              <Text style={{ color: isDark ? '#64748b' : '#94a3b8', fontSize: 14 }}>
                 Entre com sua conta FutTeam
               </Text>
             </div>
@@ -271,9 +279,9 @@ export function LoginPage() {
                   prefix={<MailOutlined style={{ color: '#94a3b8', marginRight: 8 }} />}
                   placeholder="Seu e-mail"
                   style={{
-                    background: '#f8fafc',
-                    border: '1px solid #e2e8f0',
-                    color: '#0f172a',
+                    background: isDark ? 'rgba(255, 255, 255, 0.05)' : '#f8fafc',
+                    border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.12)' : '#e2e8f0'}`,
+                    color: isDark ? '#f8fafc' : '#0f172a',
                     borderRadius: 16,
                     height: 52,
                   }}
@@ -288,9 +296,9 @@ export function LoginPage() {
                   prefix={<LockOutlined style={{ color: '#94a3b8', marginRight: 8 }} />}
                   placeholder="Sua senha"
                   style={{
-                    background: '#f8fafc',
-                    border: '1px solid #e2e8f0',
-                    color: '#0f172a',
+                    background: isDark ? 'rgba(255, 255, 255, 0.05)' : '#f8fafc',
+                    border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.12)' : '#e2e8f0'}`,
+                    color: isDark ? '#f8fafc' : '#0f172a',
                     borderRadius: 16,
                     height: 52,
                   }}
@@ -317,10 +325,10 @@ export function LoginPage() {
               </Button>
             </Form>
 
-            <Divider style={{ borderColor: '#f1f5f9', margin: '4px 0' }}>
+            <Divider style={{ borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : '#f1f5f9', margin: '4px 0' }}>
               <Text
                 style={{
-                  color: '#cbd5e1',
+                  color: isDark ? '#64748b' : '#cbd5e1',
                   fontSize: 12,
                   fontWeight: 600,
                   letterSpacing: 0.5,
@@ -334,7 +342,7 @@ export function LoginPage() {
               <GoogleLogin
                 onSuccess={onGoogleSuccess}
                 onError={() => message.error('Erro na autenticação com Google')}
-                theme="outline"
+                theme={isDark ? 'filled_black' : 'outline'}
                 shape="pill"
                 useOneTap
                 width="100%"
@@ -342,7 +350,7 @@ export function LoginPage() {
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <Text style={{ color: '#64748b' }}>
+              <Text style={{ color: isDark ? '#94a3b8' : '#64748b' }}>
                 Não tem uma conta?{' '}
                 <Button
                   type="link"

@@ -13,6 +13,8 @@ import {
   type PlayerPresenceMatchesResponse,
 } from '../../services/players.service'
 import { PlayerAvatar } from '../components/PlayerAvatar'
+import { useAppTheme } from '../../theme/ThemeProvider'
+import { APP_COLORS } from '../../theme/theme'
 
 const { Text, Title } = Typography
 
@@ -27,6 +29,7 @@ function formatMatchDate(iso: string) {
 
 export function AttendancePlayerMatchesPage() {
   const { token } = theme.useToken()
+  const { isDark } = useAppTheme()
   const { season } = useSeason()
   const { playerId } = useParams()
 
@@ -72,7 +75,17 @@ export function AttendancePlayerMatchesPage() {
         )
       : 0
   const pctColor =
-    pct >= 70 ? token.colorSuccess : pct >= 40 ? token.colorWarning : token.colorError
+    pct >= 70
+      ? isDark
+        ? APP_COLORS.winDark
+        : APP_COLORS.winLight
+      : pct >= 40
+        ? isDark
+          ? APP_COLORS.drawDark
+          : APP_COLORS.drawLight
+        : isDark
+          ? APP_COLORS.lossDark
+          : APP_COLORS.lossLight
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -169,7 +182,9 @@ export function AttendancePlayerMatchesPage() {
                   ? 'error'
                   : 'warning'
             const presenceAccent = isPresent
-              ? token.colorSuccess
+              ? isDark
+                ? APP_COLORS.winDark
+                : APP_COLORS.winLight
               : token.colorFillTertiary
 
             return (
@@ -208,7 +223,10 @@ export function AttendancePlayerMatchesPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         {isPresent ? (
                           <CheckCircleFilled
-                            style={{ fontSize: 13, color: token.colorSuccess }}
+                            style={{
+                              fontSize: 13,
+                              color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight,
+                            }}
                           />
                         ) : (
                           <CloseCircleFilled
@@ -219,9 +237,11 @@ export function AttendancePlayerMatchesPage() {
                           style={{
                             fontSize: 11,
                             color: isPresent
-                              ? token.colorSuccess
+                              ? isDark
+                                ? APP_COLORS.winDark
+                                : APP_COLORS.winLight
                               : token.colorTextTertiary,
-                            fontWeight: 500,
+                            fontWeight: 600,
                           }}
                         >
                           {isPresent ? 'Presente' : 'Ausente'}

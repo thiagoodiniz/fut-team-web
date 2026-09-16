@@ -1,11 +1,18 @@
-import { ArrowLeftOutlined, LogoutOutlined, SwapOutlined } from '@ant-design/icons'
-import { Button, Dropdown, Layout, theme, Typography, Select, Avatar, Tag } from 'antd'
+import {
+  ArrowLeftOutlined,
+  LogoutOutlined,
+  MoonOutlined,
+  SunOutlined,
+  SwapOutlined,
+} from '@ant-design/icons'
+import { Button, Dropdown, Layout, theme, Typography, Select, Avatar, Tag, Tooltip } from 'antd'
 import type { MenuProps } from 'antd'
 import { useNavigate } from 'react-router-dom'
 
 import { useSeason } from '../contexts/SeasonContext'
 import { TeamLogo } from '../components/TeamLogo'
 import { useTeam } from '../contexts/TeamContext'
+import { useAppTheme } from '../../theme/ThemeProvider'
 import posthog from 'posthog-js'
 
 const { Header } = Layout
@@ -21,6 +28,7 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
   const { token } = theme.useToken()
   const { season, seasons, setSeasonId } = useSeason()
   const { team } = useTeam()
+  const { isDark, toggleTheme } = useAppTheme()
 
   // Ler os dados do usuário salvos no localStorage no login
   const authData = localStorage.getItem('auth')
@@ -48,6 +56,12 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
       disabled: true,
     },
     { type: 'divider' },
+    {
+      key: 'toggle-theme',
+      label: isDark ? 'Modo Claro' : 'Modo Noturno',
+      icon: isDark ? <SunOutlined /> : <MoonOutlined />,
+      onClick: toggleTheme,
+    },
     {
       key: 'switch-team',
       label: 'Trocar de Time',
@@ -188,6 +202,28 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
             )
           }}
         />
+
+        <Tooltip title={isDark ? 'Mudar para modo claro' : 'Mudar para modo noturno'}>
+          <Button
+            type="text"
+            shape="circle"
+            onClick={toggleTheme}
+            icon={
+              isDark ? (
+                <SunOutlined style={{ color: '#facc15', fontSize: 16 }} />
+              ) : (
+                <MoonOutlined style={{ color: token.colorTextSecondary, fontSize: 16 }} />
+              )
+            }
+            style={{
+              width: 36,
+              height: 36,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          />
+        </Tooltip>
 
         <Dropdown menu={{ items }} trigger={['click']} placement="bottomRight">
           <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>

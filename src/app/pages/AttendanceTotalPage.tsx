@@ -7,25 +7,27 @@ import { getDashboardStats, type DashboardStats } from '../../services/dashboard
 import { PlayerAvatar } from '../components/PlayerAvatar'
 import { useSeason } from '../contexts/SeasonContext'
 import { useIsPWA } from '../hooks/useIsPWA'
+import { useAppTheme } from '../../theme/ThemeProvider'
+import { APP_COLORS } from '../../theme/theme'
 
 const { Text } = Typography
 
 function rankBg(index: number, fallback: string) {
-  if (index === 0) return '#fadb14'
-  if (index === 1) return '#d9d9d9'
-  if (index === 2) return '#d48806'
+  if (index === 0) return APP_COLORS.gold
+  if (index === 1) return APP_COLORS.silver
+  if (index === 2) return APP_COLORS.bronze
   return fallback
 }
 
 function rankTextColor(index: number, fallback: string) {
   if (index === 0) return '#1a1a1a'
-  if (index === 1) return '#1a1a1a'
-  if (index === 2) return '#ffffff'
+  if (index === 1 || index === 2) return '#ffffff'
   return fallback
 }
 
 export function AttendanceTotalPage() {
   const { token } = theme.useToken()
+  const { isDark, clubColors } = useAppTheme()
   const navigate = useNavigate()
   const { season } = useSeason()
   const isPWA = useIsPWA()
@@ -82,10 +84,16 @@ export function AttendanceTotalPage() {
           attendanceList.map((item, index) => {
             const pctColor =
               item.percentage >= 70
-                ? token.colorSuccess
+                ? isDark
+                  ? APP_COLORS.winDark
+                  : APP_COLORS.winLight
                 : item.percentage >= 40
-                  ? token.colorWarning
-                  : token.colorError
+                  ? isDark
+                    ? APP_COLORS.drawDark
+                    : APP_COLORS.drawLight
+                  : isDark
+                    ? APP_COLORS.lossDark
+                    : APP_COLORS.lossLight
 
             return (
               <div
@@ -119,8 +127,8 @@ export function AttendanceTotalPage() {
                       width: 28,
                       height: 28,
                       borderRadius: '50%',
-                      background: rankBg(index, token.colorFillTertiary),
-                      color: rankTextColor(index, token.colorTextSecondary),
+                      background: rankBg(index, clubColors.primary),
+                      color: rankTextColor(index, '#ffffff'),
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',

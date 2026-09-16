@@ -48,6 +48,8 @@ import { EditMatchModal } from '../components/EditMatchModal'
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
 import { useIsPWA } from '../hooks/useIsPWA'
+import { useAppTheme } from '../../theme/ThemeProvider'
+import { APP_COLORS } from '../../theme/theme'
 
 const { Title, Text } = Typography
 
@@ -70,6 +72,7 @@ export function MatchDetailsPage() {
   const { token } = theme.useToken()
   const { isActiveSeason } = useSeason()
   const { isAdmin } = useTeam()
+  const { isDark } = useAppTheme()
   const isPWA = useIsPWA()
 
   const [loading, setLoading] = React.useState(true)
@@ -296,10 +299,16 @@ export function MatchDetailsPage() {
 
   const resultColor =
     match.ourScore > match.theirScore
-      ? token.colorSuccess
+      ? isDark
+        ? APP_COLORS.winDark
+        : APP_COLORS.winLight
       : match.ourScore < match.theirScore
-        ? token.colorError
-        : token.colorWarning
+        ? isDark
+          ? APP_COLORS.lossDark
+          : APP_COLORS.lossLight
+        : isDark
+          ? APP_COLORS.drawDark
+          : APP_COLORS.drawLight
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 80 }}>

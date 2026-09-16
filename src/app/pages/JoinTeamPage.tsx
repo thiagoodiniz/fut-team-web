@@ -153,7 +153,7 @@ export function JoinTeamPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#f6f7f9',
+          background: token.colorBgLayout,
           padding: 20,
         }}
       >
@@ -199,7 +199,7 @@ export function JoinTeamPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f6f7f9', padding: '60px 20px' }}>
+    <div style={{ minHeight: '100vh', background: token.colorBgLayout, padding: '60px 20px' }}>
       <div style={{ maxWidth: 640, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <Title style={{ margin: '0 0 8px 0', fontSize: 32 }}>Quase lá! 🎉</Title>
@@ -261,7 +261,7 @@ export function JoinTeamPage() {
                       Entrar no Time
                     </Button>,
                   ]}
-                  style={{ borderBottom: '1px solid #f0f0f0', padding: '20px 0' }}
+                  style={{ borderBottom: `1px solid ${token.colorBorderSecondary}`, padding: '20px 0' }}
                 >
                   <List.Item.Meta
                     avatar={
@@ -291,7 +291,7 @@ export function JoinTeamPage() {
                 borderRadius: 24,
                 border: `1px solid ${token.colorPrimaryBorder}`,
                 boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
-                background: `linear-gradient(to right, ${token.colorPrimaryBg}, #f8fafc)`,
+                background: `linear-gradient(to right, ${token.colorPrimaryBg}, ${token.colorBgContainer})`,
               }}
             >
               <div

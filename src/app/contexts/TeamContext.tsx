@@ -54,3 +54,8 @@ export function useTeam() {
   }
   return context
 }
+
+export function useOptionalTeam() {
+  return useContext(TeamContext)
+}
+

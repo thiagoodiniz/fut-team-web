@@ -7,6 +7,8 @@ import { getDashboardStats, type DashboardStats } from '../../services/dashboard
 import { PlayerAvatar } from '../components/PlayerAvatar'
 import { useSeason } from '../contexts/SeasonContext'
 import { useIsPWA } from '../hooks/useIsPWA'
+import { useAppTheme } from '../../theme/ThemeProvider'
+import { APP_COLORS } from '../../theme/theme'
 
 const { Text } = Typography
 
@@ -41,21 +43,21 @@ function Pill({ bg, color, icon, label }: PillProps) {
 }
 
 function rankBg(index: number, fallback: string) {
-  if (index === 0) return '#fadb14'
-  if (index === 1) return '#d9d9d9'
-  if (index === 2) return '#d48806'
+  if (index === 0) return APP_COLORS.gold
+  if (index === 1) return APP_COLORS.silver
+  if (index === 2) return APP_COLORS.bronze
   return fallback
 }
 
 function rankTextColor(index: number, fallback: string) {
   if (index === 0) return '#1a1a1a'
-  if (index === 1) return '#1a1a1a'
-  if (index === 2) return '#ffffff'
+  if (index === 1 || index === 2) return '#ffffff'
   return fallback
 }
 
 export function ScorersTotalPage() {
   const { token } = theme.useToken()
+  const { isDark } = useAppTheme()
   const navigate = useNavigate()
   const { season } = useSeason()
   const isPWA = useIsPWA()
@@ -234,40 +236,40 @@ export function ScorersTotalPage() {
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                       {item.hatTricks > 0 && (
                         <Pill
-                          bg="#fadb14"
-                          color="#1a1a1a"
+                          bg={isDark ? 'rgba(250, 219, 20, 0.15)' : '#fef9c3'}
+                          color={isDark ? '#fde047' : '#854d0e'}
                           icon={<span style={{ fontSize: 11 }}>{'\uD83C\uDFA9'}</span>}
                           label={`${item.hatTricks}\u00d7 hat-trick${item.hatTricks > 1 ? 's' : ''}`}
                         />
                       )}
                       {item.doubles > 0 && (
                         <Pill
-                          bg={token.colorSuccessBg}
-                          color={token.colorSuccess}
+                          bg={isDark ? 'rgba(34, 197, 94, 0.15)' : '#dcfce7'}
+                          color={isDark ? '#4ade80' : '#15803d'}
                           icon={<span style={{ fontSize: 10 }}>{'\u26BD\u26BD'}</span>}
                           label={`${item.doubles}\u00d7 doblete${item.doubles > 1 ? 's' : ''}`}
                         />
                       )}
                       {item.freeKickGoals > 0 && (
                         <Pill
-                          bg={token.colorPrimaryBg}
-                          color={token.colorPrimary}
+                          bg={isDark ? 'rgba(59, 130, 246, 0.15)' : '#dbeafe'}
+                          color={isDark ? '#60a5fa' : '#1d4ed8'}
                           icon={<AimOutlined style={{ fontSize: 11 }} />}
                           label={`${item.freeKickGoals} de falta`}
                         />
                       )}
                       {item.penaltyGoals > 0 && (
                         <Pill
-                          bg={token.colorFillTertiary}
-                          color={token.colorTextSecondary}
+                          bg={isDark ? 'rgba(148, 163, 184, 0.15)' : '#f1f5f9'}
+                          color={isDark ? '#cbd5e1' : '#475569'}
                           icon={<span style={{ fontSize: 11 }}>{'\uD83E\uDD45'}</span>}
                           label={`${item.penaltyGoals} de p\u00eanalt\u00ed`}
                         />
                       )}
                       {item.currentStreak >= 2 && (
                         <Pill
-                          bg={token.colorWarningBg}
-                          color={token.colorWarning}
+                          bg={isDark ? 'rgba(249, 115, 22, 0.15)' : '#ffedd5'}
+                          color={isDark ? '#fb923c' : '#c2410c'}
                           icon={<FireOutlined style={{ fontSize: 11 }} />}
                           label={`${item.currentStreak} em sequ\u00eancia`}
                         />

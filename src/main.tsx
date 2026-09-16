@@ -6,6 +6,7 @@ import ptBR from 'antd/locale/pt_BR'
 import { router } from './router'
 import { api } from './services/api'
 import { applyAnalyticsPreferenceFromStorage } from './services/analytics.service'
+import { ThemeProvider } from './theme/ThemeProvider'
 
 import 'antd/dist/reset.css'
 import './styles/global.css'
@@ -127,7 +128,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <PostHogProvider client={posthog}>
         <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
           <ApiHealthGate>
-            <RouterProvider router={router} />
+            <ThemeProvider>
+              <RouterProvider router={router} />
+            </ThemeProvider>
           </ApiHealthGate>
         </GoogleOAuthProvider>
       </PostHogProvider>

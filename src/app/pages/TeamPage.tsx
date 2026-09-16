@@ -21,12 +21,15 @@ import {
   getTeamHistoricalStats,
   type TeamHistoricalStats,
 } from '../../services/teamStats.service'
+import { useAppTheme } from '../../theme/ThemeProvider'
+import { APP_COLORS } from '../../theme/theme'
 
 const { Title, Text } = Typography
 
 export function TeamPage() {
   const { team, isAdmin } = useTeam()
   const { token } = theme.useToken()
+  const { isDark } = useAppTheme()
   const navigate = useNavigate()
   const [stats, setStats] = useState<TeamHistoricalStats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -67,8 +70,26 @@ export function TeamPage() {
           position: 'relative',
           overflow: 'hidden',
         }}
-        bodyStyle={{ padding: 24, display: 'flex', alignItems: 'center', gap: 20 }}
+        styles={{
+          body: {
+            padding: 24,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 20,
+            position: 'relative',
+            zIndex: 1,
+          },
+        }}
       >
+        {/* Subtle dark tint overlay to ensure text contrast against any bright club colors */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.15) 100%)',
+            pointerEvents: 'none',
+          }}
+        />
         {isAdmin && (
           <Button
             type="text"
@@ -79,7 +100,7 @@ export function TeamPage() {
               top: 12,
               right: 12,
               color: 'white',
-              background: 'rgba(0,0,0,0.2)',
+              background: 'rgba(0,0,0,0.25)',
               borderRadius: '50%',
             }}
           />
@@ -93,14 +114,14 @@ export function TeamPage() {
             borderRadius: 16,
             background: 'white',
             padding: team.logo ? 4 : 0,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
           }}
         />
         <div>
-          <Title level={3} style={{ margin: 0, color: 'white' }}>
+          <Title level={3} style={{ margin: 0, color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
             {team.name}
           </Title>
-          <Text style={{ color: 'rgba(255,255,255,0.9)' }}>
+          <Text style={{ color: 'rgba(255,255,255,0.92)', textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
             {stats
               ? stats.summary.minYear === stats.summary.maxYear
                 ? `Temporada ${stats.summary.minYear}`
@@ -120,7 +141,7 @@ export function TeamPage() {
             <Col span={12}>
               <Card
                 style={{ borderRadius: 12 }}
-                bodyStyle={{ padding: 16, textAlign: 'center' }}
+                styles={{ body: { padding: 16, textAlign: 'center' } }}
               >
                 <Statistic title="Jogos" value={stats.summary.totalMatches} />
               </Card>
@@ -128,7 +149,7 @@ export function TeamPage() {
             <Col span={12}>
               <Card
                 style={{ borderRadius: 12 }}
-                bodyStyle={{ padding: 16, textAlign: 'center' }}
+                styles={{ body: { padding: 16, textAlign: 'center' } }}
               >
                 <Statistic
                   title="Aproveitamento"
@@ -136,8 +157,8 @@ export function TeamPage() {
                   valueStyle={{
                     color:
                       stats.summary.winRate >= 50
-                        ? token.colorSuccess
-                        : token.colorWarning,
+                        ? (isDark ? APP_COLORS.winDark : APP_COLORS.winLight)
+                        : (isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight),
                   }}
                 />
               </Card>
@@ -145,19 +166,19 @@ export function TeamPage() {
             <Col span={12}>
               <Card
                 style={{ borderRadius: 12 }}
-                bodyStyle={{ padding: 16, textAlign: 'center' }}
+                styles={{ body: { padding: 16, textAlign: 'center' } }}
               >
                 <Text type="secondary" style={{ display: 'block', marginBottom: 4 }}>
                   Resultados
                 </Text>
                 <Space size={8}>
-                  <Text strong style={{ color: token.colorSuccess }}>
+                  <Text strong style={{ color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight }}>
                     {stats.summary.wins}V
                   </Text>
-                  <Text strong style={{ color: token.colorTextSecondary }}>
+                  <Text strong style={{ color: isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight }}>
                     {stats.summary.draws}E
                   </Text>
-                  <Text strong style={{ color: token.colorError }}>
+                  <Text strong style={{ color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight }}>
                     {stats.summary.losses}D
                   </Text>
                 </Space>
@@ -166,17 +187,17 @@ export function TeamPage() {
             <Col span={12}>
               <Card
                 style={{ borderRadius: 12 }}
-                bodyStyle={{ padding: 16, textAlign: 'center' }}
+                styles={{ body: { padding: 16, textAlign: 'center' } }}
               >
                 <Text type="secondary" style={{ display: 'block', marginBottom: 4 }}>
                   Gols
                 </Text>
                 <Space size={8}>
-                  <Text strong style={{ color: token.colorSuccess }}>
+                  <Text strong style={{ color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight }}>
                     {stats.summary.goalsScored}
                   </Text>
                   <Text>-</Text>
-                  <Text strong style={{ color: token.colorError }}>
+                  <Text strong style={{ color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight }}>
                     {stats.summary.goalsAgainst}
                   </Text>
                 </Space>
@@ -190,12 +211,12 @@ export function TeamPage() {
               <Card
                 title={
                   <>
-                    <TrophyOutlined style={{ color: '#faad14', marginRight: 8 }} />{' '}
+                    <TrophyOutlined style={{ color: APP_COLORS.gold, marginRight: 8 }} />{' '}
                     Artilharia Histórica (Top 5)
                   </>
                 }
                 style={{ borderRadius: 12 }}
-                bodyStyle={{ padding: '16px 24px' }}
+                styles={{ body: { padding: '16px 24px' } }}
               >
                 {stats.topScorers.length > 0 ? (
                   <Space direction="vertical" style={{ width: '100%' }} size={16}>
@@ -333,13 +354,13 @@ export function TeamPage() {
             </Col>
 
             <Col span={24}>
-              <Card style={{ borderRadius: 12 }} bodyStyle={{ padding: 16 }}>
+              <Card style={{ borderRadius: 12 }} styles={{ body: { padding: 16 } }}>
                 <Text
                   strong
                   style={{
                     display: 'block',
                     marginBottom: 12,
-                    color: token.colorSuccess,
+                    color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight,
                   }}
                 >
                   Maiores Vítimas (Gols Pró)
@@ -367,10 +388,14 @@ export function TeamPage() {
             </Col>
 
             <Col span={24}>
-              <Card style={{ borderRadius: 12 }} bodyStyle={{ padding: 16 }}>
+              <Card style={{ borderRadius: 12 }} styles={{ body: { padding: 16 } }}>
                 <Text
                   strong
-                  style={{ display: 'block', marginBottom: 12, color: token.colorError }}
+                  style={{
+                    display: 'block',
+                    marginBottom: 12,
+                    color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight,
+                  }}
                 >
                   Mais Difíceis (Gols Contra)
                 </Text>

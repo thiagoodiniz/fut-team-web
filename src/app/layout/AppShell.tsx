@@ -29,15 +29,6 @@ function getActiveTab(pathname: string): TabKey {
 }
 
 export function AppShell() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { title, showBack } = useAppHeader()
-  const { token } = theme.useToken()
-
-  const isPWA = useIsPWA()
-
-  const activeTab = getActiveTab(location.pathname)
-
   const authData = localStorage.getItem('auth')
   let auth: { teamId?: string; userId?: string } | null = null
   try {
@@ -49,30 +40,46 @@ export function AppShell() {
   if (!auth?.userId) return <Navigate to="/login" replace />
   if (!auth?.teamId) return <Navigate to="/onboarding" replace />
 
+  return (
+    <TeamProvider>
+      <ThemeProvider>
+        <SeasonProvider>
+          <AppShellLayout />
+        </SeasonProvider>
+      </ThemeProvider>
+    </TeamProvider>
+  )
+}
+
+function AppShellLayout() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { title, showBack } = useAppHeader()
+  const { token } = theme.useToken()
+  const isPWA = useIsPWA()
+  const activeTab = getActiveTab(location.pathname)
+
   function onTabClick(key: TabKey) {
     posthog.capture('bottom_tab_clicked', { tab: key })
     navigate(`/app/${key}`)
   }
 
   return (
-    <TeamProvider>
-      <ThemeProvider>
-        <SeasonProvider>
-          <PostHogPageviewTracker />
-          <Layout style={{ minHeight: '100dvh', background: token.colorBgLayout }}>
-            <AppHeader title={title} showBack={showBack} />
-            <Content
-              style={{
-                padding: `74px 14px calc(${isPWA ? 108 : 76}px + env(safe-area-inset-bottom)) 14px`,
-              }}
-            >
-              <Outlet />
-            </Content>
-            <BottomTabs activeTab={activeTab} onTabClick={onTabClick} />
-          </Layout>
-        </SeasonProvider>
-      </ThemeProvider>
-    </TeamProvider>
+    <>
+      <PostHogPageviewTracker />
+      <Layout style={{ minHeight: '100dvh', background: token.colorBgLayout }}>
+        <AppHeader title={title} showBack={showBack} />
+        <Content
+          style={{
+            padding: `74px 14px calc(${isPWA ? 108 : 76}px + env(safe-area-inset-bottom)) 14px`,
+            background: token.colorBgLayout,
+          }}
+        >
+          <Outlet />
+        </Content>
+        <BottomTabs activeTab={activeTab} onTabClick={onTabClick} />
+      </Layout>
+    </>
   )
 }
 

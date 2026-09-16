@@ -192,6 +192,11 @@ function DynamicPwaManifest() {
   const { team } = useTeam()
 
   useEffect(() => {
+    if (team) {
+      localStorage.setItem('futteam_cached_logo', team.logo || '')
+      localStorage.setItem('futteam_cached_name', team.name || '')
+    }
+
     const iconUrl = team?.logo || '/icon.svg'
 
     const manifest = {

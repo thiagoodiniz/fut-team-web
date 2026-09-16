@@ -192,24 +192,26 @@ function DynamicPwaManifest() {
   const { team } = useTeam()
 
   useEffect(() => {
-    if (!team) return
-
     const manifest = {
-      name: team.name || 'Fut Team',
-      short_name: team.name || 'FutTeam',
-      description: `Aplicativo do time ${team.name || 'Fut Team'}`,
+      name: team?.name || 'Fut Team',
+      short_name: team?.name || 'FutTeam',
+      description: team?.name ? `Aplicativo do time ${team.name}` : 'Gestão de Futebol',
       start_url: '/',
       display: 'standalone',
       background_color: '#ffffff',
-      theme_color: team.primaryColor || '#ffffff',
-      icons: team.logo
+      theme_color: team?.primaryColor || '#ffffff',
+      icons: team?.logo
         ? [
             {
               src: team.logo,
-              sizes: '192x192 512x512',
-              type: 'image/png',
+              sizes: '192x192',
               purpose: 'any maskable',
             },
+            {
+              src: team.logo,
+              sizes: '512x512',
+              purpose: 'any maskable',
+            }
           ]
         : [
             {
@@ -222,8 +224,7 @@ function DynamicPwaManifest() {
     }
 
     const stringManifest = JSON.stringify(manifest)
-    const blob = new Blob([stringManifest], { type: 'application/json' })
-    const manifestUrl = URL.createObjectURL(blob)
+    const manifestUrl = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(stringManifest)
 
     let link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]')
     if (!link) {
@@ -232,11 +233,9 @@ function DynamicPwaManifest() {
       document.head.appendChild(link)
     }
 
-    if (link.href.startsWith('blob:')) {
-      URL.revokeObjectURL(link.href)
+    if (link.href !== manifestUrl) {
+      link.href = manifestUrl
     }
-
-    link.href = manifestUrl
   }, [team])
 
   return null

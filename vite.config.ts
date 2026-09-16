@@ -8,20 +8,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
-      manifest: {
-        name: 'Fut Team',
-        short_name: 'FutTeam',
-        description: 'Aplicativo de Futebol',
-        theme_color: '#ffffff',
-        icons: [
-          {
-            src: 'icon.svg',
-            sizes: '192x192 512x512',
-            type: 'image/svg+xml',
-            purpose: 'any maskable'
-          }
-        ]
-      },
+      manifest: false,
       devOptions: {
         enabled: true,
         type: 'module',

@@ -27,7 +27,7 @@ import {
   type PlayerDTO,
   type PlayerStats,
 } from '../../services/players.service'
-import { clearPlayerPhotoCache } from '../../services/image.service'
+import { clearPlayerPhotoCache, getPlayerPhoto } from '../../services/image.service'
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
 
@@ -89,6 +89,7 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
   const [form] = Form.useForm()
   const [saving, setSaving] = React.useState(false)
   const [photoBase64, setPhotoBase64] = React.useState<string | null>(null)
+  const [photoChanged, setPhotoChanged] = React.useState(false)
   const [stats, setStats] = React.useState<PlayerStats | null>(null)
   const [loadingStats, setLoadingStats] = React.useState(false)
   const { token } = theme.useToken()
@@ -99,6 +100,7 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
 
   React.useEffect(() => {
     if (open) {
+      setPhotoChanged(false)
       if (player) {
         form.setFieldsValue({
           name: player.name,
@@ -106,7 +108,8 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
           position: player.position,
           number: player.number,
         })
-        setPhotoBase64(player.photo || null)
+        // Load photo
+        getPlayerPhoto(player.id).then(setPhotoBase64).catch(() => setPhotoBase64(null))
 
         // Load stats
         setLoadingStats(true)
@@ -127,11 +130,14 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
       const values = await form.validateFields()
       setSaving(true)
 
-      const payload = { ...values, photo: photoBase64 }
+      const payload: any = { ...values }
+      if (photoChanged) {
+        payload.photo = photoBase64
+      }
 
       if (player) {
         await updatePlayer(player.id, payload)
-        clearPlayerPhotoCache(player.id)
+        if (photoChanged) clearPlayerPhotoCache(player.id)
         message.success('Jogador atualizado!')
       } else {
         await createPlayer(payload)
@@ -152,10 +158,17 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
     try {
       const compressed = await compressImage(file)
       setPhotoBase64(compressed)
+      setPhotoChanged(true)
     } catch {
       message.error('Erro ao processar imagem')
     }
     return false
+  }
+
+  function handleRemovePhoto(e: React.MouseEvent) {
+    e.stopPropagation()
+    setPhotoBase64(null)
+    setPhotoChanged(true)
   }
 
   return (
@@ -394,7 +407,7 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
                   size="small"
                   danger
                   icon={<DeleteOutlined />}
-                  onClick={() => setPhotoBase64(null)}
+                  onClick={handleRemovePhoto}
                 >
                   Remover
                 </Button>

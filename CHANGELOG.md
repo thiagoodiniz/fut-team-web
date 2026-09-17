@@ -5,6 +5,9 @@ O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+### Corrigido
+- **Foto do Jogador:** Correção de bug onde a foto do jogador não era carregada no modal de Edição devido à omissão da imagem na listagem da API (otimização de banda). Agora a foto é carregada individualmente e cacheada ao abrir o modal.
+
 ### Modificado
 - **Interface e Navegação:**
   - Substituição do título "Home" no cabeçalho pelo nome do time atual.

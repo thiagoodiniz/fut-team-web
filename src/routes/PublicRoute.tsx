@@ -16,29 +16,33 @@ export function PublicRoute() {
   useEffect(() => {
     if (!slug) return
 
-    // Check if user is logged in AND is from this team
-    const authStr = localStorage.getItem('auth')
-    if (authStr) {
-      try {
-        const auth = JSON.parse(authStr)
-        const savedSlug = localStorage.getItem('teamSlug')
-        if (auth.teamId && savedSlug === slug) {
-          navigate('/app/home', { replace: true })
-          return
-        }
-      } catch {}
-    }
-
     getPublicTeam(slug)
       .then((t) => {
         setTeam(t)
         setLoading(false)
-        localStorage.setItem('teamSlug', slug)
+
+        // Only save teamSlug for anonymous visitors to avoid corrupting logged-in user's active team
+        const token = localStorage.getItem('token')
+        if (!token) {
+          localStorage.setItem('teamSlug', slug)
+        }
       })
       .catch(() => {
         navigate('/onboarding', { replace: true })
       })
   }, [slug, navigate])
+
+  const tokenStr = localStorage.getItem('token')
+  const authData = localStorage.getItem('auth')
+  let auth: any = null
+  try {
+    auth = authData ? JSON.parse(authData) : null
+  } catch {}
+  const isLoggedIn = Boolean(tokenStr && auth?.userId)
+  const isManager = auth?.isManager === true
+  const isThisTeamAdmin = auth?.teamId === team?.id && auth?.role === 'ADMIN'
+  const isAdmin = isManager || isThisTeamAdmin
+  const role = auth?.teamId === team?.id ? auth?.role : null
 
   if (loading || !team) {
     return (
@@ -49,9 +53,23 @@ export function PublicRoute() {
   }
 
   return (
-    <TeamContext.Provider value={{ team, loading: false, refreshTeam: async () => {}, role: null, isAdmin: false, isManager: false }}>
+    <TeamContext.Provider
+      value={{
+        team,
+        loading: false,
+        refreshTeam: async () => {
+          if (slug) {
+            const t = await getPublicTeam(slug)
+            setTeam(t)
+          }
+        },
+        role,
+        isAdmin,
+        isManager,
+      }}
+    >
       <ThemeProvider>
-        <SeasonProvider isPublic={true} publicSlug={slug}>
+        <SeasonProvider isPublic={!isLoggedIn} publicSlug={slug}>
           <Outlet />
         </SeasonProvider>
       </ThemeProvider>

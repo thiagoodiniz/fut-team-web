@@ -2,6 +2,7 @@ import React from 'react'
 import { Layout, theme, Button } from 'antd'
 import { Outlet, useNavigate, useLocation, useParams } from 'react-router-dom'
 import { HomeOutlined, CalendarOutlined, TeamOutlined, TrophyOutlined, SwapOutlined } from '@ant-design/icons'
+import { AppHeader } from './AppHeader'
 import { useAppHeader } from '../hooks/useAppHeader'
 import { useIsPWA } from '../hooks/useIsPWA'
 import { TeamLogo } from '../components/TeamLogo'
@@ -25,7 +26,15 @@ export function PublicAppShell() {
   const { team } = useTeam()
   const { token } = theme.useToken()
   const isPWA = useIsPWA()
-  const { title } = useAppHeader()
+  const { title, showBack } = useAppHeader()
+
+  const tokenStr = localStorage.getItem('token')
+  const authData = localStorage.getItem('auth')
+  let auth: any = null
+  try {
+    auth = authData ? JSON.parse(authData) : null
+  } catch {}
+  const isLoggedIn = Boolean(tokenStr && auth?.userId)
 
   const activeTab = getActiveTab(location.pathname, slug || '')
 
@@ -36,45 +45,49 @@ export function PublicAppShell() {
 
   return (
     <Layout style={{ minHeight: '100dvh', background: token.colorBgLayout }}>
-      <Header
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
-          padding: '0 16px',
-          height: 60,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: token.colorBgElevated,
-          borderBottom: `1px solid ${token.colorBorderSecondary}`,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {team && <TeamLogo teamId={team.id} name={team.name} size={32} />}
-          <span style={{ fontSize: 18, fontWeight: 600 }}>{title}</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Button
-            size="small"
-            icon={<SwapOutlined />}
-            onClick={() => navigate('/onboarding')}
-            style={{ borderRadius: 8, fontSize: 12 }}
-          >
-            Outro time
-          </Button>
-          <Button
-            type="primary"
-            size="small"
-            onClick={() => navigate('/login')}
-            style={{ borderRadius: 8, fontSize: 12, fontWeight: 600 }}
-          >
-            Entrar
-          </Button>
-        </div>
-      </Header>
+      {isLoggedIn ? (
+        <AppHeader title={title} showBack={showBack} />
+      ) : (
+        <Header
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1000,
+            padding: '0 16px',
+            height: 60,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            background: token.colorBgElevated,
+            borderBottom: `1px solid ${token.colorBorderSecondary}`,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {team && <TeamLogo teamId={team.id} name={team.name} size={32} />}
+            <span style={{ fontSize: 18, fontWeight: 600 }}>{title === 'Home' ? (team?.name || 'Time') : title}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Button
+              size="small"
+              icon={<SwapOutlined />}
+              onClick={() => navigate('/onboarding')}
+              style={{ borderRadius: 8, fontSize: 12 }}
+            >
+              Outro time
+            </Button>
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => navigate('/login')}
+              style={{ borderRadius: 8, fontSize: 12, fontWeight: 600 }}
+            >
+              Entrar
+            </Button>
+          </div>
+        </Header>
+      )}
 
       <Content
         style={{

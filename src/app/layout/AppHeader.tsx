@@ -64,7 +64,7 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
     },
     {
       key: 'switch-team',
-      label: 'Trocar de Time',
+      label: 'Ver outros Times',
       icon: <SwapOutlined />,
       onClick: () => {
         posthog.capture('switch_team_clicked')
@@ -165,7 +165,7 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
             fontWeight: 700,
           }}
         >
-          {title}
+          {title === 'Home' ? (team?.name || 'Time') : title}
         </Title>
       </div>
 

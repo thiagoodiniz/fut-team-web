@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
-import { ConfigProvider, Modal, Spin, Typography } from 'antd'
+import { ConfigProvider, Spin } from 'antd'
 import ptBR from 'antd/locale/pt_BR'
 import { router } from './router'
 import { api } from './services/api'
@@ -100,19 +100,15 @@ function ApiHealthGate({ children }: { children: React.ReactNode }) {
 
   if (!isApiReady) {
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-        <Modal open centered footer={null} closable={false} keyboard={false} width={460}>
-          <div style={{ textAlign: 'center', padding: '16px 8px' }}>
-            <Spin size="large" />
-            <Typography.Title level={4} style={{ marginTop: 20, marginBottom: 8 }}>
-              Quase lá...
-            </Typography.Title>
-            <Typography.Text type="secondary">
-              Estamos acordando o servidor. Em instantes o Fut Team vai aparecer para
-              você.
-            </Typography.Text>
-          </div>
-        </Modal>
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Spin size="large" />
       </div>
     )
   }

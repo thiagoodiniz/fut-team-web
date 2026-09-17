@@ -18,6 +18,7 @@ import {
   EnvironmentOutlined,
   AimOutlined,
   RightOutlined,
+  TeamOutlined,
 } from '@ant-design/icons'
 
 import { useSeason } from '../contexts/SeasonContext'
@@ -27,6 +28,7 @@ import { getPublicDashboard } from '../../services/public.service'
 import { useAuthGate } from '../hooks/useAuthGate'
 import { AuthGateModal } from '../components/AuthGateModal'
 import { PlayerAvatar } from '../components/PlayerAvatar'
+import { TeamLogo } from '../components/TeamLogo'
 import { useIsPWA } from '../hooks/useIsPWA'
 import { useAppTheme } from '../../theme/ThemeProvider'
 import { APP_COLORS } from '../../theme/theme'
@@ -140,31 +142,40 @@ export function HomePage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24, paddingBottom: 40 }}>
       {/* Team Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div
-          style={{
-            width: 52,
-            height: 52,
-            borderRadius: 14,
-            background: token.colorFillSecondary,
-            display: 'grid',
-            placeItems: 'center',
-            overflow: 'hidden',
-            flexShrink: 0,
-            border: `1px solid ${token.colorBorderSecondary}`,
-          }}
-        >
-          {team?.logo ? (
-            <img
-              src={team.logo}
-              alt="Logo"
-              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-            />
-          ) : (
-            <Text strong style={{ fontSize: 20, color: token.colorPrimary }}>
-              {team?.name?.[0] || 'T'}
-            </Text>
-          )}
-        </div>
+        {team?.id ? (
+          <TeamLogo
+            teamId={team.id}
+            name={team.name}
+            size={52}
+            shape="square"
+            style={{
+              borderRadius: 14,
+              background: token.colorFillSecondary,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+              flexShrink: 0,
+              border: `1px solid ${token.colorBorderSecondary}`,
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: 14,
+              background: token.colorFillSecondary,
+              display: 'grid',
+              placeItems: 'center',
+              overflow: 'hidden',
+              flexShrink: 0,
+              border: `1px solid ${token.colorBorderSecondary}`,
+            }}
+          >
+            <TeamOutlined style={{ fontSize: 24, color: token.colorTextSecondary }} />
+          </div>
+        )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Title level={3} style={{ margin: 0, lineHeight: 1.2 }}>
             {team?.name || 'Carregando...'}

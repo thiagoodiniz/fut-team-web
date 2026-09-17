@@ -14,11 +14,13 @@ export function TeamLogo({ teamId, name, ...props }: TeamLogoProps) {
   useEffect(() => {
     let mounted = true
 
-    getTeamLogo(teamId).then((res) => {
-      if (mounted) {
-        setLogo(res)
-      }
-    })
+    if (teamId) {
+      getTeamLogo(teamId).then((res) => {
+        if (mounted) {
+          setLogo(res)
+        }
+      })
+    }
 
     return () => {
       mounted = false
@@ -26,12 +28,19 @@ export function TeamLogo({ teamId, name, ...props }: TeamLogoProps) {
   }, [teamId])
 
   if (!logo) {
-    return (
-      <Avatar {...props} icon={!name ? <TeamOutlined /> : undefined}>
-        {name ? name.charAt(0).toUpperCase() : undefined}
-      </Avatar>
-    )
+    return <Avatar icon={<TeamOutlined />} {...props} />
   }
 
-  return <Avatar {...props} src={logo} />
+  return (
+    <Avatar
+      {...props}
+      src={
+        <img
+          src={logo}
+          alt={name || 'Escudo do time'}
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        />
+      }
+    />
+  )
 }

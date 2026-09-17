@@ -38,10 +38,15 @@ export function JoinTeamPage() {
 
   const pendingRequest = location.state?.pendingRequest
 
-  // Read isManager from localStorage
+  // Read auth and isManager from localStorage
+  const tokenStr = localStorage.getItem('token')
   const authData = localStorage.getItem('auth')
-  const auth = authData ? JSON.parse(authData) : null
+  let auth: any = null
+  try {
+    auth = authData ? JSON.parse(authData) : null
+  } catch {}
   const isManager = auth?.isManager === true
+  const isLoggedIn = Boolean(tokenStr && auth?.userId)
 
   useEffect(() => {
     handleSearch('')
@@ -81,6 +86,10 @@ export function JoinTeamPage() {
             isManager: auth.isManager ?? data.isManager ?? false,
           }),
         )
+
+        if (values.slug) {
+          localStorage.setItem('teamSlug', values.slug)
+        }
 
         // Track team context in PostHog
         posthog.group('team', data.teamId, {
@@ -286,16 +295,25 @@ export function JoinTeamPage() {
         </Space>
 
         <div style={{ textAlign: 'center', marginTop: 48 }}>
-          <Button
-            type="link"
-            danger
-            onClick={() => {
-              localStorage.clear()
-              navigate('/login', { replace: true })
-            }}
-          >
-            Sair da conta
-          </Button>
+          {isLoggedIn ? (
+            <Button
+              type="link"
+              danger
+              onClick={() => {
+                localStorage.clear()
+                navigate('/login', { replace: true })
+              }}
+            >
+              Sair da conta
+            </Button>
+          ) : (
+            <Button
+              type="link"
+              onClick={() => navigate('/login')}
+            >
+              Já tem uma conta? Entrar
+            </Button>
+          )}
         </div>
       </div>
 

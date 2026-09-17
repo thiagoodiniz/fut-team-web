@@ -3,6 +3,15 @@
 Todas as modificações relevantes deste projeto são documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/) e este projeto segue o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [Unreleased]
+
+### Modificado
+- **Interface e Navegação:**
+  - Substituição do título "Home" no cabeçalho pelo nome do time atual.
+  - Substituição do quadrado com a letra inicial na área Hero pelo escudo do time (`TeamLogo`).
+- **Loader Principal:**
+  - Remoção da mensagem e modal "Acordando o servidor", simplificando a inicialização com um spinner padrão.
+
 ## [2.2.0] - 2026-09-16
 
 ### Adicionado

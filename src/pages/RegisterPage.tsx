@@ -50,7 +50,7 @@ export function RegisterPage() {
 
   async function handleLoginSuccess(data: LoginResponse) {
     localStorage.setItem('token', data.token)
-    localStorage.setItem('storage_version', '2')
+    localStorage.setItem('storage_version', '3')
     localStorage.setItem(
       'auth',
       JSON.stringify({

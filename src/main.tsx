@@ -24,7 +24,7 @@ const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN
 
 // Auto-purge old storage structure — must run BEFORE PostHog init
 // so that localStorage.clear() doesn't wipe PostHog's persisted opt-out state
-const STORAGE_VERSION = '2'
+const STORAGE_VERSION = '3'
 const currentVersion = localStorage.getItem('storage_version')
 if (currentVersion !== STORAGE_VERSION) {
   const wasLoggedIn = !!localStorage.getItem('token')

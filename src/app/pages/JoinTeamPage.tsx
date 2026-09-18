@@ -73,7 +73,7 @@ export function JoinTeamPage() {
 
       if (data.token) {
         localStorage.setItem('token', data.token)
-        localStorage.setItem('storage_version', '2')
+        localStorage.setItem('storage_version', '3')
         const authData = localStorage.getItem('auth')
         const auth = authData ? JSON.parse(authData) : {}
         const updatedTeams = auth.teams ? [...auth.teams] : []

@@ -60,7 +60,7 @@ if (SENTRY_DSN) {
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 const HEALTH_CHECK_INTERVAL_MS = 5000
-const HEALTH_CHECK_TIMEOUT_MS = 4000
+const HEALTH_CHECK_TIMEOUT_MS = 15000
 
 function ApiHealthGate({ children }: { children: React.ReactNode }) {
   const [isApiReady, setIsApiReady] = useState(false)

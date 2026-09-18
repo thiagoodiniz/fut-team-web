@@ -12,6 +12,11 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`
   }
 
+  const teamSlug = localStorage.getItem('teamSlug')
+  if (teamSlug) {
+    config.headers['x-team-slug'] = teamSlug
+  }
+
   return config
 })
 

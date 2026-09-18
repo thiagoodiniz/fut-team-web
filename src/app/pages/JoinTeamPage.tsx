@@ -76,6 +76,14 @@ export function JoinTeamPage() {
         localStorage.setItem('storage_version', '2')
         const authData = localStorage.getItem('auth')
         const auth = authData ? JSON.parse(authData) : {}
+        const updatedTeams = auth.teams ? [...auth.teams] : []
+        updatedTeams.push({
+          id: data.teamId,
+          slug: values.slug,
+          name: values.name,
+          role: 'ADMIN'
+        })
+
         localStorage.setItem(
           'auth',
           JSON.stringify({
@@ -83,6 +91,7 @@ export function JoinTeamPage() {
             userId: auth.userId || data.userId,
             teamId: data.teamId,
             role: 'ADMIN',
+            teams: updatedTeams,
             isManager: auth.isManager ?? data.isManager ?? false,
           }),
         )

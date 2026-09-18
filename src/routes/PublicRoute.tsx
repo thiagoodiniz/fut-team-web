@@ -21,11 +21,8 @@ export function PublicRoute() {
         setTeam(t)
         setLoading(false)
 
-        // Only save teamSlug for anonymous visitors to avoid corrupting logged-in user's active team
-        const token = localStorage.getItem('token')
-        if (!token) {
-          localStorage.setItem('teamSlug', slug)
-        }
+        // Always save the teamSlug so the API interceptor knows the context
+        localStorage.setItem('teamSlug', slug)
       })
       .catch(() => {
         navigate('/onboarding', { replace: true })
@@ -40,9 +37,21 @@ export function PublicRoute() {
   } catch {}
   const isLoggedIn = Boolean(tokenStr && auth?.userId)
   const isManager = auth?.isManager === true
-  const isThisTeamAdmin = auth?.teamId === team?.id && auth?.role === 'ADMIN'
+  // Determine role based on the teams array if available
+  let role = null
+  let currentTeamContext = null
+  if (auth?.teams && slug) {
+    currentTeamContext = auth.teams.find((t: any) => t.slug === slug)
+    if (currentTeamContext) {
+      role = currentTeamContext.role
+    }
+  } else if (auth?.teamId === team?.id) {
+    // Fallback for older auth storage
+    role = auth?.role
+  }
+
+  const isThisTeamAdmin = role === 'ADMIN'
   const isAdmin = isManager || isThisTeamAdmin
-  const role = auth?.teamId === team?.id ? auth?.role : null
 
   if (loading || !team) {
     return (

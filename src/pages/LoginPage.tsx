@@ -34,6 +34,12 @@ type LoginResponse = {
     slug: string
     role: 'ADMIN' | 'MEMBER'
   }
+  teams?: {
+    id: string
+    name: string
+    slug: string
+    role: 'ADMIN' | 'MEMBER'
+  }[]
   isManager?: boolean
   onboarding?: boolean
   pendingRequest?: {
@@ -73,6 +79,7 @@ export function LoginPage() {
         name: data.user.name,
         email: data.user.email,
         role: data.team?.role,
+        teams: data.teams || [],
         isManager: data.isManager ?? false,
       }),
     )

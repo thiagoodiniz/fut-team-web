@@ -81,7 +81,7 @@ export function JoinTeamPage() {
           id: data.teamId,
           slug: values.slug,
           name: values.name,
-          role: 'ADMIN'
+          role: 'OWNER'
         })
 
         localStorage.setItem(
@@ -90,7 +90,7 @@ export function JoinTeamPage() {
             ...auth,
             userId: auth.userId || data.userId,
             teamId: data.teamId,
-            role: 'ADMIN',
+            role: 'OWNER',
             teams: updatedTeams,
             isManager: auth.isManager ?? data.isManager ?? false,
           }),

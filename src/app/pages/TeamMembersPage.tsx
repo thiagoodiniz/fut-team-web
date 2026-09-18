@@ -31,7 +31,7 @@ export function TeamMembersPage() {
   const [members, setMembers] = useState<any[]>([])
   const [requests, setRequests] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
-  const { isAdmin } = useTeam()
+  const { isAdmin, role: myRole, isManager } = useTeam()
   const authData = localStorage.getItem('auth')
   const currentUserId = authData ? JSON.parse(authData).userId : null
 
@@ -174,15 +174,16 @@ export function TeamMembersPage() {
                   variant="filled"
                   disabled={
                     member.userId === currentUserId ||
-                    (member.role === 'OWNER' && member.userId !== currentUserId)
+                    (member.role === 'OWNER' && !isManager) ||
+                    (member.role === 'ADMIN' && myRole !== 'OWNER' && !isManager)
                   }
                   options={[
-                    { value: 'OWNER', label: 'Dono' },
+                    ...(myRole === 'OWNER' || isManager ? [{ value: 'OWNER', label: 'Dono' }] : []),
                     { value: 'ADMIN', label: 'Admin' },
                     { value: 'MEMBER', label: 'Membro' },
                   ]}
                 />
-                {member.userId !== currentUserId && (
+                {member.userId !== currentUserId && (myRole === 'OWNER' || isManager || (member.role !== 'OWNER' && member.role !== 'ADMIN')) && (
                   <Popconfirm
                     title="Remover membro?"
                     description="O usuário perderá acesso ao time imediatamente."

@@ -50,7 +50,7 @@ export function PublicRoute() {
     role = auth?.role
   }
 
-  const isThisTeamAdmin = role === 'ADMIN'
+  const isThisTeamAdmin = role === 'ADMIN' || role === 'OWNER'
   const isAdmin = isManager || isThisTeamAdmin
 
   if (loading || !team) {

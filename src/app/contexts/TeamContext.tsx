@@ -5,7 +5,7 @@ interface TeamContextType {
   team: TeamDTO | null
   loading: boolean
   refreshTeam: () => Promise<void>
-  role: 'ADMIN' | 'MEMBER' | null
+  role: 'OWNER' | 'ADMIN' | 'MEMBER' | null
   isAdmin: boolean
   isManager: boolean
 }
@@ -36,7 +36,7 @@ export function TeamProvider({ children }: { children: ReactNode }) {
   const auth = authData ? JSON.parse(authData) : null
   const role = auth?.role || null
   const isManager = auth?.isManager === true
-  const isAdmin = isManager || role === 'ADMIN'
+  const isAdmin = isManager || role === 'ADMIN' || role === 'OWNER'
 
   return (
     <TeamContext.Provider

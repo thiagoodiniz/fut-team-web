@@ -94,7 +94,7 @@ export function TeamMembersPage() {
   const membersTab = (
     <List
       loading={loading}
-      dataSource={members}
+      dataSource={members.filter((m: any) => m.role !== 'OWNER')}
       renderItem={(member) => (
         <div
           style={{
@@ -178,7 +178,6 @@ export function TeamMembersPage() {
                     (member.role === 'ADMIN' && myRole !== 'OWNER' && !isManager)
                   }
                   options={[
-                    ...(myRole === 'OWNER' || isManager ? [{ value: 'OWNER', label: 'Dono' }] : []),
                     { value: 'ADMIN', label: 'Admin' },
                     { value: 'MEMBER', label: 'Membro' },
                   ]}

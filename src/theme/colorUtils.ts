@@ -195,4 +195,3 @@ export function getAccessibleTextColor(
   const contrastWithDark = getContrastRatio(backgroundHex, '#0f172a')
   return contrastWithWhite >= contrastWithDark ? lightText : darkText
 }
-

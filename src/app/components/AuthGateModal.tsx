@@ -50,23 +50,13 @@ export function AuthGateModal({ open, onClose }: AuthGateModalProps) {
       </div>
 
       <Space direction="vertical" style={{ width: '100%' }} size={12}>
-        <Button
-          type="primary"
-          block
-          size="large"
-          onClick={() => navigate('/login')}
-        >
+        <Button type="primary" block size="large" onClick={() => navigate('/login')}>
           Entrar
         </Button>
-        <Button
-          block
-          size="large"
-          onClick={() => navigate('/register')}
-        >
+        <Button block size="large" onClick={() => navigate('/register')}>
           Cadastre-se
         </Button>
       </Space>
     </Modal>
   )
 }
-

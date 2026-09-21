@@ -14,9 +14,7 @@ export async function getMyTeam(): Promise<TeamDTO> {
   return response.data.team
 }
 
-export async function updateMyTeam(
-  data: Omit<TeamDTO, 'id'>,
-): Promise<TeamDTO> {
+export async function updateMyTeam(data: Omit<TeamDTO, 'id'>): Promise<TeamDTO> {
   const response = await api.patch<{ team: TeamDTO }>('/teams/active', data)
   return response.data.team
 }

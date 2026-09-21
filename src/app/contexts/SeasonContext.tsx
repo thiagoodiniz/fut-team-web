@@ -11,7 +11,15 @@ interface SeasonContextValue {
 
 const SeasonContext = React.createContext<SeasonContextValue>({} as SeasonContextValue)
 
-export function SeasonProvider({ children, isPublic, publicSlug }: { children: React.ReactNode, isPublic?: boolean, publicSlug?: string }) {
+export function SeasonProvider({
+  children,
+  isPublic,
+  publicSlug,
+}: {
+  children: React.ReactNode
+  isPublic?: boolean
+  publicSlug?: string
+}) {
   const [seasons, setSeasons] = React.useState<SeasonDTO[]>([])
   const [seasonId, setSeasonId] = React.useState<string | null>(
     localStorage.getItem('seasonId'),

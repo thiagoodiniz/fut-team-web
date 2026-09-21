@@ -43,7 +43,9 @@ export function TeamPage() {
     if (!team) return
     async function fetchStats() {
       try {
-        const data = slug ? await getPublicTeamStats(slug) : await getTeamHistoricalStats()
+        const data = slug
+          ? await getPublicTeamStats(slug)
+          : await getTeamHistoricalStats()
         setStats(data)
       } catch (err) {
         console.error(err)
@@ -89,7 +91,8 @@ export function TeamPage() {
           style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.15) 100%)',
+            background:
+              'linear-gradient(to right, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.15) 100%)',
             pointerEvents: 'none',
           }}
         />
@@ -121,10 +124,18 @@ export function TeamPage() {
           }}
         />
         <div>
-          <Title level={3} style={{ margin: 0, color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
+          <Title
+            level={3}
+            style={{ margin: 0, color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
+          >
             {team.name}
           </Title>
-          <Text style={{ color: 'rgba(255,255,255,0.92)', textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
+          <Text
+            style={{
+              color: 'rgba(255,255,255,0.92)',
+              textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+            }}
+          >
             {stats
               ? stats.summary.minYear === stats.summary.maxYear
                 ? `Temporada ${stats.summary.minYear}`
@@ -160,8 +171,12 @@ export function TeamPage() {
                   valueStyle={{
                     color:
                       stats.summary.winRate >= 50
-                        ? (isDark ? APP_COLORS.winDark : APP_COLORS.winLight)
-                        : (isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight),
+                        ? isDark
+                          ? APP_COLORS.winDark
+                          : APP_COLORS.winLight
+                        : isDark
+                          ? APP_COLORS.drawDark
+                          : APP_COLORS.drawLight,
                   }}
                 />
               </Card>
@@ -175,13 +190,22 @@ export function TeamPage() {
                   Resultados
                 </Text>
                 <Space size={8}>
-                  <Text strong style={{ color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight }}>
+                  <Text
+                    strong
+                    style={{ color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight }}
+                  >
                     {stats.summary.wins}V
                   </Text>
-                  <Text strong style={{ color: isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight }}>
+                  <Text
+                    strong
+                    style={{ color: isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight }}
+                  >
                     {stats.summary.draws}E
                   </Text>
-                  <Text strong style={{ color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight }}>
+                  <Text
+                    strong
+                    style={{ color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight }}
+                  >
                     {stats.summary.losses}D
                   </Text>
                 </Space>
@@ -196,11 +220,17 @@ export function TeamPage() {
                   Gols
                 </Text>
                 <Space size={8}>
-                  <Text strong style={{ color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight }}>
+                  <Text
+                    strong
+                    style={{ color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight }}
+                  >
                     {stats.summary.goalsScored}
                   </Text>
                   <Text>-</Text>
-                  <Text strong style={{ color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight }}>
+                  <Text
+                    strong
+                    style={{ color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight }}
+                  >
                     {stats.summary.goalsAgainst}
                   </Text>
                 </Space>

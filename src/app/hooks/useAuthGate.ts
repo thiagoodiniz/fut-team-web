@@ -14,4 +14,3 @@ export function useAuthGate() {
 
   return { requireAuth, isModalOpen, setIsModalOpen }
 }
-

@@ -81,7 +81,7 @@ export function JoinTeamPage() {
           id: data.teamId,
           slug: values.slug,
           name: values.name,
-          role: 'ADMIN'
+          role: 'ADMIN',
         })
 
         localStorage.setItem(
@@ -180,7 +180,13 @@ export function JoinTeamPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: token.colorBgLayout, padding: '60px 20px' }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: token.colorBgLayout,
+        padding: '60px 20px',
+      }}
+    >
       <div style={{ maxWidth: 640, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <Title style={{ margin: '0 0 8px 0', fontSize: 32 }}>Bem-vindo!</Title>
@@ -240,7 +246,10 @@ export function JoinTeamPage() {
                       Acessar Time
                     </Button>,
                   ]}
-                  style={{ borderBottom: `1px solid ${token.colorBorderSecondary}`, padding: '20px 0' }}
+                  style={{
+                    borderBottom: `1px solid ${token.colorBorderSecondary}`,
+                    padding: '20px 0',
+                  }}
                 >
                   <List.Item.Meta
                     avatar={
@@ -316,10 +325,7 @@ export function JoinTeamPage() {
               Sair da conta
             </Button>
           ) : (
-            <Button
-              type="link"
-              onClick={() => navigate('/login')}
-            >
+            <Button type="link" onClick={() => navigate('/login')}>
               Já tem uma conta? Entrar
             </Button>
           )}

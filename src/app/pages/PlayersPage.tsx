@@ -46,7 +46,9 @@ export function PlayersPage() {
     if (!season) return
     try {
       setLoading(true)
-      const data = slug ? await getPublicPlayers(slug, season.id) : await listPlayers(season.id)
+      const data = slug
+        ? await getPublicPlayers(slug, season.id)
+        : await listPlayers(season.id)
       setPlayers(data)
     } finally {
       setLoading(false)

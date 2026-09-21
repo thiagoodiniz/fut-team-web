@@ -182,20 +182,23 @@ export function TeamMembersPage() {
                     { value: 'MEMBER', label: 'Membro' },
                   ]}
                 />
-                {member.userId !== currentUserId && (myRole === 'OWNER' || isManager || (member.role !== 'OWNER' && member.role !== 'ADMIN')) && (
-                  <Popconfirm
-                    title="Remover membro?"
-                    description="O usuário perderá acesso ao time imediatamente."
-                    onConfirm={() => {
-                      posthog.capture('member_removed', { userId: member.userId })
-                      handleRemoveMember(member.userId)
-                    }}
-                    okText="Sim"
-                    cancelText="Não"
-                  >
-                    <Button danger icon={<DeleteOutlined />} type="text" />
-                  </Popconfirm>
-                )}
+                {member.userId !== currentUserId &&
+                  (myRole === 'OWNER' ||
+                    isManager ||
+                    (member.role !== 'OWNER' && member.role !== 'ADMIN')) && (
+                    <Popconfirm
+                      title="Remover membro?"
+                      description="O usuário perderá acesso ao time imediatamente."
+                      onConfirm={() => {
+                        posthog.capture('member_removed', { userId: member.userId })
+                        handleRemoveMember(member.userId)
+                      }}
+                      okText="Sim"
+                      cancelText="Não"
+                    >
+                      <Button danger icon={<DeleteOutlined />} type="text" />
+                    </Popconfirm>
+                  )}
               </>
             ) : (
               <div style={{ marginTop: 8 }}>

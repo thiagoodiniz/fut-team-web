@@ -1,7 +1,13 @@
 import React from 'react'
 import { Layout, theme, Button } from 'antd'
 import { Outlet, useNavigate, useLocation, useParams } from 'react-router-dom'
-import { HomeOutlined, CalendarOutlined, TeamOutlined, TrophyOutlined, SwapOutlined } from '@ant-design/icons'
+import {
+  HomeOutlined,
+  CalendarOutlined,
+  TeamOutlined,
+  TrophyOutlined,
+  SwapOutlined,
+} from '@ant-design/icons'
 import { AppHeader } from './AppHeader'
 import { useAppHeader } from '../hooks/useAppHeader'
 import { useIsPWA } from '../hooks/useIsPWA'
@@ -66,7 +72,9 @@ export function PublicAppShell() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {team && <TeamLogo teamId={team.id} name={team.name} size={32} />}
-            <span style={{ fontSize: 18, fontWeight: 600 }}>{title === 'Home' ? (team?.name || 'Time') : title}</span>
+            <span style={{ fontSize: 18, fontWeight: 600 }}>
+              {title === 'Home' ? team?.name || 'Time' : title}
+            </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Button
@@ -105,7 +113,9 @@ export function PublicAppShell() {
           right: 0,
           bottom: 0,
           height: `calc(${isPWA ? 92 : 60}px + env(safe-area-inset-bottom))`,
-          paddingBottom: isPWA ? 'calc(32px + env(safe-area-inset-bottom))' : 'env(safe-area-inset-bottom)',
+          paddingBottom: isPWA
+            ? 'calc(32px + env(safe-area-inset-bottom))'
+            : 'env(safe-area-inset-bottom)',
           zIndex: 1000,
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
@@ -114,16 +124,46 @@ export function PublicAppShell() {
           backdropFilter: 'blur(12px)',
         }}
       >
-        <TabButton active={activeTab === 'home'} icon={<HomeOutlined />} label="Início" onClick={() => onTabClick('home')} />
-        <TabButton active={activeTab === 'matches'} icon={<CalendarOutlined />} label="Jogos" onClick={() => onTabClick('matches')} />
-        <TabButton active={activeTab === 'players'} icon={<TeamOutlined />} label="Elenco" onClick={() => onTabClick('players')} />
-        <TabButton active={activeTab === 'team'} icon={<TrophyOutlined />} label="Clube" onClick={() => onTabClick('team')} />
+        <TabButton
+          active={activeTab === 'home'}
+          icon={<HomeOutlined />}
+          label="Início"
+          onClick={() => onTabClick('home')}
+        />
+        <TabButton
+          active={activeTab === 'matches'}
+          icon={<CalendarOutlined />}
+          label="Jogos"
+          onClick={() => onTabClick('matches')}
+        />
+        <TabButton
+          active={activeTab === 'players'}
+          icon={<TeamOutlined />}
+          label="Elenco"
+          onClick={() => onTabClick('players')}
+        />
+        <TabButton
+          active={activeTab === 'team'}
+          icon={<TrophyOutlined />}
+          label="Clube"
+          onClick={() => onTabClick('team')}
+        />
       </nav>
     </Layout>
   )
 }
 
-function TabButton({ active, icon, label, onClick }: { active: boolean, icon: React.ReactNode, label: string, onClick: () => void }) {
+function TabButton({
+  active,
+  icon,
+  label,
+  onClick,
+}: {
+  active: boolean
+  icon: React.ReactNode
+  label: string
+  onClick: () => void
+}) {
   const { token } = theme.useToken()
   return (
     <button
@@ -147,7 +187,19 @@ function TabButton({ active, icon, label, onClick }: { active: boolean, icon: Re
         transition: 'color 0.2s',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 28, borderRadius: 14, fontSize: 20, background: active ? token.colorPrimaryBg : 'transparent', transition: 'background 0.2s' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 44,
+          height: 28,
+          borderRadius: 14,
+          fontSize: 20,
+          background: active ? token.colorPrimaryBg : 'transparent',
+          transition: 'background 0.2s',
+        }}
+      >
         {icon}
       </div>
       <span style={{ lineHeight: 1 }}>{label}</span>

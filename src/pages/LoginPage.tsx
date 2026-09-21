@@ -235,7 +235,13 @@ export function LoginPage() {
           >
             Fut<span style={{ color: antdToken.colorSuccess }}>Team</span>
           </Title>
-          <Text style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: 16, fontWeight: 500 }}>
+          <Text
+            style={{
+              color: isDark ? '#94a3b8' : '#64748b',
+              fontSize: 16,
+              fontWeight: 500,
+            }}
+          >
             Gestão de elite para o futebol amador
           </Text>
         </div>
@@ -335,7 +341,12 @@ export function LoginPage() {
               </Button>
             </Form>
 
-            <Divider style={{ borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : '#f1f5f9', margin: '4px 0' }}>
+            <Divider
+              style={{
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : '#f1f5f9',
+                margin: '4px 0',
+              }}
+            >
               <Text
                 style={{
                   color: isDark ? '#64748b' : '#cbd5e1',

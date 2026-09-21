@@ -1,7 +1,7 @@
 import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
-  Card,
+  
   Col,
   Progress,
   Row,
@@ -10,6 +10,7 @@ import {
   theme,
   Button,
   FloatButton,
+  Skeleton,
 } from 'antd'
 import {
   TrophyOutlined,
@@ -23,8 +24,8 @@ import {
 
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
-import { getDashboardStats, type DashboardStats } from '../../services/dashboard.service'
-import { getPublicDashboard } from '../../services/public.service'
+import { getDashboardSummary, getDashboardLastMatches, getDashboardTopScorers, getDashboardAttendance } from '../../services/dashboard.service'
+import { getPublicDashboardSummary, getPublicDashboardLastMatches, getPublicDashboardTopScorers, getPublicDashboardAttendance } from '../../services/public.service'
 import { useAuthGate } from '../hooks/useAuthGate'
 import { AuthGateModal } from '../components/AuthGateModal'
 import { PlayerAvatar } from '../components/PlayerAvatar'
@@ -63,31 +64,43 @@ export function HomePage() {
   const { isDark, clubColors } = useAppTheme()
   const isPWA = useIsPWA()
 
-  const [loading, setLoading] = React.useState(true)
-  const [data, setData] = React.useState<DashboardStats | null>(null)
+  const [summaryData, setSummaryData] = React.useState<any>(null)
+  const [lastMatchesData, setLastMatchesData] = React.useState<any>(null)
+  const [topScorersData, setTopScorersData] = React.useState<any>(null)
+  const [attendanceData, setAttendanceData] = React.useState<any>(null)
 
   React.useEffect(() => {
+    let active = true;
+    
     async function load() {
-      try {
-        setLoading(true)
-        const stats = slug
-          ? await getPublicDashboard(slug, season?.id)
-          : await getDashboardStats(season?.id)
-        setData(stats)
-      } catch (err) {
-        console.error(err)
-      } finally {
-        setLoading(false)
+      if (slug) {
+        getPublicDashboardSummary(slug, season?.id).then(d => active && setSummaryData(d)).catch(console.error)
+        getPublicDashboardLastMatches(slug, season?.id).then(d => active && setLastMatchesData(d)).catch(console.error)
+        getPublicDashboardTopScorers(slug, season?.id).then(d => active && setTopScorersData(d)).catch(console.error)
+        getPublicDashboardAttendance(slug, season?.id).then(d => active && setAttendanceData(d)).catch(console.error)
+      } else {
+        getDashboardSummary(season?.id).then(d => active && setSummaryData(d)).catch(console.error)
+        getDashboardLastMatches(season?.id).then(d => active && setLastMatchesData(d)).catch(console.error)
+        getDashboardTopScorers(season?.id).then(d => active && setTopScorersData(d)).catch(console.error)
+        getDashboardAttendance(season?.id).then(d => active && setAttendanceData(d)).catch(console.error)
       }
     }
+    
+    setSummaryData(null)
+    setLastMatchesData(null)
+    setTopScorersData(null)
+    setAttendanceData(null)
+    
     load()
+    
+    return () => { active = false }
   }, [season?.id, slug])
 
-  if (loading || !data) {
-    return <Card loading />
-  }
-
-  const { summary, lastMatches, attendance } = data
+  const summary = summaryData?.summary
+  const nextMatch = summaryData?.nextMatch
+  const lastMatches = lastMatchesData?.lastMatches || []
+  const attendance = attendanceData?.attendance || []
+  const data = { topScorers: topScorersData?.topScorers || [] } // For compatibility with lower code
 
   const rankColor = (index: number) =>
     index === 0
@@ -195,12 +208,18 @@ export function HomePage() {
       </div>
 
       {/* Next Match */}
-      {data.nextMatch && (
+      {!summaryData ? <Skeleton active /> : nextMatch && (
         <div
           role="button"
           onClick={() => {
-            posthog.capture('next_match_card_clicked', { match_id: data.nextMatch?.id })
-            requireAuth(() => navigate(slug ? `/${slug}/matches/${data.nextMatch?.id}` : `/app/matches/${data.nextMatch?.id}`))
+            posthog.capture('next_match_card_clicked', { match_id: nextMatch?.id })
+            requireAuth(() =>
+              navigate(
+                slug
+                  ? `/${slug}/matches/${nextMatch?.id}`
+                  : `/app/matches/${nextMatch?.id}`,
+              ),
+            )
           }}
           style={{
             background: token.colorBgContainer,
@@ -213,7 +232,9 @@ export function HomePage() {
             justifyContent: 'space-between',
             alignItems: 'center',
             gap: 16,
-            boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.25)' : '0 2px 10px rgba(0,0,0,0.03)',
+            boxShadow: isDark
+              ? '0 4px 20px rgba(0,0,0,0.25)'
+              : '0 2px 10px rgba(0,0,0,0.03)',
             transition: 'opacity 0.15s, transform 0.15s',
           }}
         >
@@ -250,15 +271,15 @@ export function HomePage() {
                 textOverflow: 'ellipsis',
               }}
             >
-              vs {data.nextMatch.opponent || 'Adversário não definido'}
+              vs {nextMatch.opponent || 'Adversário não definido'}
             </Title>
-            {data.nextMatch.location && (
+            {nextMatch.location && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <EnvironmentOutlined
                   style={{ fontSize: 11, color: token.colorTextSecondary }}
                 />
                 <Text type="secondary" style={{ fontSize: 12 }}>
-                  {data.nextMatch.location}
+                  {nextMatch.location}
                 </Text>
               </div>
             )}
@@ -266,7 +287,9 @@ export function HomePage() {
 
           <div
             style={{
-              background: isDark ? 'rgba(255, 255, 255, 0.04)' : token.colorFillQuaternary,
+              background: isDark
+                ? 'rgba(255, 255, 255, 0.04)'
+                : token.colorFillQuaternary,
               border: `1px solid ${token.colorBorderSecondary}`,
               padding: '10px 14px',
               borderRadius: 12,
@@ -284,7 +307,7 @@ export function HomePage() {
                 color: clubColors.primary,
               }}
             >
-              {new Date(data.nextMatch.date).getDate()}
+              {new Date(nextMatch.date).getDate()}
             </Text>
             <Text
               style={{
@@ -297,13 +320,13 @@ export function HomePage() {
                 letterSpacing: '0.05em',
               }}
             >
-              {new Date(data.nextMatch.date).toLocaleString('pt-BR', { month: 'short' })}
+              {new Date(nextMatch.date).toLocaleString('pt-BR', { month: 'short' })}
             </Text>
             <Text
               type="secondary"
               style={{ display: 'block', fontSize: 11, marginTop: 3 }}
             >
-              {new Date(data.nextMatch.date).toLocaleTimeString('pt-BR', {
+              {new Date(nextMatch.date).toLocaleTimeString('pt-BR', {
                 hour: '2-digit',
                 minute: '2-digit',
               })}
@@ -313,7 +336,7 @@ export function HomePage() {
       )}
 
       {/* Summary Stats */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {!summaryData ? <Skeleton active paragraph={{rows: 4}} /> : <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <SectionHeader label="Temporada" />
         <Row gutter={[10, 10]}>
           {/* Card 1: Jogos */}
@@ -471,7 +494,9 @@ export function HomePage() {
               role="button"
               onClick={() => {
                 posthog.capture('total_goals_card_clicked')
-                requireAuth(() => navigate(slug ? `/${slug}/scorers` : '/app/ranking/scorers'))
+                requireAuth(() =>
+                  navigate(slug ? `/${slug}/scorers` : '/app/ranking/scorers'),
+                )
               }}
               style={{
                 background: token.colorBgContainer,
@@ -494,9 +519,7 @@ export function HomePage() {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <FireOutlined
-                    style={{ fontSize: 12, color: clubColors.primary }}
-                  />
+                  <FireOutlined style={{ fontSize: 12, color: clubColors.primary }} />
                   <Text
                     style={{
                       fontSize: 11,
@@ -627,7 +650,7 @@ export function HomePage() {
             </div>
           </Col>
         </Row>
-      </div>
+      </div>}
 
       <Row gutter={[16, 24]}>
         {/* Last Matches */}
@@ -639,34 +662,58 @@ export function HomePage() {
               onAction={() => navigate(slug ? `/${slug}/matches` : '/app/matches')}
             />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {lastMatches.map((item, index) => {
+              {!lastMatchesData ? <Skeleton active /> : lastMatches.map((item: any, index: number) => {
                 const isWin = item.result === 'WIN'
                 const isLoss = item.result === 'LOSS'
                 const accentColor = isWin
-                  ? (isDark ? APP_COLORS.winDark : APP_COLORS.winLight)
+                  ? isDark
+                    ? APP_COLORS.winDark
+                    : APP_COLORS.winLight
                   : isLoss
-                    ? (isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight)
-                    : (isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight)
+                    ? isDark
+                      ? APP_COLORS.lossDark
+                      : APP_COLORS.lossLight
+                    : isDark
+                      ? APP_COLORS.drawDark
+                      : APP_COLORS.drawLight
 
                 const badgeBg = isWin
-                  ? (isDark ? 'rgba(34, 197, 94, 0.15)' : '#dcfce7')
+                  ? isDark
+                    ? 'rgba(34, 197, 94, 0.15)'
+                    : '#dcfce7'
                   : isLoss
-                    ? (isDark ? 'rgba(239, 68, 68, 0.15)' : '#fee2e2')
-                    : (isDark ? 'rgba(250, 204, 21, 0.15)' : '#fef3c7')
+                    ? isDark
+                      ? 'rgba(239, 68, 68, 0.15)'
+                      : '#fee2e2'
+                    : isDark
+                      ? 'rgba(250, 204, 21, 0.15)'
+                      : '#fef3c7'
 
                 const badgeBorder = isWin
-                  ? (isDark ? 'rgba(34, 197, 94, 0.3)' : '#bbf7d0')
+                  ? isDark
+                    ? 'rgba(34, 197, 94, 0.3)'
+                    : '#bbf7d0'
                   : isLoss
-                    ? (isDark ? 'rgba(239, 68, 68, 0.3)' : '#fecaca')
-                    : (isDark ? 'rgba(250, 204, 21, 0.3)' : '#fde68a')
+                    ? isDark
+                      ? 'rgba(239, 68, 68, 0.3)'
+                      : '#fecaca'
+                    : isDark
+                      ? 'rgba(250, 204, 21, 0.3)'
+                      : '#fde68a'
 
                 return (
                   <div
                     key={index}
-                      onClick={() => {
-                        posthog.capture('last_match_card_clicked', { match_id: item.id })
-                        requireAuth(() => navigate(slug ? `/${slug}/matches/${item.id}` : `/app/matches/${item.id}`))
-                      }}
+                    onClick={() => {
+                      posthog.capture('last_match_card_clicked', { match_id: item.id })
+                      requireAuth(() =>
+                        navigate(
+                          slug
+                            ? `/${slug}/matches/${item.id}`
+                            : `/app/matches/${item.id}`,
+                        ),
+                      )
+                    }}
                     style={{
                       background: token.colorBgContainer,
                       border: `1px solid ${token.colorBorderSecondary}`,
@@ -765,7 +812,13 @@ export function HomePage() {
               <SectionHeader
                 label="Frequência"
                 action="Ver mais"
-                onAction={() => requireAuth(() => navigate(slug ? `/${slug}/ranking/attendance` : '/app/ranking/attendance'))}
+                onAction={() =>
+                  requireAuth(() =>
+                    navigate(
+                      slug ? `/${slug}/ranking/attendance` : '/app/ranking/attendance',
+                    ),
+                  )
+                }
               />
               <div
                 style={{
@@ -775,7 +828,7 @@ export function HomePage() {
                   overflow: 'hidden',
                 }}
               >
-                {attendance.slice(0, 5).map((item, index) => (
+                {!attendanceData ? <div style={{padding: 20}}><Skeleton active /></div> : attendance.slice(0, 5).map((item: any, index: number) => (
                   <div
                     key={index}
                     style={{
@@ -868,7 +921,11 @@ export function HomePage() {
               <SectionHeader
                 label="Artilharia"
                 action="Ver mais"
-                onAction={() => requireAuth(() => navigate(slug ? `/${slug}/ranking/scorers` : '/app/ranking/scorers'))}
+                onAction={() =>
+                  requireAuth(() =>
+                    navigate(slug ? `/${slug}/ranking/scorers` : '/app/ranking/scorers'),
+                  )
+                }
               />
               {data.topScorers.length === 0 ? (
                 <div
@@ -893,7 +950,7 @@ export function HomePage() {
                     overflow: 'hidden',
                   }}
                 >
-                  {data.topScorers.slice(0, 5).map((item, index) => (
+                  {data.topScorers.slice(0, 5).map((item: any, index: number) => (
                     <div
                       key={index}
                       style={{

@@ -12,7 +12,7 @@ export function useIsPWA() {
   useEffect(() => {
     const mq = window.matchMedia('(display-mode: standalone)')
     const onChange = (e: MediaQueryListEvent) => setIsPWA(e.matches)
-    
+
     // Add event listener (newer spec) or addListener (older spec fallback)
     if (mq.addEventListener) {
       mq.addEventListener('change', onChange)

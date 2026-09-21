@@ -101,7 +101,9 @@ function BottomTabs({
         right: 0,
         bottom: 0,
         height: `calc(${isPWA ? 92 : 60}px + env(safe-area-inset-bottom))`,
-        paddingBottom: isPWA ? 'calc(32px + env(safe-area-inset-bottom))' : 'env(safe-area-inset-bottom)',
+        paddingBottom: isPWA
+          ? 'calc(32px + env(safe-area-inset-bottom))'
+          : 'env(safe-area-inset-bottom)',
         zIndex: 1000,
         display: 'grid',
         gridTemplateColumns: 'repeat(4, 1fr)',

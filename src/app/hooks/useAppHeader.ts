@@ -29,4 +29,3 @@ function shouldShowBack(pathname: string) {
   if (/\/team\/settings/.test(pathname)) return true
   return false
 }
-

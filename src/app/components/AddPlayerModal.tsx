@@ -109,7 +109,9 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
           number: player.number,
         })
         // Load photo
-        getPlayerPhoto(player.id).then(setPhotoBase64).catch(() => setPhotoBase64(null))
+        getPlayerPhoto(player.id)
+          .then(setPhotoBase64)
+          .catch(() => setPhotoBase64(null))
 
         // Load stats
         setLoadingStats(true)

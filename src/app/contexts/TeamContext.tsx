@@ -35,9 +35,11 @@ export function TeamProvider({ children }: { children: ReactNode }) {
   const authData = localStorage.getItem('auth')
   const auth = authData ? JSON.parse(authData) : null
   let role = auth?.role || null
-  
+
   if (team && auth?.teams) {
-    const currentTeam = auth.teams.find((t: any) => t.id === team.id || t.slug === team.slug)
+    const currentTeam = auth.teams.find(
+      (t: any) => t.id === team.id || t.slug === team.slug,
+    )
     if (currentTeam) {
       role = currentTeam.role
     }
@@ -66,4 +68,3 @@ export function useTeam() {
 export function useOptionalTeam() {
   return useContext(TeamContext)
 }
-

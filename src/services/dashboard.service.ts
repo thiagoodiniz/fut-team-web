@@ -63,3 +63,38 @@ export async function getDashboardStats(seasonId?: string) {
   const res = await api.get<DashboardStats>('/dashboard', { params })
   return res.data
 }
+
+export async function getDashboardSummary(seasonId?: string) {
+  const params = seasonId ? { seasonId } : {}
+  const res = await api.get<Pick<DashboardStats, 'summary' | 'nextMatch'>>(
+    '/dashboard/summary',
+    { params },
+  )
+  return res.data
+}
+
+export async function getDashboardLastMatches(seasonId?: string) {
+  const params = seasonId ? { seasonId } : {}
+  const res = await api.get<Pick<DashboardStats, 'lastMatches'>>(
+    '/dashboard/last-matches',
+    { params },
+  )
+  return res.data
+}
+
+export async function getDashboardTopScorers(seasonId?: string) {
+  const params = seasonId ? { seasonId } : {}
+  const res = await api.get<Pick<DashboardStats, 'topScorers'>>(
+    '/dashboard/top-scorers',
+    { params },
+  )
+  return res.data
+}
+
+export async function getDashboardAttendance(seasonId?: string) {
+  const params = seasonId ? { seasonId } : {}
+  const res = await api.get<Pick<DashboardStats, 'attendance'>>('/dashboard/attendance', {
+    params,
+  })
+  return res.data
+}

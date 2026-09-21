@@ -60,7 +60,9 @@ export function MatchesPage() {
 
     try {
       setLoading(true)
-      const data = slug ? await getPublicMatches(slug, season.id) : await listMatches(season.id)
+      const data = slug
+        ? await getPublicMatches(slug, season.id)
+        : await listMatches(season.id)
       setMatches(data)
     } finally {
       setLoading(false)
@@ -487,7 +489,9 @@ export function MatchesPage() {
                             match_id: match.id,
                             opponent: match.opponent,
                           })
-                          requireAuth(() => navigate(`/${slug || 'app'}/matches/${match.id}`))
+                          requireAuth(() =>
+                            navigate(`/${slug || 'app'}/matches/${match.id}`),
+                          )
                         }}
                       >
                         <div style={{ minWidth: 0, flex: 1 }}>

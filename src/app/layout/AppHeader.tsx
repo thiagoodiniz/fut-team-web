@@ -5,7 +5,17 @@ import {
   SunOutlined,
   SwapOutlined,
 } from '@ant-design/icons'
-import { Button, Dropdown, Layout, theme, Typography, Select, Avatar, Tag, Tooltip } from 'antd'
+import {
+  Button,
+  Dropdown,
+  Layout,
+  theme,
+  Typography,
+  Select,
+  Avatar,
+  Tag,
+  Tooltip,
+} from 'antd'
 import type { MenuProps } from 'antd'
 import { useNavigate } from 'react-router-dom'
 
@@ -165,7 +175,7 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
             fontWeight: 700,
           }}
         >
-          {title === 'Home' ? (team?.name || 'Time') : title}
+          {title === 'Home' ? team?.name || 'Time' : title}
         </Title>
       </div>
 

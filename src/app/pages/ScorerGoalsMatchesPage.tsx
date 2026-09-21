@@ -115,7 +115,10 @@ export function ScorerGoalsMatchesPage() {
             <FireFilled style={{ color: isDark ? '#fbbf24' : '#b45309' }} />
             <Text style={{ fontSize: 13, color: isDark ? '#fef08a' : '#92400e' }}>
               Maior sequência:{' '}
-              <Text strong style={{ fontSize: 13, color: isDark ? '#fef08a' : '#92400e' }}>
+              <Text
+                strong
+                style={{ fontSize: 13, color: isDark ? '#fef08a' : '#92400e' }}
+              >
                 {data.stats.maxStreak} jogos seguidos
               </Text>
             </Text>
@@ -148,16 +151,28 @@ export function ScorerGoalsMatchesPage() {
             const isWin = match.ourScore > match.theirScore
             const isLoss = match.ourScore < match.theirScore
             const accent = isWin
-              ? (isDark ? APP_COLORS.winDark : APP_COLORS.winLight)
+              ? isDark
+                ? APP_COLORS.winDark
+                : APP_COLORS.winLight
               : isLoss
-                ? (isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight)
-                : (isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight)
+                ? isDark
+                  ? APP_COLORS.lossDark
+                  : APP_COLORS.lossLight
+                : isDark
+                  ? APP_COLORS.drawDark
+                  : APP_COLORS.drawLight
 
             const scoreBg = isWin
-              ? (isDark ? 'rgba(34, 197, 94, 0.18)' : '#dcfce7')
+              ? isDark
+                ? 'rgba(34, 197, 94, 0.18)'
+                : '#dcfce7'
               : isLoss
-                ? (isDark ? 'rgba(239, 68, 68, 0.18)' : '#fee2e2')
-                : (isDark ? 'rgba(245, 158, 11, 0.18)' : '#fef3c7')
+                ? isDark
+                  ? 'rgba(239, 68, 68, 0.18)'
+                  : '#fee2e2'
+                : isDark
+                  ? 'rgba(245, 158, 11, 0.18)'
+                  : '#fef3c7'
 
             return (
               <div

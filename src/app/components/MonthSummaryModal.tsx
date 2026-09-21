@@ -245,7 +245,13 @@ export function MonthSummaryModal({
               >
                 Vitórias
               </Text>
-              <Text strong style={{ fontSize: 20, color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight }}>
+              <Text
+                strong
+                style={{
+                  fontSize: 20,
+                  color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight,
+                }}
+              >
                 {stats.wins}
               </Text>
             </div>
@@ -261,7 +267,13 @@ export function MonthSummaryModal({
               >
                 Empates
               </Text>
-              <Text strong style={{ fontSize: 20, color: isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight }}>
+              <Text
+                strong
+                style={{
+                  fontSize: 20,
+                  color: isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight,
+                }}
+              >
                 {stats.draws}
               </Text>
             </div>
@@ -277,7 +289,13 @@ export function MonthSummaryModal({
               >
                 Derrotas
               </Text>
-              <Text strong style={{ fontSize: 20, color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight }}>
+              <Text
+                strong
+                style={{
+                  fontSize: 20,
+                  color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight,
+                }}
+              >
                 {stats.losses}
               </Text>
             </div>
@@ -299,7 +317,12 @@ export function MonthSummaryModal({
                 borderRight: `1px solid ${token.colorBorderSecondary}`,
               }}
             >
-              <ArrowUpOutlined style={{ color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight, fontSize: 14 }} />
+              <ArrowUpOutlined
+                style={{
+                  color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight,
+                  fontSize: 14,
+                }}
+              />
               <Text
                 type="secondary"
                 style={{
@@ -317,7 +340,12 @@ export function MonthSummaryModal({
               </Text>
             </div>
             <div style={{ flex: 1, textAlign: 'center' }}>
-              <ArrowDownOutlined style={{ color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight, fontSize: 14 }} />
+              <ArrowDownOutlined
+                style={{
+                  color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight,
+                  fontSize: 14,
+                }}
+              />
               <Text
                 type="secondary"
                 style={{

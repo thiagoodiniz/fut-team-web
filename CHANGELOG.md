@@ -9,6 +9,9 @@ O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 - **Foto do Jogador:** Correção de bug onde a foto do jogador não era carregada no modal de Edição devido à omissão da imagem na listagem da API (otimização de banda). Agora a foto é carregada individualmente e cacheada ao abrir o modal.
 
 ### Modificado
+- **Performance da Tela Início (Dashboard):**
+  - Implementação de chamadas paralelas para buscar informações do dashboard de forma segmentada (Resumo, Últimos Jogos, Artilharia, Frequência).
+  - Utilização de `Skeleton` loaders dinâmicos (efeito fantasma) para partes da tela que demoram mais para responder, eliminando o travamento completo inicial e dando uma resposta visual imediata ao usuário.
 - **Interface e Navegação:**
   - Substituição do título "Home" no cabeçalho pelo nome do time atual.
   - Substituição do quadrado com a letra inicial na área Hero pelo escudo do time (`TeamLogo`).

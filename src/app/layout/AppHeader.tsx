@@ -28,6 +28,8 @@ import posthog from 'posthog-js'
 const { Header } = Layout
 const { Title } = Typography
 
+declare const __APP_VERSION__: string
+
 type AppHeaderProps = {
   title: string
   showBack?: boolean
@@ -58,8 +60,11 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
           <Typography.Text strong style={{ display: 'block' }}>
             {user?.name || 'Usuário'}
           </Typography.Text>
-          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+          <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
             {user?.email || ''}
+          </Typography.Text>
+          <Typography.Text type="secondary" style={{ fontSize: 10, display: 'block', marginTop: 4, opacity: 0.7 }}>
+            v{__APP_VERSION__}
           </Typography.Text>
         </div>
       ),

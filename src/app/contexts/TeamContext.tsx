@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useRef, type ReactNode } from 'react'
 import { getMyTeam, type TeamDTO } from '../../services/teams.service'
 
 interface TeamContextType {
@@ -28,8 +28,12 @@ export function TeamProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const fetched = useRef(false)
   useEffect(() => {
-    loadTeam()
+    if (!fetched.current) {
+      fetched.current = true
+      loadTeam()
+    }
   }, [])
 
   const authData = localStorage.getItem('auth')

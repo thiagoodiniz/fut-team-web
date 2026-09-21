@@ -59,7 +59,7 @@ export function HomePage() {
   const { slug } = useParams<{ slug: string }>()
   const { requireAuth, isModalOpen, setIsModalOpen } = useAuthGate()
   const { token } = theme.useToken()
-  const { season } = useSeason()
+  const { season, loading: loadingSeason } = useSeason()
   const { team } = useTeam()
   const { isDark, clubColors } = useAppTheme()
   const isPWA = useIsPWA()
@@ -72,7 +72,7 @@ export function HomePage() {
   React.useEffect(() => {
     let active = true;
     
-    async function load() {
+    if (loadingSeason) return; async function load() {
       if (slug) {
         getPublicDashboardSummary(slug, season?.id).then(d => active && setSummaryData(d)).catch(console.error)
         getPublicDashboardLastMatches(slug, season?.id).then(d => active && setLastMatchesData(d)).catch(console.error)
@@ -94,7 +94,7 @@ export function HomePage() {
     load()
     
     return () => { active = false }
-  }, [season?.id, slug])
+  }, [season?.id, slug, loadingSeason])
 
   const summary = summaryData?.summary
   const nextMatch = summaryData?.nextMatch

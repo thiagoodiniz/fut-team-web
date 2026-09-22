@@ -3,7 +3,6 @@ import {
   Modal,
   Form,
   Input,
-  DatePicker,
   message,
   InputNumber,
   Button,
@@ -11,12 +10,40 @@ import {
   Typography,
   theme,
 } from 'antd'
-import type { Dayjs } from 'dayjs'
-import dayjs from 'dayjs'
 import { updateMatch, type MatchDTO } from '../../services/matches.service'
-import { DeleteOutlined } from '@ant-design/icons'
+import { DeleteOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons'
 
 const { Text } = Typography
+
+const StepperWithInput = ({ value, onChange }: { value?: number; onChange?: (v: number) => void }) => {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+      <Button
+        shape="circle"
+        icon={<MinusOutlined />}
+        onClick={() => onChange?.(Math.max(0, (value || 0) - 1))}
+      />
+      <Input
+        type="tel"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        value={value}
+        onChange={(e) => {
+          const val = parseInt(e.target.value, 10)
+          if (!isNaN(val)) onChange?.(val)
+          else if (e.target.value === '') onChange?.(0)
+        }}
+        style={{ width: 48, textAlign: 'center', fontSize: 18, fontWeight: 'bold', padding: '4px 0' }}
+        styles={{ input: { textAlign: 'center' } }}
+      />
+      <Button
+        shape="circle"
+        icon={<PlusOutlined />}
+        onClick={() => onChange?.((value || 0) + 1)}
+      />
+    </div>
+  )
+}
 
 interface EditMatchModalProps {
   open: boolean
@@ -39,8 +66,12 @@ export function EditMatchModal({
 
   React.useEffect(() => {
     if (open && match) {
+      const dateObj = new Date(match.date)
+      const tzOffset = dateObj.getTimezoneOffset() * 60000
+      const localISOTime = new Date(dateObj.getTime() - tzOffset).toISOString().slice(0, 16)
+
       form.setFieldsValue({
-        date: dayjs(match.date),
+        date: localISOTime,
         opponent: match.opponent,
         location: match.location,
         notes: match.notes,
@@ -51,7 +82,7 @@ export function EditMatchModal({
   }, [open, match, form])
 
   async function handleSubmit(values: {
-    date: Dayjs
+    date: string
     location?: string
     opponent?: string
     notes?: string
@@ -61,7 +92,7 @@ export function EditMatchModal({
     try {
       setLoading(true)
       await updateMatch(match.id, {
-        date: values.date.toISOString(),
+        date: new Date(values.date).toISOString(),
         location: values.location,
         opponent: values.opponent,
         notes: values.notes,
@@ -101,7 +132,7 @@ export function EditMatchModal({
           label="Data e Hora"
           rules={[{ required: true, message: 'Informe a data' }]}
         >
-          <DatePicker showTime format="DD/MM/YYYY HH:mm" style={{ width: '100%' }} />
+          <Input type="datetime-local" style={{ width: '100%', fontSize: '16px' }} />
         </Form.Item>
 
         <Form.Item name="opponent" label="Adversário">
@@ -134,10 +165,13 @@ export function EditMatchModal({
           >
             Placar
           </Text>
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12 }}>
-            <Form.Item name="ourScore" label="Nós" style={{ flex: 1, margin: 0 }}>
-              <InputNumber min={0} style={{ width: '100%' }} controls />
-            </Form.Item>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+            <div style={{ textAlign: 'center' }}>
+              <Text style={{ fontSize: 12, color: token.colorTextSecondary, display: 'block', marginBottom: 8 }}>Nós</Text>
+              <Form.Item name="ourScore" style={{ margin: 0 }}>
+                <StepperWithInput />
+              </Form.Item>
+            </div>
             <div
               style={{
                 paddingBottom: 6,
@@ -150,9 +184,12 @@ export function EditMatchModal({
             >
               ×
             </div>
-            <Form.Item name="theirScore" label="Eles" style={{ flex: 1, margin: 0 }}>
-              <InputNumber min={0} style={{ width: '100%' }} controls />
-            </Form.Item>
+            <div style={{ textAlign: 'center' }}>
+              <Text style={{ fontSize: 12, color: token.colorTextSecondary, display: 'block', marginBottom: 8 }}>Eles</Text>
+              <Form.Item name="theirScore" style={{ margin: 0 }}>
+                <StepperWithInput />
+              </Form.Item>
+            </div>
           </div>
         </div>
 

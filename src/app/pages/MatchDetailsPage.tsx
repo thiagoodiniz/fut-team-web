@@ -13,6 +13,7 @@ import {
   FloatButton,
   Skeleton,
   AutoComplete,
+  Alert,
 } from 'antd'
 import posthog from 'posthog-js'
 import {
@@ -344,16 +345,6 @@ export function MatchDetailsPage() {
             >
               {opponent}
             </Title>
-            {isActiveSeason && isAdmin && (
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => {
-                  posthog.capture('edit_match_clicked', { match_id: id })
-                  setEditMatchModalOpen(true)
-                }}
-              />
-            )}
           </div>
 
           {/* Score */}
@@ -454,6 +445,23 @@ export function MatchDetailsPage() {
               <Text>{match.notes}</Text>
             </div>
           ) : null}
+
+          {isActiveSeason && isAdmin && (
+            <Button
+              type="primary"
+              ghost
+              block
+              icon={<EditOutlined />}
+              onClick={() => {
+                posthog.capture('edit_match_clicked', { match_id: id })
+                setEditMatchModalOpen(true)
+              }}
+              style={{ marginTop: 16, height: 40 }}
+            >
+              Editar placar ou informações do jogo
+            </Button>
+          )}
+
         </div>
       </div>
 
@@ -489,6 +497,17 @@ export function MatchDetailsPage() {
             {goals.length} {goals.length === 1 ? 'gol' : 'gols'}
           </Text>
         </div>
+
+        {match.ourScore > goals.length && (
+          <div style={{ padding: '0 20px 12px' }}>
+            <Alert
+              message="Gols não atribuídos"
+              description={`O placar indica que fizemos ${match.ourScore} ${match.ourScore === 1 ? 'gol' : 'gols'}, mas apenas ${goals.length} ${goals.length === 1 ? 'foi atribuído' : 'foram atribuídos'} a jogadores ou como gol contra.`}
+              type="warning"
+              showIcon
+            />
+          </div>
+        )}
 
         {isActiveSeason && isAdmin && (
           <div style={{ padding: '0 20px 12px' }}>

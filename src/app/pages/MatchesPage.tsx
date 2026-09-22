@@ -10,6 +10,7 @@ import {
   PlusOutlined,
   RightOutlined,
   UserOutlined,
+  WarningOutlined,
 } from '@ant-design/icons'
 import { listMatches, type MatchDTO } from '../../services/matches.service'
 import { getPublicMatches } from '../../services/public.service'
@@ -514,6 +515,7 @@ export function MatchesPage() {
                               alignItems: 'center',
                               gap: 8,
                               marginTop: 4,
+                              flexWrap: 'wrap',
                             }}
                           >
                             <div
@@ -561,6 +563,22 @@ export function MatchesPage() {
                                   (match.loanedPlayers?.length || 0)}
                               </Text>
                             </div>
+                            {match.ourScore > (match.goals?.length || 0) && (
+                              <Tag
+                                color="warning"
+                                style={{
+                                  margin: 0,
+                                  fontSize: 10,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 4,
+                                  lineHeight: '16px',
+                                  padding: '0 4px',
+                                }}
+                              >
+                                <WarningOutlined /> Gols não atribuídos
+                              </Tag>
+                            )}
                           </div>
                         </div>
 

@@ -1,7 +1,6 @@
 import React from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Typography, theme, Skeleton, Tag, FloatButton } from 'antd'
-import { LeftOutlined } from '@ant-design/icons'
 
 import { useSeason } from '../contexts/SeasonContext'
 import {

@@ -33,26 +33,27 @@ export function JoinTeamPage() {
   const navigate = useNavigate()
   const { token } = theme.useToken()
 
-  const pendingRequest = location.state?.pendingRequest
 
-  // Read auth and isManager from localStorage
+  const [auth, setAuth] = useState(() => {
+    const authData = localStorage.getItem('auth')
+    try {
+      return authData ? JSON.parse(authData) : null
+    } catch {
+      return null
+    }
+  })
+
   const tokenStr = localStorage.getItem('token')
-  const authData = localStorage.getItem('auth')
-  let auth: any = null
-  try {
-    auth = authData ? JSON.parse(authData) : null
-  } catch {}
   const isManager = auth?.isManager === true
   const isLoggedIn = Boolean(tokenStr && auth?.userId)
+  
+  const pendingRequest = location.state?.pendingRequest || auth?.pendingRequest
 
   useEffect(() => {
     handleSearch('')
     syncAuth().then((updatedAuth) => {
-      // If after sync we find the user has teams but no team is selected,
-      // syncAuth automatically sets it and updates localStorage.
-      // If we see they got a team, we can redirect them to /app
-      if (updatedAuth && updatedAuth.teams?.length > 0) {
-        navigate('/app', { replace: true })
+      if (updatedAuth) {
+        setAuth(updatedAuth)
       }
     })
   }, [])

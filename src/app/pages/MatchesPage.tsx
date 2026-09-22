@@ -114,8 +114,8 @@ export function MatchesPage() {
   const stats = React.useMemo(() => {
     return matches.reduce(
       (acc, m) => {
-        acc.total++
         if (m.ourScore === null || m.theirScore === null) return acc
+        acc.total++
         acc.gf += m.ourScore
         acc.ga += m.theirScore
 
@@ -167,7 +167,7 @@ export function MatchesPage() {
               marginBottom: 2,
             }}
           >
-            Jogos
+            Realizados
           </Text>
           <Text strong style={{ fontSize: 22, color: token.colorTextBase }}>
             {stats.total}

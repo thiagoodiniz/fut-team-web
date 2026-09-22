@@ -32,12 +32,13 @@ export function MonthSummaryModal({
   const { isDark } = useAppTheme()
 
   const stats = React.useMemo(() => {
-    const total = matches.length
-    const wins = matches.filter((m) => m.ourScore > m.theirScore).length
-    const losses = matches.filter((m) => m.ourScore < m.theirScore).length
-    const draws = matches.filter((m) => m.ourScore === m.theirScore).length
-    const goalsFor = matches.reduce((acc, m) => acc + m.ourScore, 0)
-    const goalsAgainst = matches.reduce((acc, m) => acc + m.theirScore, 0)
+    const scoredMatches = matches.filter((m) => m.ourScore !== null && m.theirScore !== null)
+    const total = scoredMatches.length
+    const wins = scoredMatches.filter((m) => m.ourScore! > m.theirScore!).length
+    const losses = scoredMatches.filter((m) => m.ourScore! < m.theirScore!).length
+    const draws = scoredMatches.filter((m) => m.ourScore! === m.theirScore!).length
+    const goalsFor = scoredMatches.reduce((acc, m) => acc + m.ourScore!, 0)
+    const goalsAgainst = scoredMatches.reduce((acc, m) => acc + m.theirScore!, 0)
 
     // Ranking Scorer
     const scorerMap = new Map<
@@ -227,7 +228,7 @@ export function MonthSummaryModal({
                   letterSpacing: '0.05em',
                 }}
               >
-                Jogos
+                Realizados
               </Text>
               <Text strong style={{ fontSize: 20 }}>
                 {stats.total}

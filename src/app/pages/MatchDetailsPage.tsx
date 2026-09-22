@@ -38,6 +38,7 @@ import {
   type GoalDTO,
   createGoals,
   deleteGoal,
+  updateGoal,
 } from '../../services/goals.service'
 import {
   listMatchPresences,
@@ -47,6 +48,7 @@ import {
 import { AddGoalModal } from '../components/AddGoalModal'
 import { PlayerAvatar } from '../components/PlayerAvatar'
 import { EditMatchModal } from '../components/EditMatchModal'
+import { EditGoalModal } from '../components/EditGoalModal'
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
 import { useIsPWA } from '../hooks/useIsPWA'
@@ -86,6 +88,7 @@ export function MatchDetailsPage() {
 
   const [goalModalOpen, setGoalModalOpen] = React.useState(false)
   const [editMatchModalOpen, setEditMatchModalOpen] = React.useState(false)
+  const [editingGoal, setEditingGoal] = React.useState<any | null>(null)
 
   const [creatingGoal, setCreatingGoal] = React.useState(false)
   const [loanedPlayersOptions, setLoanedPlayersOptions] = React.useState<
@@ -255,9 +258,20 @@ export function MatchDetailsPage() {
       setMatch(matchData)
     } catch (err) {
       console.error(err)
-      message.error('Erro ao adicionar gol')
+      message.error('Erro ao registrar gol')
     } finally {
       setCreatingGoal(false)
+    }
+  }
+
+  async function handleEditGoalSubmit(goalId: string, data: any) {
+    try {
+      await updateGoal(goalId, data)
+      message.success('Gol atualizado com sucesso!')
+      setEditingGoal(null)
+      load()
+    } catch {
+      message.error('Erro ao atualizar gol')
     }
   }
 
@@ -584,9 +598,22 @@ export function MatchDetailsPage() {
                 : g.player?.nickname
                   ? g.player?.name
                   : undefined
+              const assistantName = !g.ownGoal
+                ? g.assistant?.nickname || g.assistant?.name || g.loanedAssistantName
+                : null
+
               return (
                 <div
                   key={g.id}
+                  onClick={() => {
+                    if (isActiveSeason && isAdmin) {
+                      setEditingGoal({
+                        ...g,
+                        scorerName: playerName,
+                        scorerId: g.playerId || (g.loanedPlayerName ? `loaned:${g.loanedPlayerName}` : null),
+                      })
+                    }
+                  }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -597,13 +624,22 @@ export function MatchDetailsPage() {
                         ? `1px solid ${token.colorFillQuaternary}`
                         : 'none',
                     borderLeft: `3px solid ${accent}`,
+                    cursor: isActiveSeason && isAdmin ? 'pointer' : 'default',
                   }}
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <Text strong style={{ display: 'block' }}>
                       {playerName}
                     </Text>
-                    {playerSub && (
+                    {assistantName && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                        <span style={{ fontSize: 10 }}>👟</span>
+                        <Text type="secondary" style={{ fontSize: 11 }}>
+                          {assistantName}
+                        </Text>
+                      </div>
+                    )}
+                    {playerSub && !assistantName && (
                       <Text type="secondary" style={{ fontSize: 12 }}>
                         {playerSub}
                       </Text>
@@ -926,7 +962,10 @@ export function MatchDetailsPage() {
         open={editMatchModalOpen}
         match={match}
         onCancel={() => setEditMatchModalOpen(false)}
-        onSuccess={load}
+        onSuccess={() => {
+          setEditMatchModalOpen(false)
+          load()
+        }}
         onDelete={async () => {
           try {
             await deleteMatch(match.id)
@@ -937,6 +976,14 @@ export function MatchDetailsPage() {
             message.error('Erro ao remover jogo')
           }
         }}
+      />
+
+      <EditGoalModal
+        open={!!editingGoal}
+        goal={editingGoal}
+        players={presentPlayersOptions}
+        onCancel={() => setEditingGoal(null)}
+        onSubmit={handleEditGoalSubmit}
       />
 
       <FloatButton.BackTop

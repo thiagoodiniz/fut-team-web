@@ -15,11 +15,10 @@ import {
 import {
   CameraOutlined,
   DeleteOutlined,
-  TrophyOutlined,
   TeamOutlined,
-  FireOutlined,
+  TrophyOutlined,
 } from '@ant-design/icons'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import {
   createPlayer,
   updatePlayer,
@@ -95,6 +94,7 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
   const { token } = theme.useToken()
   const { season, isActiveSeason } = useSeason()
   const { isAdmin } = useTeam()
+  const { slug } = useParams()
 
   const isReadOnly = !isAdmin || !isActiveSeason
 
@@ -203,7 +203,7 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
             <Skeleton active paragraph={{ rows: 1 }} title={false} />
           ) : stats ? (
             <div
-              style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}
             >
               {/* Presenças */}
               <div style={{ textAlign: 'center' }}>
@@ -265,9 +265,7 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
                     marginBottom: 2,
                   }}
                 >
-                  <FireOutlined
-                    style={{ fontSize: 12, color: token.colorTextSecondary }}
-                  />
+                  <span style={{ fontSize: 12 }}>⚽</span>
                   <Text
                     style={{
                       fontSize: 10,
@@ -292,7 +290,7 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
                 {stats.goals > 0 && (
                   <div style={{ marginTop: 2 }}>
                     <Link
-                      to={`/app/ranking/scorers/${player.id}/goals`}
+                      to={slug ? `/${slug}/ranking/scorers/${player.id}/goals` : `/app/ranking/scorers/${player.id}/goals`}
                       onClick={onClose}
                       style={{ fontSize: 11 }}
                     >
@@ -301,6 +299,53 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
                   </div>
                 )}
               </div>
+
+              {/* Assistências */}
+              <div style={{ textAlign: 'center' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 4,
+                    marginBottom: 2,
+                  }}
+                >
+                  <span style={{ fontSize: 12 }}>👟</span>
+                  <Text
+                    style={{
+                      fontSize: 10,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      color: token.colorTextSecondary,
+                      fontWeight: 600,
+                    }}
+                  >
+                    Assist.
+                  </Text>
+                </div>
+                <Text
+                  strong
+                  style={{
+                    fontSize: 20,
+                    color: (stats.assists || 0) > 0 ? token.colorPrimary : undefined,
+                  }}
+                >
+                  {stats.assists || 0}
+                </Text>
+                {(stats.assists || 0) > 0 && (
+                  <div style={{ marginTop: 2 }}>
+                    <Link
+                      to={slug ? `/${slug}/ranking/assistants/${player.id}/assists` : `/app/ranking/assistants/${player.id}/assists`}
+                      onClick={onClose}
+                      style={{ fontSize: 11 }}
+                    >
+                      ver todas
+                    </Link>
+                  </div>
+                )}
+              </div>
+
 
               {/* Frequência */}
               <div style={{ textAlign: 'center' }}>

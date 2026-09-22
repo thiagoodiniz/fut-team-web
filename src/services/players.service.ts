@@ -57,6 +57,7 @@ export type PlayerStats = {
   presences: number
   totalMatches: number
   goals: number
+  assists: number
 }
 
 export async function getPlayerStats(
@@ -109,6 +110,32 @@ export async function getPlayerGoalMatches(
     },
   )
   return response.data
+}
+
+export type PlayerAssistMatchesResponse = {
+  player: { id: string; name: string; nickname: string | null }
+  matches: {
+    id: string
+    date: string
+    location: string | null
+    opponent: string | null
+    competition: string | null
+    competitionPhase: string | null
+    assistsCount: number
+    ourScore: number | null
+    theirScore: number | null
+  }[]
+}
+
+export async function getPlayerAssistMatches(
+  playerId: string,
+  seasonId?: string,
+): Promise<PlayerAssistMatchesResponse> {
+  const res = await api.get<PlayerAssistMatchesResponse>(
+    `/players/${playerId}/assist-matches`,
+    { params: { seasonId } },
+  )
+  return res.data
 }
 
 export type PlayerPresenceMatchScorer = {

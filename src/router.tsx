@@ -14,6 +14,8 @@ import { TeamSettingsPage } from './app/pages/TeamSettingsPage'
 import { TeamMembersPage } from './app/pages/TeamMembersPage'
 import { ScorersTotalPage } from './app/pages/ScorersTotalPage'
 import { ScorerGoalsMatchesPage } from './app/pages/ScorerGoalsMatchesPage'
+import { AssistantsTotalPage } from './app/pages/AssistantsTotalPage'
+import { AssistantMatchesPage } from './app/pages/AssistantMatchesPage'
 import { AttendanceTotalPage } from './app/pages/AttendanceTotalPage'
 import { AttendancePlayerMatchesPage } from './app/pages/AttendancePlayerMatchesPage'
 import { JoinTeamPage } from './app/pages/JoinTeamPage'
@@ -70,6 +72,11 @@ export const router = createBrowserRouter([
             path: 'ranking/scorers/:playerId/goals',
             element: <ScorerGoalsMatchesPage />,
           },
+          { path: 'ranking/assistants', element: <AssistantsTotalPage /> },
+          {
+            path: 'ranking/assistants/:playerId/assists',
+            element: <AssistantMatchesPage />,
+          },
           { path: 'ranking/attendance', element: <AttendanceTotalPage /> },
           {
             path: 'ranking/attendance/:playerId/matches',
@@ -100,6 +107,12 @@ export const router = createBrowserRouter([
           {
             path: 'ranking/scorers/:playerId/goals',
             element: <ScorerGoalsMatchesPage />,
+          },
+          { path: 'ranking/assistants', element: <AssistantsTotalPage /> },
+          { path: 'assistants', element: <AssistantsTotalPage /> },
+          {
+            path: 'ranking/assistants/:playerId/assists',
+            element: <AssistantMatchesPage />,
           },
           { path: 'ranking/attendance', element: <AttendanceTotalPage /> },
           { path: 'attendance', element: <AttendanceTotalPage /> },

@@ -100,3 +100,9 @@ export async function getDashboardAttendance(seasonId?: string) {
   })
   return res.data
 }
+
+export async function getDashboardTopAssistants(seasonId?: string) {
+  const params = seasonId ? { seasonId } : {}
+  const res = await api.get<any>('/dashboard/top-assistants', { params })
+  return res.data
+}

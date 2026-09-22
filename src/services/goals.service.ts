@@ -5,12 +5,19 @@ export type GoalDTO = {
   matchId: string
   playerId: string | null
   loanedPlayerName: string | null
+  assistantId: string | null
+  loanedAssistantName: string | null
   minute: number | null
   ownGoal: boolean
   freeKick: boolean
   penalty: boolean
   createdAt: string
   player: {
+    id: string
+    name: string
+    nickname: string | null
+  } | null
+  assistant: {
     id: string
     name: string
     nickname: string | null
@@ -29,6 +36,8 @@ export async function createGoals(
     loanedPlayerName?: string | null
     goals: {
       minute?: number | null
+      assistantId?: string | null
+      loanedAssistantName?: string | null
       ownGoal?: boolean
       freeKick?: boolean
       penalty?: boolean
@@ -46,5 +55,10 @@ export async function createGoals(
 
 export async function deleteGoal(goalId: string) {
   const res = await api.delete(`/goals/${goalId}`)
+  return res.data
+}
+
+export async function updateGoal(goalId: string, data: any) {
+  const res = await api.patch(`/goals/${goalId}`, data)
   return res.data
 }

@@ -21,6 +21,8 @@ type PlayerOption = {
 
 type GoalEntry = {
   minute?: number | null
+  assistantId?: string | null
+  loanedAssistantName?: string | null
   ownGoal?: boolean
   freeKick?: boolean
   penalty?: boolean
@@ -50,6 +52,8 @@ export function AddGoalModal({
   const isOwnGoalChecked =
     (Form.useWatch('isOwnGoal', form) as boolean | undefined) ?? false
 
+  const selectedPlayerId = Form.useWatch('playerId', form)
+
   const remainingGoals = maxGoals !== undefined ? maxGoals - currentGoalsCount : 10
   const hasNonOwnGoals = !isOwnGoalChecked
 
@@ -60,7 +64,7 @@ export function AddGoalModal({
   function handleFinish(values: {
     playerId?: string
     isOwnGoal?: boolean
-    goals: { minute?: number; ownGoal?: boolean; freeKick?: boolean; penalty?: boolean }[]
+    goals: { minute?: number; assistantId?: string; ownGoal?: boolean; freeKick?: boolean; penalty?: boolean }[]
   }) {
     const ownGoal = values.isOwnGoal ?? false
 
@@ -68,6 +72,8 @@ export function AddGoalModal({
       playerId: values.playerId,
       goals: (values.goals || [{}]).map((g) => ({
         minute: g.minute ?? null,
+        assistantId: !ownGoal && g.assistantId && !g.assistantId.startsWith('loaned:') ? g.assistantId : null,
+        loanedAssistantName: !ownGoal && g.assistantId && g.assistantId.startsWith('loaned:') ? g.assistantId.replace('loaned:', '') : null,
         ownGoal,
         freeKick: ownGoal ? false : (g.freeKick ?? false),
         penalty: ownGoal ? false : (g.penalty ?? false),
@@ -243,10 +249,27 @@ export function AddGoalModal({
                         min={0}
                         max={150}
                         style={{ width: '100%' }}
-                        placeholder="Minuto (opcional)"
+                        placeholder="Minuto"
                         addonAfter="'"
                       />
                     </Form.Item>
+
+                    {!isOwnGoalChecked && (
+                      <Form.Item
+                        {...field}
+                        name={[field.name, 'assistantId']}
+                        style={{ flex: 2, margin: 0 }}
+                      >
+                        <Select
+                          placeholder="Assistência (opcional)"
+                          options={players.filter((p) => p.value !== selectedPlayerId)}
+                          showSearch
+                          optionFilterProp="label"
+                          disabled={!selectedPlayerId}
+                          allowClear
+                        />
+                      </Form.Item>
+                    )}
 
                     {fields.length > 1 && (
                       <MinusCircleOutlined

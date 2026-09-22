@@ -24,8 +24,8 @@ import {
 
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
-import { getDashboardSummary, getDashboardLastMatches, getDashboardTopScorers, getDashboardAttendance } from '../../services/dashboard.service'
-import { getPublicDashboardSummary, getPublicDashboardLastMatches, getPublicDashboardTopScorers, getPublicDashboardAttendance } from '../../services/public.service'
+import { getDashboardSummary, getDashboardLastMatches, getDashboardTopScorers, getDashboardTopAssistants, getDashboardAttendance } from '../../services/dashboard.service'
+import { getPublicDashboardSummary, getPublicDashboardLastMatches, getPublicDashboardTopScorers, getPublicDashboardTopAssistants, getPublicDashboardAttendance } from '../../services/public.service'
 import { useAuthGate } from '../hooks/useAuthGate'
 import { AuthGateModal } from '../components/AuthGateModal'
 import { PlayerAvatar } from '../components/PlayerAvatar'
@@ -67,6 +67,7 @@ export function HomePage() {
   const [summaryData, setSummaryData] = React.useState<any>(null)
   const [lastMatchesData, setLastMatchesData] = React.useState<any>(null)
   const [topScorersData, setTopScorersData] = React.useState<any>(null)
+  const [topAssistantsData, setTopAssistantsData] = React.useState<any>(null)
   const [attendanceData, setAttendanceData] = React.useState<any>(null)
 
   React.useEffect(() => {
@@ -77,11 +78,13 @@ export function HomePage() {
         getPublicDashboardSummary(slug, season?.id).then(d => active && setSummaryData(d)).catch(console.error)
         getPublicDashboardLastMatches(slug, season?.id).then(d => active && setLastMatchesData(d)).catch(console.error)
         getPublicDashboardTopScorers(slug, season?.id).then(d => active && setTopScorersData(d)).catch(console.error)
+        getPublicDashboardTopAssistants(slug, season?.id).then(d => active && setTopAssistantsData(d)).catch(console.error)
         getPublicDashboardAttendance(slug, season?.id).then(d => active && setAttendanceData(d)).catch(console.error)
       } else {
         getDashboardSummary(season?.id).then(d => active && setSummaryData(d)).catch(console.error)
         getDashboardLastMatches(season?.id).then(d => active && setLastMatchesData(d)).catch(console.error)
         getDashboardTopScorers(season?.id).then(d => active && setTopScorersData(d)).catch(console.error)
+        getDashboardTopAssistants(season?.id).then(d => active && setTopAssistantsData(d)).catch(console.error)
         getDashboardAttendance(season?.id).then(d => active && setAttendanceData(d)).catch(console.error)
       }
     }
@@ -89,6 +92,7 @@ export function HomePage() {
     setSummaryData(null)
     setLastMatchesData(null)
     setTopScorersData(null)
+    setTopAssistantsData(null)
     setAttendanceData(null)
     
     load()
@@ -100,7 +104,10 @@ export function HomePage() {
   const nextMatch = summaryData?.nextMatch
   const lastMatches = lastMatchesData?.lastMatches || []
   const attendance = attendanceData?.attendance || []
-  const data = { topScorers: topScorersData?.topScorers || [] } // For compatibility with lower code
+  const data = { 
+    topScorers: topScorersData?.topScorers || [],
+    topAssistants: topAssistantsData?.topAssistants || []
+  }
 
   const rankColor = (index: number) =>
     index === 0
@@ -1120,6 +1127,126 @@ export function HomePage() {
                         </Text>
                         <Text type="secondary" style={{ fontSize: 10 }}>
                           gols
+                        </Text>
+                        <Text
+                          type="secondary"
+                          style={{ fontSize: 10, display: 'block', marginTop: 1 }}
+                        >
+                          {item.matchesPlayed} jogos
+                        </Text>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Top Assistants */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 16 }}>
+              <SectionHeader
+                label="Ranking de Assistências"
+                action="Ver mais"
+                onAction={() =>
+                  requireAuth(() =>
+                    navigate(slug ? `/${slug}/ranking/assistants` : '/app/ranking/assistants'),
+                  )
+                }
+              />
+              {data.topAssistants.length === 0 ? (
+                <div
+                  style={{
+                    background: token.colorBgContainer,
+                    border: `1px solid ${token.colorBorderSecondary}`,
+                    borderRadius: 12,
+                    padding: '24px 16px',
+                    textAlign: 'center',
+                  }}
+                >
+                  <Text type="secondary" style={{ fontSize: 13 }}>
+                    Nenhuma assistência registrada
+                  </Text>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    background: token.colorBgContainer,
+                    borderRadius: 12,
+                    border: `1px solid ${token.colorBorderSecondary}`,
+                    overflow: 'hidden',
+                  }}
+                >
+                  {data.topAssistants.slice(0, 5).map((item: any, index: number) => (
+                    <div
+                      key={index}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        padding: '10px 16px',
+                        borderBottom:
+                          index < Math.min(data.topAssistants.length, 5) - 1
+                            ? `1px solid ${token.colorFillQuaternary}`
+                            : undefined,
+                      }}
+                    >
+                      <PlayerAvatar
+                        playerId={item.id}
+                        name={item.nickname || item.name}
+                        size={34}
+                        style={{
+                          backgroundColor: rankColor(index),
+                          color: rankTextColor(index),
+                          fontSize: 12,
+                          fontWeight: 600,
+                        }}
+                      />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <Text
+                            strong
+                            style={{ fontSize: 13, display: 'block', lineHeight: 1.4 }}
+                          >
+                            {item.nickname || item.name}
+                          </Text>
+                          {(item as any).isLoaned && (
+                            <Tag
+                              color="blue"
+                              style={{
+                                margin: 0,
+                                fontSize: 9,
+                                padding: '0 4px',
+                                lineHeight: '16px',
+                                borderRadius: 4,
+                              }}
+                            >
+                              emprestado
+                            </Tag>
+                          )}
+                        </div>
+                        <Text
+                          type="secondary"
+                          style={{ fontSize: 10, display: 'block', marginTop: 2 }}
+                        >
+                          {item.matchesPlayed > 0
+                            ? (item.assists / item.matchesPlayed).toFixed(2)
+                            : '0.00'}{' '}
+                          assistências/jogo
+                        </Text>
+                      </div>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <Text
+                          strong
+                          style={{
+                            fontSize: 20,
+                            color: token.colorPrimary,
+                            display: 'block',
+                            lineHeight: 1,
+                          }}
+                        >
+                          {item.assists}
+                        </Text>
+                        <Text type="secondary" style={{ fontSize: 10 }}>
+                          assistências
                         </Text>
                         <Text
                           type="secondary"

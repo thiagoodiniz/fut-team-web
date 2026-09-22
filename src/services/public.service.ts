@@ -55,6 +55,12 @@ export async function getPublicDashboardAttendance(slug: string, seasonId?: stri
   return res.data
 }
 
+export async function getPublicDashboardTopAssistants(slug: string, seasonId?: string) {
+  const params = seasonId ? { seasonId } : {}
+  const res = await api.get<any>(`/public/${slug}/dashboard/top-assistants`, { params })
+  return res.data
+}
+
 export async function getPublicSeasons(slug: string): Promise<SeasonDTO[]> {
   const res = await api.get<{ seasons: SeasonDTO[] } | SeasonDTO[]>(
     `/public/${slug}/seasons`,

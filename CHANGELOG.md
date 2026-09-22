@@ -5,6 +5,22 @@ O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-09-22
+
+### Adicionado
+- **Ranking de Assistências:** 
+  - Nova tela de ranking dedicada para assistências.
+  - Exibição das assistências no card dos últimos jogos da Home (ex: ⚽ Marcador (👟 Assistente)).
+  - Tela de detalhes dos jogos onde o jogador deu assistência.
+- **Competição e Fase na Artilharia:** Os jogos no histórico de gols do jogador agora mostram o ícone da competição.
+- **Painel de Administrador:** Acesso via cabeçalho do onboarding para gerenciamento e aprovação de novos times (Soft delete de times incluso).
+
+### Corrigido
+- **Navegação de Times:** Corrigido redirecionamento forçado que impedia a troca de time ao tentar "ver outros times".
+- **Permissão de Administrador:** Criadores do time agora ganham cargo de administrador imediatamente, sem precisar relogar.
+- **Remoção de Gols e Edição:** Corrigido bug onde o clique para remover um gol acionava simultaneamente o modal de edição.
+- **Jogos sem Placar:** Partidas que voltam a ter o placar limpo (`null x null`) são retiradas dos últimos jogos e estastísticas corretamente.
+
 ## [2.3.0] - 2026-09-22
 
 ### Adicionado

@@ -283,6 +283,18 @@ export function HomePage() {
                 </Text>
               </div>
             )}
+            {(nextMatch.competition || nextMatch.competitionPhase) && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <TrophyOutlined
+                  style={{ fontSize: 11, color: token.colorTextSecondary }}
+                />
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  {[nextMatch.competition, nextMatch.competitionPhase]
+                    .filter(Boolean)
+                    .join(' - ')}
+                </Text>
+              </div>
+            )}
           </div>
 
           <div

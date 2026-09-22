@@ -55,6 +55,8 @@ export interface DashboardStats {
     date: string
     location: string | null
     opponent: string | null
+    competition?: string | null
+    competitionPhase?: string | null
   } | null
 }
 

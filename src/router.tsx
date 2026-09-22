@@ -20,6 +20,7 @@ import { JoinTeamPage } from './app/pages/JoinTeamPage'
 import { ProtectedRoute } from './routes/ProtectedRoute'
 import { PublicRoute } from './routes/PublicRoute'
 import { RootRedirect } from './routes/RootRedirect'
+import { AdminDashboardPage } from './app/pages/AdminDashboardPage'
 
 export const router = createBrowserRouter([
   {
@@ -38,6 +39,14 @@ export const router = createBrowserRouter([
   {
     path: '/onboarding',
     element: <JoinTeamPage />,
+  },
+
+  {
+    path: '/admin',
+    element: <ProtectedRoute />,
+    children: [
+      { index: true, element: <AdminDashboardPage /> }
+    ]
   },
 
   // 🔒 rota protegida

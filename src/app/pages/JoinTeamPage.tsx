@@ -19,7 +19,6 @@ import { api } from '../../services/api'
 import { TeamLogo } from '../components/TeamLogo'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { TeamRequestModal } from '../components/TeamRequestModal'
-import { TeamRequestsListModal } from '../components/TeamRequestsListModal'
 
 const { Title, Text } = Typography
 
@@ -28,7 +27,6 @@ export function JoinTeamPage() {
   const [teams, setTeams] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [teamRequestModalOpen, setTeamRequestModalOpen] = useState(false)
-  const [teamRequestsListModalOpen, setTeamRequestsListModalOpen] = useState(false)
 
   const location = useLocation()
   const navigate = useNavigate()
@@ -247,9 +245,9 @@ export function JoinTeamPage() {
                     <Button
                       size="large"
                       style={{ borderRadius: 12 }}
-                      onClick={() => setTeamRequestsListModalOpen(true)}
+                      onClick={() => navigate('/admin')}
                     >
-                      Novos pedidos
+                      Painel Admin
                     </Button>
                   )}
                   <Button
@@ -292,12 +290,6 @@ export function JoinTeamPage() {
         onCancel={() => setTeamRequestModalOpen(false)}
         onSuccess={() => setTeamRequestModalOpen(false)}
       />
-      {isManager && (
-        <TeamRequestsListModal
-          open={teamRequestsListModalOpen}
-          onCancel={() => setTeamRequestsListModalOpen(false)}
-        />
-      )}
     </div>
   )
 }

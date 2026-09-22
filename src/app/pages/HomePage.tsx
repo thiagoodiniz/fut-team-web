@@ -809,22 +809,18 @@ export function HomePage() {
                     {item.scorers.length > 0 && (
                       <div
                         style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 6,
                           marginTop: 6,
                           paddingTop: 6,
                           borderTop: `1px solid ${token.colorFillQuaternary}`,
                         }}
                       >
-                        <span style={{ fontSize: 11 }}>⚽</span>
                         <Text
                           style={{
                             fontSize: 11,
                             color: token.colorTextSecondary,
                           }}
                         >
-                          {item.scorers.join(', ')}
+                          {item.scorers.map((s: string) => `⚽ ${s}`).join(', ')}
                         </Text>
                       </div>
                     )}

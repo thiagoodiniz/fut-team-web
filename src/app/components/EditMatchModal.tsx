@@ -173,17 +173,12 @@ export function EditMatchModal({
               letterSpacing: '0.07em',
               color: token.colorTextSecondary,
               display: 'block',
-              marginBottom: 4,
+              marginBottom: 12,
             }}
           >
             Placar
           </Text>
-          <Text
-            type="secondary"
-            style={{ fontSize: 11, display: 'block', marginBottom: 12 }}
-          >
-            Deixe em "–" se o jogo ainda não aconteceu
-          </Text>
+
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
             <div style={{ textAlign: 'center' }}>
               <Text style={{ fontSize: 12, color: token.colorTextSecondary, display: 'block', marginBottom: 8 }}>Nós</Text>

@@ -680,7 +680,8 @@ export function MatchDetailsPage() {
                         danger
                         type="text"
                         size="small"
-                        onClick={async () => {
+                        onClick={async (e) => {
+                          e.stopPropagation()
                           posthog.capture('delete_goal_clicked', { goal_id: g.id })
                           try {
                             await deleteGoal(g.id)

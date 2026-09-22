@@ -9,8 +9,6 @@ import {
   theme,
   message,
   Empty,
-  Form,
-  Modal,
 } from 'antd'
 import {
   SearchOutlined,
@@ -20,7 +18,8 @@ import {
 import { api } from '../../services/api'
 import { TeamLogo } from '../components/TeamLogo'
 import { useLocation, useNavigate } from 'react-router-dom'
-import posthog from 'posthog-js'
+import { TeamRequestModal } from '../components/TeamRequestModal'
+import { TeamRequestsListModal } from '../components/TeamRequestsListModal'
 
 const { Title, Text } = Typography
 
@@ -28,9 +27,8 @@ export function JoinTeamPage() {
   const [query, setQuery] = useState('')
   const [teams, setTeams] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
-  const [createModalOpen, setCreateModalOpen] = useState(false)
-  const [creating, setCreating] = useState(false)
-  const [form] = Form.useForm()
+  const [teamRequestModalOpen, setTeamRequestModalOpen] = useState(false)
+  const [teamRequestsListModalOpen, setTeamRequestsListModalOpen] = useState(false)
 
   const location = useLocation()
   const navigate = useNavigate()
@@ -66,65 +64,7 @@ export function JoinTeamPage() {
     }
   }
 
-  async function handleCreateTeam(values: { name: string; slug: string }) {
-    try {
-      setCreating(true)
-      const { data } = await api.post('/teams', values)
 
-      if (data.token) {
-        localStorage.setItem('token', data.token)
-        localStorage.setItem('storage_version', '3')
-        const authData = localStorage.getItem('auth')
-        const auth = authData ? JSON.parse(authData) : {}
-        const updatedTeams = auth.teams ? [...auth.teams] : []
-        updatedTeams.push({
-          id: data.teamId,
-          slug: values.slug,
-          name: values.name,
-          role: 'ADMIN',
-        })
-
-        localStorage.setItem(
-          'auth',
-          JSON.stringify({
-            ...auth,
-            userId: auth.userId || data.userId,
-            teamId: data.teamId,
-            role: 'ADMIN',
-            teams: updatedTeams,
-            isManager: auth.isManager ?? data.isManager ?? false,
-          }),
-        )
-
-        if (values.slug) {
-          localStorage.setItem('teamSlug', values.slug)
-        }
-
-        // Track team context in PostHog
-        posthog.group('team', data.teamId, {
-          name: values.name,
-          slug: values.slug,
-        })
-        posthog.capture('team_created', {
-          team_id: data.teamId,
-          name: values.name,
-          slug: values.slug,
-        })
-      }
-
-      message.success('Time criado com sucesso!')
-      window.location.href = '/app/home'
-    } catch (err: any) {
-      const errorCode = err?.response?.data?.error
-      if (errorCode === 'SLUG_ALREADY_EXISTS') {
-        message.error('Esse slug já está em uso. Escolha outro.')
-      } else {
-        message.error(errorCode ?? 'Erro ao criar time')
-      }
-    } finally {
-      setCreating(false)
-    }
-  }
 
   if (pendingRequest) {
     return (
@@ -275,7 +215,7 @@ export function JoinTeamPage() {
             />
           </Card>
 
-          {isManager && (
+          {isLoggedIn && (
             <Card
               styles={{ body: { padding: 32 } }}
               style={{
@@ -291,25 +231,37 @@ export function JoinTeamPage() {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   gap: 24,
+                  flexWrap: 'wrap',
                 }}
               >
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: 200 }}>
                   <Title level={4} style={{ margin: '0 0 4px 0' }}>
                     Criar novo Time
                   </Title>
                   <Text type="secondary">
-                    Crie e gerencie um novo time como administrador.
+                    Solicite a criação e seja o administrador do seu time.
                   </Text>
                 </div>
-                <Button
-                  type="primary"
-                  icon={<PlusCircleOutlined />}
-                  size="large"
-                  style={{ borderRadius: 12 }}
-                  onClick={() => setCreateModalOpen(true)}
-                >
-                  Criar Time
-                </Button>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  {isManager && (
+                    <Button
+                      size="large"
+                      style={{ borderRadius: 12 }}
+                      onClick={() => setTeamRequestsListModalOpen(true)}
+                    >
+                      Novos pedidos
+                    </Button>
+                  )}
+                  <Button
+                    type="primary"
+                    icon={<PlusCircleOutlined />}
+                    size="large"
+                    style={{ borderRadius: 12 }}
+                    onClick={() => setTeamRequestModalOpen(true)}
+                  >
+                    Criar Time
+                  </Button>
+                </div>
               </div>
             </Card>
           )}
@@ -335,64 +287,17 @@ export function JoinTeamPage() {
         </div>
       </div>
 
-      {/* Create Team Modal - only visible to managers */}
-      <Modal
-        title="Criar novo Time"
-        open={createModalOpen}
-        onCancel={() => {
-          setCreateModalOpen(false)
-          form.resetFields()
-        }}
-        onOk={() => form.submit()}
-        okText="Criar Time"
-        cancelText="Cancelar"
-        confirmLoading={creating}
-        mask={{ closable: false }}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleCreateTeam}
-          style={{ marginTop: 16 }}
-        >
-          <Form.Item
-            label="Nome do Time"
-            name="name"
-            rules={[{ required: true, message: 'O nome é obrigatório', min: 2 }]}
-          >
-            <Input
-              placeholder="Ex: Galáticos FC"
-              size="large"
-              onChange={(e) => {
-                // Auto-generate slug from name
-                const slug = e.target.value
-                  .toLowerCase()
-                  .normalize('NFD')
-                  .replace(/[\u0300-\u036f]/g, '')
-                  .replace(/[^a-z0-9\s-]/g, '')
-                  .replace(/\s+/g, '-')
-                  .replace(/-+/g, '-')
-                  .trim()
-                form.setFieldValue('slug', slug)
-              }}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Slug (identificador único)"
-            name="slug"
-            rules={[
-              { required: true, message: 'O slug é obrigatório' },
-              {
-                pattern: /^[a-z0-9-]+$/,
-                message: 'Apenas letras minúsculas, números e hífens',
-              },
-            ]}
-            extra="Usado na URL do time. Gerado automaticamente a partir do nome."
-          >
-            <Input placeholder="ex: galaticos-fc" size="large" />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <TeamRequestModal
+        open={teamRequestModalOpen}
+        onCancel={() => setTeamRequestModalOpen(false)}
+        onSuccess={() => setTeamRequestModalOpen(false)}
+      />
+      {isManager && (
+        <TeamRequestsListModal
+          open={teamRequestsListModalOpen}
+          onCancel={() => setTeamRequestsListModalOpen(false)}
+        />
+      )}
     </div>
   )
 }

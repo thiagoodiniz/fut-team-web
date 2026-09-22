@@ -5,10 +5,22 @@ O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
-### Corrigido
-- **Foto do Jogador:** Correção de bug onde a foto do jogador não era carregada no modal de Edição devido à omissão da imagem na listagem da API (otimização de banda). Agora a foto é carregada individualmente e cacheada ao abrir o modal.
+## [2.3.0] - 2026-09-22
+
+### Adicionado
+- **Campos de Competição e Fase:** 
+  - Adicionado "Competição" e "Fase competição" na criação e edição de jogos.
+  - Campos de autocompletar baseados no histórico para facilitar digitação.
+  - Exibição da competição e fase nos cards de listagem de jogos (tela de Jogos, Início, Frequência e Artilharia).
+  - Adicionado suporte a filtro por competição na busca da tela de Jogos.
 
 ### Modificado
+- **Placares Não Definidos (Próximos Jogos):** 
+  - Jogos futuros agora são salvos com placar nulo ("-") ao invés de "0x0" para não poluir as estatísticas.
+  - Contadores de Vitórias, Empates, Derrotas e Gols pró/sofridos agora ignoram completamente os jogos com placares nulos.
+  - Os placares nulos exibem crachá informativo de "Próximo jogo" na listagem.
+- **Responsividade do Onboarding:**
+  - Ajustado o layout da tela "Junte-se ao time" para o celular, exibindo o escudo acima do nome em modo coluna, evitando quebra visual.
 - **Performance da Tela Início (Dashboard):**
   - Implementação de chamadas paralelas para buscar informações do dashboard de forma segmentada (Resumo, Últimos Jogos, Artilharia, Frequência).
   - Utilização de `Skeleton` loaders dinâmicos (efeito fantasma) para partes da tela que demoram mais para responder, eliminando o travamento completo inicial e dando uma resposta visual imediata ao usuário.
@@ -17,6 +29,11 @@ O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
   - Substituição do quadrado com a letra inicial na área Hero pelo escudo do time (`TeamLogo`).
 - **Loader Principal:**
   - Remoção da mensagem e modal "Acordando o servidor", simplificando a inicialização com um spinner padrão.
+
+### Corrigido
+- **Contagem de Empates Incorreta:** 
+  - Correção do erro onde partidas sem placar (nulos) eram interpretadas como empates na soma do "Resumo do Mês" e "Estatísticas Gerais".
+- **Foto do Jogador:** Correção de bug onde a foto do jogador não era carregada no modal de Edição devido à omissão da imagem na listagem da API (otimização de banda). Agora a foto é carregada individualmente e cacheada ao abrir o modal.
 
 ## [2.2.0] - 2026-09-16
 

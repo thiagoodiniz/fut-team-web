@@ -81,6 +81,8 @@ export type PlayerGoalMatch = {
   date: string
   location: string | null
   opponent: string
+  competition: string | null
+  competitionPhase: string | null
   ourScore: number
   theirScore: number
   scorers: PlayerGoalMatchScorer[]

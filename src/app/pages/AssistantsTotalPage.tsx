@@ -64,25 +64,8 @@ export function AssistantsTotalPage() {
     <div style={{ paddingBottom: 80 }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-        <div
-          role="button"
-          onClick={() => navigate(slug ? `/${slug}` : '/app')}
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
-            background: token.colorBgContainer,
-            border: `1px solid ${token.colorBorderSecondary}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-          }}
-        >
-          <LeftOutlined style={{ color: token.colorTextSecondary }} />
-        </div>
         <Title level={4} style={{ margin: 0 }}>
-          Ranking de Assistências
+          Assistências
         </Title>
       </div>
 
@@ -138,16 +121,27 @@ export function AssistantsTotalPage() {
                 cursor: item.isLoaned ? 'default' : 'pointer',
               }}
             >
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  background: index < 3 ? rankColor(index) : token.colorFillTertiary,
+                  color: index < 3 ? rankTextColor(index) : token.colorTextSecondary,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  flexShrink: 0,
+                }}
+              >
+                {index + 1}
+              </div>
               <PlayerAvatar
                 playerId={item.id}
                 name={item.nickname || item.name}
                 size={42}
-                style={{
-                  backgroundColor: rankColor(index),
-                  color: rankTextColor(index),
-                  fontSize: 14,
-                  fontWeight: 600,
-                }}
               />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

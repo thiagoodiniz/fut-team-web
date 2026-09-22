@@ -10,8 +10,8 @@ export type MatchDTO = {
   opponent: string | null
   notes: string | null
 
-  ourScore: number
-  theirScore: number
+  ourScore: number | null
+  theirScore: number | null
 
   loanedPlayers: string[]
 

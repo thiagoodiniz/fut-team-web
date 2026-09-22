@@ -110,11 +110,12 @@ export function MatchesPage() {
     return groups
   }, [filteredMatches])
 
-  // Calculate summary stats based on ALL matches in the season
+  // Calculate summary stats — only count matches with a defined score
   const stats = React.useMemo(() => {
     return matches.reduce(
       (acc, m) => {
         acc.total++
+        if (m.ourScore === null || m.theirScore === null) return acc
         acc.gf += m.ourScore
         acc.ga += m.theirScore
 
@@ -128,7 +129,8 @@ export function MatchesPage() {
     )
   }, [matches])
 
-  function getResultAccent(our: number, their: number) {
+  function getResultAccent(our: number | null, their: number | null) {
+    if (our === null || their === null) return token.colorTextQuaternary
     if (our > their) return isDark ? APP_COLORS.winDark : APP_COLORS.winLight
     if (our < their) return isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight
     return isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight
@@ -314,11 +316,14 @@ export function MatchesPage() {
           </div>
         ) : (
           groupedMatches.map((group) => {
-            const wins = group.data.filter((m) => m.ourScore > m.theirScore).length
-            const losses = group.data.filter((m) => m.ourScore < m.theirScore).length
-            const draws = group.data.filter((m) => m.ourScore === m.theirScore).length
-            const goalsFor = group.data.reduce((acc, m) => acc + m.ourScore, 0)
-            const goalsAgainst = group.data.reduce((acc, m) => acc + m.theirScore, 0)
+            const scoredMatches = group.data.filter(
+              (m) => m.ourScore !== null && m.theirScore !== null
+            )
+            const wins = scoredMatches.filter((m) => m.ourScore! > m.theirScore!).length
+            const losses = scoredMatches.filter((m) => m.ourScore! < m.theirScore!).length
+            const draws = scoredMatches.filter((m) => m.ourScore! === m.theirScore!).length
+            const goalsFor = scoredMatches.reduce((acc, m) => acc + m.ourScore!, 0)
+            const goalsAgainst = scoredMatches.reduce((acc, m) => acc + m.theirScore!, 0)
 
             return (
               <div key={group.monthYear}>
@@ -384,74 +389,78 @@ export function MatchesPage() {
                   }}
                 >
                   <Tag style={{ margin: 0, fontSize: 11 }}>{group.data.length} jogos</Tag>
-                  <Tag
-                    style={{
-                      margin: 0,
-                      fontSize: 11,
-                      fontWeight: 600,
-                      color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight,
-                      background: isDark ? 'rgba(34, 197, 94, 0.15)' : '#dcfce7',
-                      borderColor: isDark ? 'rgba(34, 197, 94, 0.3)' : '#bbf7d0',
-                    }}
-                  >
-                    {wins}V
-                  </Tag>
-                  {draws > 0 && (
-                    <Tag
-                      style={{
-                        margin: 0,
-                        fontSize: 11,
-                        fontWeight: 600,
-                        color: isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight,
-                        background: isDark ? 'rgba(250, 204, 21, 0.15)' : '#fef3c7',
-                        borderColor: isDark ? 'rgba(250, 204, 21, 0.3)' : '#fde68a',
-                      }}
-                    >
-                      {draws}E
-                    </Tag>
+                  {scoredMatches.length > 0 && (
+                    <>
+                      <Tag
+                        style={{
+                          margin: 0,
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight,
+                          background: isDark ? 'rgba(34, 197, 94, 0.15)' : '#dcfce7',
+                          borderColor: isDark ? 'rgba(34, 197, 94, 0.3)' : '#bbf7d0',
+                        }}
+                      >
+                        {wins}V
+                      </Tag>
+                      {draws > 0 && (
+                        <Tag
+                          style={{
+                            margin: 0,
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: isDark ? APP_COLORS.drawDark : APP_COLORS.drawLight,
+                            background: isDark ? 'rgba(250, 204, 21, 0.15)' : '#fef3c7',
+                            borderColor: isDark ? 'rgba(250, 204, 21, 0.3)' : '#fde68a',
+                          }}
+                        >
+                          {draws}E
+                        </Tag>
+                      )}
+                      <Tag
+                        style={{
+                          margin: 0,
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight,
+                          background: isDark ? 'rgba(239, 68, 68, 0.15)' : '#fee2e2',
+                          borderColor: isDark ? 'rgba(239, 68, 68, 0.3)' : '#fecaca',
+                        }}
+                      >
+                        {losses}D
+                      </Tag>
+                      <div
+                        style={{
+                          marginLeft: 4,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 4,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 11,
+                            color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight,
+                            fontWeight: 700,
+                          }}
+                        >
+                          {goalsFor}
+                        </Text>
+                        <Text type="secondary" style={{ fontSize: 11 }}>
+                          ×
+                        </Text>
+                        <Text
+                          style={{
+                            fontSize: 11,
+                            color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight,
+                            fontWeight: 700,
+                          }}
+                        >
+                          {goalsAgainst}
+                        </Text>
+                      </div>
+                    </>
                   )}
-                  <Tag
-                    style={{
-                      margin: 0,
-                      fontSize: 11,
-                      fontWeight: 600,
-                      color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight,
-                      background: isDark ? 'rgba(239, 68, 68, 0.15)' : '#fee2e2',
-                      borderColor: isDark ? 'rgba(239, 68, 68, 0.3)' : '#fecaca',
-                    }}
-                  >
-                    {losses}D
-                  </Tag>
-                  <div
-                    style={{
-                      marginLeft: 4,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 4,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 11,
-                        color: isDark ? APP_COLORS.winDark : APP_COLORS.winLight,
-                        fontWeight: 700,
-                      }}
-                    >
-                      {goalsFor}
-                    </Text>
-                    <Text type="secondary" style={{ fontSize: 11 }}>
-                      ×
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: 11,
-                        color: isDark ? APP_COLORS.lossDark : APP_COLORS.lossLight,
-                        fontWeight: 700,
-                      }}
-                    >
-                      {goalsAgainst}
-                    </Text>
-                  </div>
                 </div>
 
                 {/* Match list */}
@@ -467,6 +476,7 @@ export function MatchesPage() {
                     const opponent = match.opponent?.trim() || 'Sem adversário'
                     const dateLabel = formatMatchDate(match.date)
                     const accentColor = getResultAccent(match.ourScore, match.theirScore)
+                    const hasScore = match.ourScore !== null && match.theirScore !== null
 
                     return (
                       <div
@@ -563,7 +573,7 @@ export function MatchesPage() {
                                   (match.loanedPlayers?.length || 0)}
                               </Text>
                             </div>
-                            {match.ourScore > (match.goals?.length || 0) && (
+                            {hasScore && match.ourScore! > (match.goals?.length || 0) && (
                               <Tag
                                 color="warning"
                                 style={{
@@ -592,20 +602,15 @@ export function MatchesPage() {
                         >
                           <div
                             style={{
-                              background:
-                                match.ourScore > match.theirScore
-                                  ? isDark
-                                    ? 'rgba(34, 197, 94, 0.15)'
-                                    : '#dcfce7'
-                                  : match.ourScore < match.theirScore
-                                    ? isDark
-                                      ? 'rgba(239, 68, 68, 0.15)'
-                                      : '#fee2e2'
-                                    : isDark
-                                      ? 'rgba(250, 204, 21, 0.15)'
-                                      : '#fef3c7',
+                              background: hasScore
+                                ? match.ourScore! > match.theirScore!
+                                  ? isDark ? 'rgba(34, 197, 94, 0.15)' : '#dcfce7'
+                                  : match.ourScore! < match.theirScore!
+                                    ? isDark ? 'rgba(239, 68, 68, 0.15)' : '#fee2e2'
+                                    : isDark ? 'rgba(250, 204, 21, 0.15)' : '#fef3c7'
+                                : token.colorFillSecondary,
                               color: accentColor,
-                              border: `1px solid ${withAlpha(accentColor, 0.3)}`,
+                              border: `1px solid ${withAlpha(accentColor, hasScore ? 0.3 : 0.15)}`,
                               fontSize: 13,
                               fontWeight: 700,
                               lineHeight: '22px',
@@ -615,7 +620,7 @@ export function MatchesPage() {
                               textAlign: 'center',
                             }}
                           >
-                            {match.ourScore} × {match.theirScore}
+                            {hasScore ? `${match.ourScore} × ${match.theirScore}` : '–'}
                           </div>
                           <RightOutlined
                             style={{ fontSize: 11, color: token.colorTextQuaternary }}

@@ -298,12 +298,15 @@ export function MatchDetailsPage() {
   const opponent = match.opponent?.trim() || 'Sem adversário'
   const dateLabel = formatFullDate(match.date)
 
-  const resultColor =
-    match.ourScore > match.theirScore
+  const hasScore = match.ourScore !== null && match.theirScore !== null
+
+  const resultColor = !hasScore
+    ? token.colorTextQuaternary
+    : match.ourScore! > match.theirScore!
       ? isDark
         ? APP_COLORS.winDark
         : APP_COLORS.winLight
-      : match.ourScore < match.theirScore
+      : match.ourScore! < match.theirScore!
         ? isDark
           ? APP_COLORS.lossDark
           : APP_COLORS.lossLight
@@ -349,66 +352,82 @@ export function MatchDetailsPage() {
 
           {/* Score */}
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 16,
-              }}
-            >
-              <div>
-                <Text
-                  type="secondary"
+            {!hasScore ? (
+              <div style={{ padding: '12px 0' }}>
+                <Tag
                   style={{
-                    fontSize: 11,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.07em',
-                    display: 'block',
-                    marginBottom: 2,
+                    fontSize: 13,
+                    padding: '4px 16px',
+                    borderRadius: 20,
+                    fontWeight: 600,
+                    letterSpacing: '0.04em',
                   }}
                 >
-                  Nós
-                </Text>
-                <Text
-                  style={{
-                    fontSize: 48,
-                    fontWeight: 800,
-                    lineHeight: 1,
-                    color: resultColor,
-                  }}
-                >
-                  {match.ourScore}
-                </Text>
+                  Próximo jogo · Placar não definido
+                </Tag>
               </div>
-              <Text type="secondary" style={{ fontSize: 24, fontWeight: 300 }}>
-                ×
-              </Text>
-              <div>
-                <Text
-                  type="secondary"
-                  style={{
-                    fontSize: 11,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.07em',
-                    display: 'block',
-                    marginBottom: 2,
-                  }}
-                >
-                  Eles
+            ) : (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 16,
+                }}
+              >
+                <div>
+                  <Text
+                    type="secondary"
+                    style={{
+                      fontSize: 11,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.07em',
+                      display: 'block',
+                      marginBottom: 2,
+                    }}
+                  >
+                    Nós
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 48,
+                      fontWeight: 800,
+                      lineHeight: 1,
+                      color: resultColor,
+                    }}
+                  >
+                    {match.ourScore}
+                  </Text>
+                </div>
+                <Text type="secondary" style={{ fontSize: 24, fontWeight: 300 }}>
+                  ×
                 </Text>
-                <Text
-                  style={{
-                    fontSize: 48,
-                    fontWeight: 800,
-                    lineHeight: 1,
-                    color: token.colorTextSecondary,
-                  }}
-                >
-                  {match.theirScore}
-                </Text>
+                <div>
+                  <Text
+                    type="secondary"
+                    style={{
+                      fontSize: 11,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.07em',
+                      display: 'block',
+                      marginBottom: 2,
+                    }}
+                  >
+                    Eles
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 48,
+                      fontWeight: 800,
+                      lineHeight: 1,
+                      color: token.colorTextSecondary,
+                    }}
+                  >
+                    {match.theirScore}
+                  </Text>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Date + Location */}
@@ -498,7 +517,7 @@ export function MatchDetailsPage() {
           </Text>
         </div>
 
-        {match.ourScore > goals.length && (
+        {hasScore && match.ourScore! > goals.length && (
           <div style={{ padding: '0 20px 12px' }}>
             <Alert
               message="Gols não atribuídos"

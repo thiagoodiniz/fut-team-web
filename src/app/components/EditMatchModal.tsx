@@ -4,7 +4,6 @@ import {
   Form,
   Input,
   message,
-  InputNumber,
   Button,
   Popconfirm,
   Typography,
@@ -15,31 +14,45 @@ import { DeleteOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons'
 
 const { Text } = Typography
 
-const StepperWithInput = ({ value, onChange }: { value?: number; onChange?: (v: number) => void }) => {
+// Supports null (no score yet), 0, 1, 2, ...
+// Clicking + from null → 0. Clicking − from 0 → null.
+const StepperWithInput = ({
+  value,
+  onChange,
+}: {
+  value?: number | null
+  onChange?: (v: number | null) => void
+}) => {
+  const isNull = value === null || value === undefined
+
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
       <Button
         shape="circle"
         icon={<MinusOutlined />}
-        onClick={() => onChange?.(Math.max(0, (value || 0) - 1))}
-      />
-      <Input
-        type="tel"
-        inputMode="numeric"
-        pattern="[0-9]*"
-        value={value}
-        onChange={(e) => {
-          const val = parseInt(e.target.value, 10)
-          if (!isNaN(val)) onChange?.(val)
-          else if (e.target.value === '') onChange?.(0)
+        disabled={isNull}
+        onClick={() => {
+          if (isNull) return
+          onChange?.(value === 0 ? null : value - 1)
         }}
-        style={{ width: 48, textAlign: 'center', fontSize: 18, fontWeight: 'bold', padding: '4px 0' }}
-        styles={{ input: { textAlign: 'center' } }}
       />
+      <div
+        style={{
+          width: 48,
+          textAlign: 'center',
+          fontSize: 22,
+          fontWeight: 'bold',
+          lineHeight: 1,
+          color: isNull ? '#bbb' : undefined,
+          letterSpacing: -1,
+        }}
+      >
+        {isNull ? '–' : value}
+      </div>
       <Button
         shape="circle"
         icon={<PlusOutlined />}
-        onClick={() => onChange?.((value || 0) + 1)}
+        onClick={() => onChange?.(isNull ? 0 : (value ?? 0) + 1)}
       />
     </div>
   )
@@ -75,8 +88,8 @@ export function EditMatchModal({
         opponent: match.opponent,
         location: match.location,
         notes: match.notes,
-        ourScore: match.ourScore,
-        theirScore: match.theirScore,
+        ourScore: match.ourScore ?? null,
+        theirScore: match.theirScore ?? null,
       })
     }
   }, [open, match, form])
@@ -86,8 +99,8 @@ export function EditMatchModal({
     location?: string
     opponent?: string
     notes?: string
-    ourScore?: number
-    theirScore?: number
+    ourScore?: number | null
+    theirScore?: number | null
   }) {
     try {
       setLoading(true)
@@ -96,8 +109,8 @@ export function EditMatchModal({
         location: values.location,
         opponent: values.opponent,
         notes: values.notes,
-        ourScore: values.ourScore,
-        theirScore: values.theirScore,
+        ourScore: values.ourScore ?? null,
+        theirScore: values.theirScore ?? null,
       })
       message.success('Jogo atualizado!')
       onSuccess()
@@ -160,10 +173,16 @@ export function EditMatchModal({
               letterSpacing: '0.07em',
               color: token.colorTextSecondary,
               display: 'block',
-              marginBottom: 12,
+              marginBottom: 4,
             }}
           >
             Placar
+          </Text>
+          <Text
+            type="secondary"
+            style={{ fontSize: 11, display: 'block', marginBottom: 12 }}
+          >
+            Deixe em "–" se o jogo ainda não aconteceu
           </Text>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
             <div style={{ textAlign: 'center' }}>

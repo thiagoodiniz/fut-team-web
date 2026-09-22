@@ -87,8 +87,15 @@ export function MatchesPage() {
 
     const opponent = match.opponent?.toLowerCase() || ''
     const location = match.location?.toLowerCase() || ''
+    const comp = match.competition?.toLowerCase() || ''
+    const phase = match.competitionPhase?.toLowerCase() || ''
 
-    return opponent.includes(search) || location.includes(search)
+    return (
+      opponent.includes(search) ||
+      location.includes(search) ||
+      comp.includes(search) ||
+      phase.includes(search)
+    )
   })
 
   // Group matches by month
@@ -291,7 +298,7 @@ export function MatchesPage() {
       </div>
 
       <Input.Search
-        placeholder="Filtrar por nome ou local"
+        placeholder="Filtrar por nome, local ou competição"
         allowClear
         onChange={(e) => setFilter(e.target.value)}
         style={{ width: '100%' }}

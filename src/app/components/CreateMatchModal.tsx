@@ -79,7 +79,7 @@ export function CreateMatchModal({ open, onCancel, onSuccess }: CreateMatchModal
     <Form.Item name="competition" label="Competição" style={{ flex: 1, margin: 0 }}>
       <AutoComplete
         options={competitionOptions}
-        placeholder="Ex: Liga Amadora"
+        placeholder="-"
         filterOption={(inputValue, option) =>
           option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
         }
@@ -91,7 +91,7 @@ export function CreateMatchModal({ open, onCancel, onSuccess }: CreateMatchModal
     <Form.Item name="competitionPhase" label="Fase competição" style={{ flex: 1, margin: 0 }}>
       <AutoComplete
         options={phaseOptions}
-        placeholder="Ex: Fase de grupos"
+        placeholder="-"
         filterOption={(inputValue, option) =>
           option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
         }

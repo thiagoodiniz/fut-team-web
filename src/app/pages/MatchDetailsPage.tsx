@@ -23,6 +23,7 @@ import {
   AimOutlined,
   PlusOutlined,
   CloseOutlined,
+  TrophyOutlined,
 } from '@ant-design/icons'
 
 import {
@@ -440,6 +441,16 @@ export function MatchDetailsPage() {
                 {dateLabel}
               </Text>
             </div>
+            {(match.competition || match.competitionPhase) && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <TrophyOutlined
+                  style={{ fontSize: 13, color: token.colorTextSecondary, flexShrink: 0 }}
+                />
+                <Text type="secondary" style={{ fontSize: 13 }}>
+                  {[match.competition, match.competitionPhase].filter(Boolean).join(' - ')}
+                </Text>
+              </div>
+            )}
             {match.location ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <EnvironmentOutlined

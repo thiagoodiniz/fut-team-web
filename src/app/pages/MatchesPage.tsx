@@ -11,6 +11,7 @@ import {
   RightOutlined,
   UserOutlined,
   WarningOutlined,
+  TrophyOutlined,
 } from '@ant-design/icons'
 import { listMatches, type MatchDTO } from '../../services/matches.service'
 import { getPublicMatches } from '../../services/public.service'
@@ -538,6 +539,32 @@ export function MatchesPage() {
                                 {dateLabel}
                               </Text>
                             </div>
+                            {(match.competition || match.competitionPhase) && (
+                              <div
+                                style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                              >
+                                <TrophyOutlined
+                                  style={{
+                                    fontSize: 10,
+                                    color: token.colorTextSecondary,
+                                  }}
+                                />
+                                <Text
+                                  type="secondary"
+                                  style={{
+                                    fontSize: 11,
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    maxWidth: 120,
+                                  }}
+                                >
+                                  {[match.competition, match.competitionPhase]
+                                    .filter(Boolean)
+                                    .join(' - ')}
+                                </Text>
+                              </div>
+                            )}
                             {match.location && (
                               <div
                                 style={{ display: 'flex', alignItems: 'center', gap: 4 }}

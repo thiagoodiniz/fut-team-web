@@ -755,7 +755,7 @@ export function HomePage() {
                         {item.ourScore} × {item.theirScore}
                       </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         <CalendarOutlined
                           style={{ fontSize: 11, color: token.colorTextSecondary }}
@@ -764,6 +764,18 @@ export function HomePage() {
                           {new Date(item.date).toLocaleDateString('pt-BR')}
                         </Text>
                       </div>
+                      {(item.competition || item.competitionPhase) && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <TrophyOutlined
+                            style={{ fontSize: 11, color: token.colorTextSecondary }}
+                          />
+                          <Text type="secondary" style={{ fontSize: 11 }}>
+                            {[item.competition, item.competitionPhase]
+                              .filter(Boolean)
+                              .join(' - ')}
+                          </Text>
+                        </div>
+                      )}
                       {item.location && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                           <EnvironmentOutlined

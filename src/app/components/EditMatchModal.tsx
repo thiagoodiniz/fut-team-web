@@ -8,8 +8,10 @@ import {
   Popconfirm,
   Typography,
   theme,
+  AutoComplete,
 } from 'antd'
-import { updateMatch, type MatchDTO } from '../../services/matches.service'
+import { updateMatch, listMatches, type MatchDTO } from '../../services/matches.service'
+import { useSeason } from '../contexts/SeasonContext'
 import { DeleteOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons'
 
 const { Text } = Typography
@@ -76,6 +78,25 @@ export function EditMatchModal({
   const [form] = Form.useForm()
   const [loading, setLoading] = React.useState(false)
   const { token } = theme.useToken()
+  const { season } = useSeason()
+
+  const [locations, setLocations] = React.useState<string[]>([])
+  const [opponents, setOpponents] = React.useState<string[]>([])
+  const [competitions, setCompetitions] = React.useState<string[]>([])
+  const [competitionPhases, setCompetitionPhases] = React.useState<string[]>([])
+
+  React.useEffect(() => {
+    if (open && season) {
+      listMatches(season.id)
+        .then((matches) => {
+          setLocations(Array.from(new Set(matches.map((m) => m.location).filter((loc): loc is string => !!loc))))
+          setOpponents(Array.from(new Set(matches.map((m) => m.opponent).filter((opp): opp is string => !!opp))))
+          setCompetitions(Array.from(new Set(matches.map((m) => m.competition).filter((comp): comp is string => !!comp))))
+          setCompetitionPhases(Array.from(new Set(matches.map((m) => m.competitionPhase).filter((phase): phase is string => !!phase))))
+        })
+        .catch(console.error)
+    }
+  }, [open, season])
 
   React.useEffect(() => {
     if (open && match) {
@@ -87,6 +108,8 @@ export function EditMatchModal({
         date: localISOTime,
         opponent: match.opponent,
         location: match.location,
+        competition: match.competition,
+        competitionPhase: match.competitionPhase,
         notes: match.notes,
         ourScore: match.ourScore ?? null,
         theirScore: match.theirScore ?? null,
@@ -94,10 +117,17 @@ export function EditMatchModal({
     }
   }, [open, match, form])
 
+  const locationOptions = locations.map((loc) => ({ value: loc }))
+  const opponentOptions = opponents.map((opp) => ({ value: opp }))
+  const competitionOptions = competitions.map((comp) => ({ value: comp }))
+  const phaseOptions = competitionPhases.map((phase) => ({ value: phase }))
+
   async function handleSubmit(values: {
     date: string
     location?: string
     opponent?: string
+    competition?: string
+    competitionPhase?: string
     notes?: string
     ourScore?: number | null
     theirScore?: number | null
@@ -108,6 +138,8 @@ export function EditMatchModal({
         date: new Date(values.date).toISOString(),
         location: values.location,
         opponent: values.opponent,
+        competition: values.competition,
+        competitionPhase: values.competitionPhase,
         notes: values.notes,
         ourScore: values.ourScore ?? null,
         theirScore: values.theirScore ?? null,
@@ -149,12 +181,46 @@ export function EditMatchModal({
         </Form.Item>
 
         <Form.Item name="opponent" label="Adversário">
-          <Input placeholder="Nome do time adversário" />
+          <AutoComplete
+            options={opponentOptions}
+            placeholder="Nome do time adversário"
+            filterOption={(inputValue, option) =>
+              option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+            }
+          />
         </Form.Item>
 
         <Form.Item name="location" label="Local">
-          <Input placeholder="Onde foi o jogo?" />
+          <AutoComplete
+            options={locationOptions}
+            placeholder="Onde será o jogo?"
+            filterOption={(inputValue, option) =>
+              option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+            }
+          />
         </Form.Item>
+
+        <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+          <Form.Item name="competition" label="Competição" style={{ flex: 1, margin: 0 }}>
+            <AutoComplete
+              options={competitionOptions}
+              placeholder="Ex: Liga Amadora"
+              filterOption={(inputValue, option) =>
+                option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+              }
+            />
+          </Form.Item>
+          
+          <Form.Item name="competitionPhase" label="Fase competição" style={{ flex: 1, margin: 0 }}>
+            <AutoComplete
+              options={phaseOptions}
+              placeholder="Ex: Fase de grupos"
+              filterOption={(inputValue, option) =>
+                option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+              }
+            />
+          </Form.Item>
+        </div>
 
         {/* Score */}
         <div

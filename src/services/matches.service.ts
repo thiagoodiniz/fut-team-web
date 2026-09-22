@@ -8,16 +8,14 @@ export type MatchDTO = {
   date: string
   location: string | null
   opponent: string | null
+  competition: string | null
+  competitionPhase: string | null
   notes: string | null
-
   ourScore: number | null
   theirScore: number | null
-
   loanedPlayers: string[]
-
   createdAt: string
   updatedAt: string
-
   goals?: {
     id: string
     playerId: string
@@ -53,6 +51,8 @@ export async function createMatch(data: {
   date: string
   location?: string
   opponent?: string
+  competition?: string
+  competitionPhase?: string
   notes?: string
 }) {
   const res = await api.post<{ match: MatchDTO }>('/matches', data)

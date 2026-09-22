@@ -15,6 +15,8 @@ export function CreateMatchModal({ open, onCancel, onSuccess }: CreateMatchModal
   const [loading, setLoading] = React.useState(false)
   const [locations, setLocations] = React.useState<string[]>([])
   const [opponents, setOpponents] = React.useState<string[]>([])
+  const [competitions, setCompetitions] = React.useState<string[]>([])
+  const [competitionPhases, setCompetitionPhases] = React.useState<string[]>([])
 
   React.useEffect(() => {
     if (open && season) {
@@ -29,6 +31,16 @@ export function CreateMatchModal({ open, onCancel, onSuccess }: CreateMatchModal
             new Set(matches.map((m) => m.opponent).filter((opp): opp is string => !!opp)),
           )
           setOpponents(uniqueOpponents)
+
+          const uniqueCompetitions = Array.from(
+            new Set(matches.map((m) => m.competition).filter((comp): comp is string => !!comp)),
+          )
+          setCompetitions(uniqueCompetitions)
+
+          const uniquePhases = Array.from(
+            new Set(matches.map((m) => m.competitionPhase).filter((phase): phase is string => !!phase)),
+          )
+          setCompetitionPhases(uniquePhases)
         })
         .catch(console.error)
     }
@@ -36,6 +48,8 @@ export function CreateMatchModal({ open, onCancel, onSuccess }: CreateMatchModal
 
   const locationOptions = locations.map((loc) => ({ value: loc }))
   const opponentOptions = opponents.map((opp) => ({ value: opp }))
+  const competitionOptions = competitions.map((comp) => ({ value: comp }))
+  const phaseOptions = competitionPhases.map((phase) => ({ value: phase }))
 
   const MatchLocationAutocomplete = () => (
     <Form.Item name="location" label="Local">
@@ -61,10 +75,36 @@ export function CreateMatchModal({ open, onCancel, onSuccess }: CreateMatchModal
     </Form.Item>
   )
 
+  const MatchCompetitionAutocomplete = () => (
+    <Form.Item name="competition" label="Competição" style={{ flex: 1, margin: 0 }}>
+      <AutoComplete
+        options={competitionOptions}
+        placeholder="Ex: Liga Amadora"
+        filterOption={(inputValue, option) =>
+          option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+        }
+      />
+    </Form.Item>
+  )
+
+  const MatchPhaseAutocomplete = () => (
+    <Form.Item name="competitionPhase" label="Fase competição" style={{ flex: 1, margin: 0 }}>
+      <AutoComplete
+        options={phaseOptions}
+        placeholder="Ex: Fase de grupos"
+        filterOption={(inputValue, option) =>
+          option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+        }
+      />
+    </Form.Item>
+  )
+
   async function handleSubmit(values: {
     date: string
     location?: string
     opponent?: string
+    competition?: string
+    competitionPhase?: string
     notes?: string
   }) {
     try {
@@ -73,6 +113,8 @@ export function CreateMatchModal({ open, onCancel, onSuccess }: CreateMatchModal
         date: new Date(values.date).toISOString(),
         location: values.location,
         opponent: values.opponent,
+        competition: values.competition,
+        competitionPhase: values.competitionPhase,
         notes: values.notes,
       })
       message.success('Jogo criado!')
@@ -110,6 +152,11 @@ export function CreateMatchModal({ open, onCancel, onSuccess }: CreateMatchModal
         <MatchOpponentAutocomplete />
 
         <MatchLocationAutocomplete />
+
+        <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+          <MatchCompetitionAutocomplete />
+          <MatchPhaseAutocomplete />
+        </div>
 
         <Form.Item name="notes" label="Observações">
           <Input.TextArea rows={3} />

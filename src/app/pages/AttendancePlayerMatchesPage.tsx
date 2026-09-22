@@ -5,6 +5,7 @@ import {
   CheckCircleFilled,
   CloseCircleFilled,
   EnvironmentOutlined,
+  TrophyOutlined,
 } from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
 import { useSeason } from '../contexts/SeasonContext'
@@ -258,6 +259,18 @@ export function AttendancePlayerMatchesPage() {
                           {formatMatchDate(match.date)}
                         </Text>
                       </div>
+                      {(match.competition || match.competitionPhase) && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <TrophyOutlined
+                            style={{ fontSize: 11, color: token.colorTextSecondary }}
+                          />
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            {[match.competition, match.competitionPhase]
+                              .filter(Boolean)
+                              .join(' - ')}
+                          </Text>
+                        </div>
+                      )}
                       {match.location && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                           <EnvironmentOutlined

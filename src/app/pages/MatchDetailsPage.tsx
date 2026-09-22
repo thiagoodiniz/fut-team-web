@@ -916,7 +916,7 @@ export function MatchDetailsPage() {
         open={goalModalOpen}
         loading={creatingGoal}
         players={presentPlayersOptions}
-        maxGoals={match.ourScore}
+        maxGoals={match.ourScore ?? undefined}
         currentGoalsCount={goals.filter((g) => !g.ownGoal).length}
         onCancel={() => setGoalModalOpen(false)}
         onSubmit={onCreateGoal}

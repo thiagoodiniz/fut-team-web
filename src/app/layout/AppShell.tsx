@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Layout, theme } from 'antd'
 import { Outlet, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import {
@@ -8,6 +8,7 @@ import {
   TrophyOutlined,
 } from '@ant-design/icons'
 import posthog from 'posthog-js'
+import { syncAuth } from '../../services/authSync.service'
 
 import { PostHogPageviewTracker } from '../../components/PostHogPageviewTracker'
 import { AppHeader } from './AppHeader'
@@ -39,6 +40,15 @@ export function AppShell() {
 
   if (!auth?.userId) return <Navigate to="/login" replace />
   if (!auth?.teamId) return <Navigate to="/onboarding" replace />
+
+  useEffect(() => {
+    syncAuth().then((updatedAuth) => {
+      if (updatedAuth && !updatedAuth.teamId) {
+        // Just in case they lost access to all teams
+        window.location.href = '/onboarding'
+      }
+    })
+  }, [])
 
   return (
     <TeamProvider>

@@ -19,6 +19,7 @@ import { api } from '../../services/api'
 import { TeamLogo } from '../components/TeamLogo'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { TeamRequestModal } from '../components/TeamRequestModal'
+import { syncAuth } from '../../services/authSync.service'
 
 const { Title, Text } = Typography
 
@@ -46,6 +47,14 @@ export function JoinTeamPage() {
 
   useEffect(() => {
     handleSearch('')
+    syncAuth().then((updatedAuth) => {
+      // If after sync we find the user has teams but no team is selected,
+      // syncAuth automatically sets it and updates localStorage.
+      // If we see they got a team, we can redirect them to /app
+      if (updatedAuth && updatedAuth.teams?.length > 0) {
+        navigate('/app', { replace: true })
+      }
+    })
   }, [])
 
   async function handleSearch(term: string) {

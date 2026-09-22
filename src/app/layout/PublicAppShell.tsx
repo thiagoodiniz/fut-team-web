@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Layout, theme, Button } from 'antd'
 import { Outlet, useNavigate, useLocation, useParams } from 'react-router-dom'
 import {
@@ -13,6 +13,7 @@ import { useAppHeader } from '../hooks/useAppHeader'
 import { useIsPWA } from '../hooks/useIsPWA'
 import { TeamLogo } from '../components/TeamLogo'
 import { useTeam } from '../contexts/TeamContext'
+import { syncAuth } from '../../services/authSync.service'
 
 const { Header, Content } = Layout
 
@@ -41,6 +42,12 @@ export function PublicAppShell() {
     auth = authData ? JSON.parse(authData) : null
   } catch {}
   const isLoggedIn = Boolean(tokenStr && auth?.userId)
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      syncAuth()
+    }
+  }, [isLoggedIn])
 
   const activeTab = getActiveTab(location.pathname, slug || '')
 

@@ -38,7 +38,7 @@ export function TeamLogo({ teamId, name, ...props }: TeamLogoProps) {
         <img
           src={logo}
           alt={name || 'Escudo do time'}
-          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
         />
       }
     />

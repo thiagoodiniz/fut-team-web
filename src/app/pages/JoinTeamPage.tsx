@@ -237,36 +237,39 @@ export function JoinTeamPage() {
               }}
               renderItem={(team) => (
                 <List.Item
-                  actions={[
-                    <Button
-                      type="primary"
-                      onClick={() => navigate(`/${team.slug}`)}
-                      style={{ borderRadius: 8 }}
-                    >
-                      Acessar Time
-                    </Button>,
-                  ]}
                   style={{
                     borderBottom: `1px solid ${token.colorBorderSecondary}`,
                     padding: '20px 0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 16,
+                    flexWrap: 'wrap'
                   }}
                 >
-                  <List.Item.Meta
-                    avatar={
-                      <TeamLogo
-                        teamId={team.id}
-                        name={team.name}
-                        size={56}
-                        style={{ backgroundColor: token.colorPrimary }}
-                      />
-                    }
-                    title={
-                      <Text strong style={{ fontSize: 17 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0, flex: 1 }}>
+                    <TeamLogo
+                      teamId={team.id}
+                      name={team.name}
+                      size={56}
+                      style={{ backgroundColor: token.colorPrimary, flexShrink: 0 }}
+                    />
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <Text strong style={{ fontSize: 17, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {team.name}
                       </Text>
-                    }
-                    description={`@${team.slug}`}
-                  />
+                      <Text type="secondary" style={{ display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        @{team.slug}
+                      </Text>
+                    </div>
+                  </div>
+                  <Button
+                    type="primary"
+                    onClick={() => navigate(`/${team.slug}`)}
+                    style={{ borderRadius: 8 }}
+                  >
+                    Acessar Time
+                  </Button>
                 </List.Item>
               )}
             />

@@ -241,13 +241,12 @@ export function JoinTeamPage() {
                     borderBottom: `1px solid ${token.colorBorderSecondary}`,
                     padding: '20px 0',
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
+                    flexDirection: 'column',
+                    alignItems: 'stretch',
                     gap: 16,
-                    flexWrap: 'wrap'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0, flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0 }}>
                     <TeamLogo
                       teamId={team.id}
                       name={team.name}
@@ -265,8 +264,9 @@ export function JoinTeamPage() {
                   </div>
                   <Button
                     type="primary"
+                    block
                     onClick={() => navigate(`/${team.slug}`)}
-                    style={{ borderRadius: 8 }}
+                    style={{ borderRadius: 8, height: 40 }}
                   >
                     Acessar Time
                   </Button>

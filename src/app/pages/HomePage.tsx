@@ -1144,7 +1144,7 @@ export function HomePage() {
             {/* Top Assistants */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 16 }}>
               <SectionHeader
-                label="Ranking de Assistências"
+                label="Assistências"
                 action="Ver mais"
                 onAction={() =>
                   requireAuth(() =>

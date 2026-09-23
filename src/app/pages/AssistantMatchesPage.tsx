@@ -21,14 +21,21 @@ function formatMatchDate(iso: string) {
   })
 }
 
+import { useAuthGate } from '../hooks/useAuthGate'
+import { MatchDetailsModal } from '../components/MatchDetailsModal'
+import { RightOutlined } from '@ant-design/icons'
+import posthog from 'posthog-js'
+
 export function AssistantMatchesPage() {
   const { token } = theme.useToken()
   const { isDark } = useAppTheme()
   const { season } = useSeason()
   const { playerId } = useParams()
+  const { requireAuth } = useAuthGate()
 
   const [loading, setLoading] = React.useState(true)
   const [data, setData] = React.useState<PlayerAssistMatchesResponse | null>(null)
+  const [selectedMatchId, setSelectedMatchId] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     async function load() {
@@ -142,6 +149,10 @@ export function AssistantMatchesPage() {
             return (
               <div
                 key={match.id}
+                onClick={() => {
+                  posthog.capture('player_assist_match_clicked', { match_id: match.id })
+                  requireAuth(() => setSelectedMatchId(match.id))
+                }}
                 style={{
                   background: token.colorBgContainer,
                   border: `1px solid ${token.colorBorderSecondary}`,
@@ -150,6 +161,9 @@ export function AssistantMatchesPage() {
                   display: 'flex',
                   alignItems: 'flex-start',
                   gap: 16,
+                  cursor: 'pointer',
+                  transition: 'opacity 0.15s, transform 0.15s, box-shadow 0.15s',
+                  boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.15)' : '0 1px 3px rgba(0,0,0,0.02)',
                 }}
               >
                 {/* Assistências no Jogo */}
@@ -250,12 +264,39 @@ export function AssistantMatchesPage() {
                       </div>
                     )}
                   </div>
+                  
+                  <div
+                    style={{
+                      marginTop: 10,
+                      display: 'flex',
+                      justifyContent: 'flex-start',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Text
+                      strong
+                      style={{
+                        fontSize: 12,
+                        color: token.colorPrimary,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                      }}
+                    >
+                      Ver detalhes <RightOutlined style={{ fontSize: 9 }} />
+                    </Text>
+                  </div>
                 </div>
               </div>
             )
           })
         )}
       </div>
+
+      <MatchDetailsModal
+        matchId={selectedMatchId}
+        onClose={() => setSelectedMatchId(null)}
+      />
     </div>
   )
 }

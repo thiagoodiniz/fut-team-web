@@ -22,14 +22,21 @@ function formatMatchDate(iso: string) {
   })
 }
 
+import { useAuthGate } from '../hooks/useAuthGate'
+import { MatchDetailsModal } from '../components/MatchDetailsModal'
+import { RightOutlined } from '@ant-design/icons'
+import posthog from 'posthog-js'
+
 export function ScorerGoalsMatchesPage() {
   const { token } = theme.useToken()
   const { isDark } = useAppTheme()
   const { season } = useSeason()
   const { playerId } = useParams()
+  const { requireAuth } = useAuthGate()
 
   const [loading, setLoading] = React.useState(true)
   const [data, setData] = React.useState<PlayerGoalMatchesResponse | null>(null)
+  const [selectedMatchId, setSelectedMatchId] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     async function load() {
@@ -177,106 +184,135 @@ export function ScorerGoalsMatchesPage() {
             return (
               <div
                 key={match.id}
+                onClick={() => {
+                  posthog.capture('player_goal_match_clicked', { match_id: match.id })
+                  requireAuth(() => setSelectedMatchId(match.id))
+                }}
                 style={{
                   borderLeft: `4px solid ${accent}`,
                   borderBottom:
                     i < data.matches.length - 1
                       ? `1px solid ${token.colorFillQuaternary}`
                       : 'none',
+                  cursor: 'pointer',
+                  transition: 'background 0.15s',
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
-                    alignItems: 'flex-start',
+                    flexDirection: 'column',
                     gap: 12,
                     padding: '12px 20px',
                   }}
                 >
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <Text strong style={{ fontSize: 14, display: 'block' }}>
-                      {match.opponent || 'Sem adversário'}
-                    </Text>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <Text strong style={{ fontSize: 14, display: 'block' }}>
+                        {match.opponent || 'Sem adversário'}
+                      </Text>
 
-                    <div
-                      style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <CalendarOutlined
-                          style={{ fontSize: 11, color: token.colorTextSecondary }}
-                        />
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                          {formatMatchDate(match.date)}
-                        </Text>
-                      </div>
-                      {(match.competition || match.competitionPhase) && (
+                      <div
+                        style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}
+                      >
                         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <TrophyOutlined
+                          <CalendarOutlined
                             style={{ fontSize: 11, color: token.colorTextSecondary }}
                           />
                           <Text type="secondary" style={{ fontSize: 12 }}>
-                            {[match.competition, match.competitionPhase]
-                              .filter(Boolean)
-                              .join(' - ')}
+                            {formatMatchDate(match.date)}
                           </Text>
                         </div>
-                      )}
-                      {match.location && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <EnvironmentOutlined
-                            style={{ fontSize: 11, color: token.colorTextSecondary }}
-                          />
-                          <Text type="secondary" style={{ fontSize: 12 }}>
-                            {match.location}
-                          </Text>
+                        {(match.competition || match.competitionPhase) && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <TrophyOutlined
+                              style={{ fontSize: 11, color: token.colorTextSecondary }}
+                            />
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                              {[match.competition, match.competitionPhase]
+                                .filter(Boolean)
+                                .join(' - ')}
+                            </Text>
+                          </div>
+                        )}
+                        {match.location && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <EnvironmentOutlined
+                              style={{ fontSize: 11, color: token.colorTextSecondary }}
+                            />
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                              {match.location}
+                            </Text>
+                          </div>
+                        )}
+                      </div>
+
+                      {match.scorers.length > 0 && (
+                        <div
+                          style={{
+                            marginTop: 6,
+                            fontSize: 12,
+                            color: token.colorTextSecondary,
+                          }}
+                        >
+                          {match.scorers.map((s: any, idx: number) => {
+                            const name = s.nickname || s.name
+                            const isSelected = s.playerId === data.player?.id
+                            return (
+                              <React.Fragment key={`${match.id}-${idx}-${s.playerId}`}>
+                                {idx > 0 ? ', ' : ''}
+                                {isSelected ? (
+                                  <Text
+                                    strong
+                                    style={{ fontSize: 12, color: token.colorPrimary }}
+                                  >
+                                    {name}
+                                  </Text>
+                                ) : (
+                                  <span>{name}</span>
+                                )}
+                              </React.Fragment>
+                            )
+                          })}
                         </div>
                       )}
                     </div>
 
-                    {match.scorers.length > 0 && (
-                      <div
-                        style={{
-                          marginTop: 6,
-                          fontSize: 12,
-                          color: token.colorTextSecondary,
-                        }}
-                      >
-                        {match.scorers.map((s: any, idx: number) => {
-                          const name = s.nickname || s.name
-                          const isSelected = s.playerId === data.player?.id
-                          return (
-                            <React.Fragment key={`${match.id}-${idx}-${s.playerId}`}>
-                              {idx > 0 ? ', ' : ''}
-                              {isSelected ? (
-                                <Text
-                                  strong
-                                  style={{ fontSize: 12, color: token.colorPrimary }}
-                                >
-                                  {name}
-                                </Text>
-                              ) : (
-                                <span>{name}</span>
-                              )}
-                            </React.Fragment>
-                          )
-                        })}
-                      </div>
-                    )}
+                    <div
+                      style={{
+                        background: scoreBg,
+                        color: accent,
+                        fontWeight: 700,
+                        fontSize: 13,
+                        padding: '3px 12px',
+                        borderRadius: 999,
+                        flexShrink: 0,
+                        border: `1px solid ${accent}30`,
+                      }}
+                    >
+                      {match.ourScore} x {match.theirScore ?? '-'}
+                    </div>
                   </div>
-
+                  
                   <div
                     style={{
-                      background: scoreBg,
-                      color: accent,
-                      fontWeight: 700,
-                      fontSize: 13,
-                      padding: '3px 12px',
-                      borderRadius: 999,
-                      flexShrink: 0,
-                      border: `1px solid ${accent}30`,
+                      display: 'flex',
+                      justifyContent: 'flex-start',
+                      alignItems: 'center',
                     }}
                   >
-                    {match.ourScore} x {match.theirScore}
+                    <Text
+                      strong
+                      style={{
+                        fontSize: 12,
+                        color: token.colorPrimary,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                      }}
+                    >
+                      Ver detalhes <RightOutlined style={{ fontSize: 9 }} />
+                    </Text>
                   </div>
                 </div>
               </div>
@@ -284,6 +320,11 @@ export function ScorerGoalsMatchesPage() {
           })}
         </div>
       )}
+
+      <MatchDetailsModal
+        matchId={selectedMatchId}
+        onClose={() => setSelectedMatchId(null)}
+      />
     </div>
   )
 }

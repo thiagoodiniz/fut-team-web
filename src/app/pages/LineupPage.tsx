@@ -17,6 +17,7 @@ import { PlayerPickerDrawer } from '../components/lineup/PlayerPickerDrawer'
 import {
   FORMATIONS,
   FORMATION_SLOTS,
+  adaptLineup,
   type FormationId,
   type SlotDef,
 } from '../components/lineup/formations'
@@ -74,6 +75,7 @@ export function LineupPage() {
       setSaving(true)
       await saveMatchLineup(id, { formation, slots })
       message.success('Formação salva!')
+      navigate(slug ? `/${slug}/matches/${id}` : `/app/matches/${id}`)
     } catch (err) {
       console.error(err)
       message.error('Erro ao salvar formação')
@@ -83,9 +85,9 @@ export function LineupPage() {
   }
 
   function handleFormationChange(value: FormationId) {
-    // Reset slots ao mudar formação
+    const newSlots = adaptLineup(formation, value, slots)
     setFormation(value)
-    setSlots({})
+    setSlots(newSlots)
   }
 
   function handleSlotClick(slot: SlotDef) {

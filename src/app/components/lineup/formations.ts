@@ -167,3 +167,54 @@ export const FORMATION_SLOTS: Record<FormationId, SlotDef[]> = {
     { key: 'ST', label: 'CA', zone: 'ATT', row: 0.5, col: 0 },
   ],
 }
+
+export function adaptLineup(
+  oldFormationId: FormationId,
+  newFormationId: FormationId,
+  currentSlots: Record<string, { playerId?: string; loanedPlayerName?: string }>
+): Record<string, { playerId?: string; loanedPlayerName?: string }> {
+  const oldSlots = FORMATION_SLOTS[oldFormationId]
+  const newSlots = FORMATION_SLOTS[newFormationId]
+  
+  if (!oldSlots || !newSlots) return {}
+
+  // Coletar jogadores atuais e suas respectivas zonas
+  const players = Object.entries(currentSlots).map(([key, val]) => {
+    const slotDef = oldSlots.find(s => s.key === key)
+    return { val, zone: slotDef?.zone || 'UNKNOWN' }
+  })
+
+  // Agrupar por zona
+  const playersByZone: Record<string, typeof players> = { GK: [], DEF: [], MID: [], ATT: [], UNKNOWN: [] }
+  players.forEach(p => {
+    if (!playersByZone[p.zone]) playersByZone[p.zone] = []
+    playersByZone[p.zone].push(p)
+  })
+
+  const result: Record<string, { playerId?: string; loanedPlayerName?: string }> = {}
+  const leftovers: (typeof players[0])[] = []
+
+  // Passo 1: Alocar jogadores em slots da mesma zona
+  newSlots.forEach(newSlot => {
+    const zonePlayers = playersByZone[newSlot.zone] || []
+    if (zonePlayers.length > 0) {
+      const p = zonePlayers.shift()!
+      result[newSlot.key] = p.val
+    }
+  })
+
+  // Juntar todos que sobraram
+  Object.values(playersByZone).forEach(list => {
+    leftovers.push(...list)
+  })
+
+  // Passo 2: Alocar sobras nos slots vazios restantes da nova formação
+  newSlots.forEach(newSlot => {
+    if (!result[newSlot.key] && leftovers.length > 0) {
+      const p = leftovers.shift()!
+      result[newSlot.key] = p.val
+    }
+  })
+
+  return result
+}

@@ -1,5 +1,6 @@
 import { Typography } from 'antd'
 import { PlayerAvatar } from '../PlayerAvatar'
+import { useOptionalTeam } from '../../contexts/TeamContext'
 
 const { Text } = Typography
 
@@ -21,6 +22,10 @@ export function PlayerSlot({
   onClick,
 }: PlayerSlotProps) {
   const isEmpty = !playerName
+  const team = useOptionalTeam()
+  
+  const primaryColor = team?.primaryColor || '#1677ff'
+  const secondaryColor = team?.secondaryColor || '#fff'
 
   const SIZE = 52
 
@@ -43,14 +48,14 @@ export function PlayerSlot({
           borderRadius: '50%',
           border: isEmpty
             ? `2px dashed rgba(255,255,255,0.5)`
-            : `2px solid rgba(255,255,255,0.85)`,
+            : `3px solid ${primaryColor}`,
           background: isEmpty
             ? 'rgba(255,255,255,0.08)'
-            : 'rgba(255,255,255,0.18)',
+            : primaryColor,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: isEmpty ? 'none' : '0 2px 8px rgba(0,0,0,0.35)',
+          boxShadow: isEmpty ? 'none' : `0 0 0 1px ${secondaryColor}, 0 2px 8px rgba(0,0,0,0.35)`,
           transition: 'border-color 0.15s, background 0.15s',
           overflow: 'hidden',
           flexShrink: 0,
@@ -60,15 +65,30 @@ export function PlayerSlot({
           <PlayerAvatar
             playerId={playerId}
             name={playerName!}
-            size={SIZE}
-            style={{ borderRadius: '50%' }}
+            size={46}
+            style={{ 
+              borderRadius: '50%', 
+              backgroundColor: primaryColor,
+              color: secondaryColor,
+              fontSize: 20,
+              fontWeight: 'bold'
+            }}
           />
+        ) : !isEmpty && !playerId ? (
+          // Emprestado sem foto
+          <div style={{
+            width: '100%', height: '100%', display: 'flex', alignItems: 'center', 
+            justifyContent: 'center', backgroundColor: primaryColor, color: secondaryColor,
+            fontSize: 20, fontWeight: 'bold'
+          }}>
+            {playerName![0]?.toUpperCase()}
+          </div>
         ) : (
           <Text
             style={{
               fontSize: 11,
               fontWeight: 700,
-              color: isEmpty ? 'rgba(255,255,255,0.55)' : 'white',
+              color: 'rgba(255,255,255,0.55)',
               letterSpacing: '0.04em',
               lineHeight: 1,
               userSelect: 'none',

@@ -725,18 +725,21 @@ export function HomePage() {
                 return (
                   <div
                     key={index}
+                    onClick={() => {
+                      posthog.capture('last_match_card_clicked', { match_id: item.id })
+                      requireAuth(() => setSelectedMatchId(item.id))
+                    }}
                     style={{
                       background: token.colorBgContainer,
                       border: `1px solid ${token.colorBorderSecondary}`,
                       borderLeft: `4px solid ${accentColor}`,
                       borderRadius: 12,
                       padding: '12px 14px',
+                      cursor: 'pointer',
                       boxShadow: isDark
                         ? '0 2px 8px rgba(0,0,0,0.15)'
                         : '0 1px 3px rgba(0,0,0,0.02)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 12,
+                      transition: 'opacity 0.15s',
                     }}
                   >
                     <div
@@ -744,26 +747,30 @@ export function HomePage() {
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
+                        marginBottom: 6,
                       }}
                     >
                       <Text strong style={{ fontSize: 14 }}>
                         {item.opponent}
                       </Text>
-                      <div
-                        style={{
-                          background: badgeBg,
-                          border: `1px solid ${badgeBorder}`,
-                          color: accentColor,
-                          fontSize: 13,
-                          fontWeight: 700,
-                          lineHeight: '20px',
-                          padding: '2px 10px',
-                          borderRadius: 8,
-                          minWidth: 54,
-                          textAlign: 'center',
-                        }}
-                      >
-                        {item.ourScore} × {item.theirScore}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div
+                          style={{
+                            background: badgeBg,
+                            border: `1px solid ${badgeBorder}`,
+                            color: accentColor,
+                            fontSize: 13,
+                            fontWeight: 700,
+                            lineHeight: '20px',
+                            padding: '2px 10px',
+                            borderRadius: 8,
+                            minWidth: 54,
+                            textAlign: 'center',
+                          }}
+                        >
+                          {item.ourScore} × {item.theirScore}
+                        </div>
+                        <RightOutlined style={{ fontSize: 10, color: token.colorTextTertiary }} />
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
@@ -801,7 +808,8 @@ export function HomePage() {
                     {item.scorers.length > 0 && (
                       <div
                         style={{
-                          paddingTop: 8,
+                          marginTop: 6,
+                          paddingTop: 6,
                           borderTop: `1px solid ${token.colorFillQuaternary}`,
                         }}
                       >
@@ -815,18 +823,6 @@ export function HomePage() {
                         </Text>
                       </div>
                     )}
-                    
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <Button 
-                        style={{ flex: 1, borderRadius: 8 }} 
-                        onClick={() => {
-                          posthog.capture('last_match_card_details_clicked', { match_id: item.id })
-                          requireAuth(() => setSelectedMatchId(item.id))
-                        }}
-                      >
-                        Ver detalhes
-                      </Button>
-                    </div>
                   </div>
                 )
               })}

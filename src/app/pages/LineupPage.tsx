@@ -86,7 +86,7 @@ export function LineupPage() {
   }
 
   function handleFormationChange(value: FormationId) {
-    const newSlots = adaptLineup(formation, value, slots)
+    const newSlots = adaptLineup(formation, value, slots as any)
     setFormation(value)
     setSlots(newSlots)
   }

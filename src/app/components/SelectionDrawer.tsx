@@ -1,5 +1,5 @@
 import React from 'react'
-import { Drawer, Typography, Input, Checkbox, theme, Button } from 'antd'
+import { Drawer, Typography, Input, theme, Button } from 'antd'
 import { SearchOutlined, CheckCircleFilled } from '@ant-design/icons'
 
 const { Text } = Typography

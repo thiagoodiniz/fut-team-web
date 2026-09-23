@@ -5,7 +5,7 @@ export type PlayerDTO = {
   name: string
   nickname: string | null
   photo: string | null
-  position: string | null
+  positions: string[]
   number: number | null
 }
 

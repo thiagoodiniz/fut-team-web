@@ -1,6 +1,6 @@
 import React from 'react'
-import { Modal, Typography, Tag, theme, Spin, Button, Empty } from 'antd'
-import { CalendarOutlined, EditOutlined, EnvironmentOutlined, ProfileOutlined, TrophyOutlined } from '@ant-design/icons'
+import { Modal, Typography, theme, Spin, Button } from 'antd'
+import { EditOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getMatchById, type MatchDTO } from '../../services/matches.service'
 import { getMatchLineup, type LineupData } from '../../services/lineup.service'
@@ -9,7 +9,6 @@ import { listMatchGoals, type GoalDTO } from '../../services/goals.service'
 import { FootballPitch } from './lineup/FootballPitch'
 import { PlayerAvatar } from '../components/PlayerAvatar'
 import { useTeam } from '../contexts/TeamContext'
-import { APP_COLORS } from '../../theme/theme'
 import { groupPlayersByPosition } from '../../utils/playerSort'
 
 const { Text } = Typography
@@ -107,41 +106,40 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
           {/* Cabeçalho */}
           <div style={{ textAlign: 'center' }}>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              {match.result && match.result !== 'none' && (
-                <div
-                  style={{
-                    display: 'inline-block',
-                    background:
-                      match.result === 'win'
-                        ? token.colorSuccessBg
-                        : match.result === 'loss'
-                          ? token.colorErrorBg
-                          : match.result === 'draw'
-                            ? token.colorWarningBg
-                            : token.colorFillQuaternary,
-                    color:
-                      match.result === 'win'
-                        ? token.colorSuccess
-                        : match.result === 'loss'
-                          ? token.colorError
-                          : match.result === 'draw'
-                            ? token.colorWarning
-                            : token.colorTextSecondary,
-                    padding: '2px 8px',
-                    borderRadius: 12,
-                    fontWeight: 700,
-                    fontSize: 10,
-                  }}
-                >
-                  {match.result === 'win'
-                    ? 'VITÓRIA'
-                    : match.result === 'loss'
-                      ? 'DERROTA'
-                      : match.result === 'draw'
-                        ? 'EMPATE'
-                        : ''}
-                </div>
-              )}
+              {(() => {
+                const result = match.ourScore !== null && match.theirScore !== null 
+                  ? (match.ourScore > match.theirScore ? 'win' : match.ourScore < match.theirScore ? 'loss' : 'draw') 
+                  : 'none';
+                return result !== 'none' && (
+                  <div
+                    style={{
+                      display: 'inline-block',
+                      background:
+                        result === 'win'
+                          ? token.colorSuccessBg
+                          : result === 'loss'
+                            ? token.colorErrorBg
+                            : token.colorWarningBg,
+                      color:
+                        result === 'win'
+                          ? token.colorSuccess
+                          : result === 'loss'
+                            ? token.colorError
+                            : token.colorWarning,
+                      padding: '2px 8px',
+                      borderRadius: 12,
+                      fontWeight: 700,
+                      fontSize: 10,
+                    }}
+                  >
+                    {result === 'win'
+                      ? 'VITÓRIA'
+                      : result === 'loss'
+                        ? 'DERROTA'
+                        : 'EMPATE'}
+                  </div>
+                )
+              })()}
               <Text strong style={{ fontSize: 24, lineHeight: 1 }}>
                 {match.ourScore ?? '-'} <span style={{ fontSize: 18, color: token.colorTextQuaternary, margin: '0 4px' }}>×</span> {match.theirScore ?? '-'}
               </Text>
@@ -154,10 +152,9 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
               <Text type="secondary" style={{ fontSize: 12 }}>
                 {[
                   new Date(match.date).toLocaleDateString('pt-BR'),
-                  match.time,
                   match.location,
                   match.competition,
-                  match.phase
+                  match.competitionPhase
                 ].filter(Boolean).join(' • ')}
               </Text>
             </div>
@@ -170,7 +167,7 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
             </Text>
             {lineup ? (
               <FootballPitch
-                formation={lineup.formation}
+                formation={lineup.formation as any}
                 lineup={lineup.slots}
                 presences={presentPlayers}
                 matchGoals={goals}
@@ -246,7 +243,7 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
                           return (
                             <div key={`loaned-${i}`} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                               <div style={{ position: 'relative' }}>
-                                <div style={{ width: 32, height: 32, borderRadius: '50%', background: APP_COLORS.primary, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                                <div style={{ width: 32, height: 32, borderRadius: '50%', background: token.colorPrimary, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
                                   {name[0]?.toUpperCase()}
                                 </div>
                                 {goalsCount > 0 && (

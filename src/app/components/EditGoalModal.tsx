@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Form, Select, InputNumber, Checkbox, Typography, theme } from 'antd'
+import { Modal, Form, InputNumber, Checkbox, Typography, theme } from 'antd'
 import { DrawerSelect } from './DrawerSelect'
 
 const { Text } = Typography

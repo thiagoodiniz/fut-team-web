@@ -4,7 +4,6 @@ import {
   Form,
   Input,
   InputNumber,
-  Select,
   Button,
   Upload,
   message,
@@ -16,7 +15,6 @@ import {
   CameraOutlined,
   DeleteOutlined,
   TeamOutlined,
-  TrophyOutlined,
 } from '@ant-design/icons'
 import { Link, useParams } from 'react-router-dom'
 import {

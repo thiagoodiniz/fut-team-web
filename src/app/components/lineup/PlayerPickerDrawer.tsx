@@ -4,7 +4,7 @@ import { CloseCircleFilled, SearchOutlined } from '@ant-design/icons'
 import { PlayerAvatar } from '../PlayerAvatar'
 import type { PresenceDTO } from '../../../services/presences.service'
 import type { SlotDef } from './formations'
-import { getZone, hasZoneMatch } from './formations'
+import { hasZoneMatch } from './formations'
 import type { LineupData } from '../../../services/lineup.service'
 
 const { Text } = Typography

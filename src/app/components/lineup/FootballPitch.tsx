@@ -7,7 +7,6 @@ interface FootballPitchProps {
   formation: FormationId
   lineup: LineupData['slots']
   presences: PresenceDTO[]
-  loanedPlayers?: string[]
   isEditing: boolean
   onSlotClick?: (slot: SlotDef) => void
 }
@@ -16,7 +15,6 @@ function getPlayerNameForSlot(
   slot: SlotDef,
   lineup: LineupData['slots'],
   presences: PresenceDTO[],
-  loanedPlayers: string[],
 ): { name?: string; playerId?: string } {
   const entry = lineup[slot.key]
   if (!entry) return {}
@@ -40,7 +38,6 @@ export function FootballPitch({
   formation,
   lineup,
   presences,
-  loanedPlayers = [],
   isEditing,
   onSlotClick,
 }: FootballPitchProps) {
@@ -92,7 +89,6 @@ export function FootballPitch({
                   slot,
                   lineup,
                   presences,
-                  loanedPlayers,
                 )
                 return (
                   <PlayerSlot

@@ -1,4 +1,4 @@
-import { theme, Typography } from 'antd'
+import { Typography } from 'antd'
 import { PlayerAvatar } from '../PlayerAvatar'
 
 const { Text } = Typography

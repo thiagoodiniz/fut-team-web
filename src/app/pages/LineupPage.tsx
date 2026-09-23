@@ -208,7 +208,6 @@ export function LineupPage() {
           formation={formation}
           lineup={slots}
           presences={presences}
-          loanedPlayers={loanedPlayers}
           isEditing={isAdmin}
           onSlotClick={isAdmin ? handleSlotClick : undefined}
         />

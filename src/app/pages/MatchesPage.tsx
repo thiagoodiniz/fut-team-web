@@ -1,5 +1,5 @@
 import React from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useAuthGate } from '../hooks/useAuthGate'
 import { AuthGateModal } from '../components/AuthGateModal'
 import { Typography, Input, Card, theme, FloatButton, Tag, Empty } from 'antd'
@@ -18,7 +18,7 @@ import { getPublicMatches } from '../../services/public.service'
 import { CreateMatchModal } from '../components/CreateMatchModal'
 import { MonthSummaryModal } from '../components/MonthSummaryModal'
 import { MatchDetailsModal } from '../components/MatchDetailsModal'
-import { Button } from 'antd'
+
 
 const { Text, Title } = Typography
 
@@ -40,7 +40,6 @@ import { APP_COLORS } from '../../theme/theme'
 import { withAlpha } from '../../theme/colorUtils'
 
 export function MatchesPage() {
-  const navigate = useNavigate()
   const { slug } = useParams<{ slug: string }>()
   const { requireAuth, isModalOpen, setIsModalOpen } = useAuthGate()
   const { token } = theme.useToken()
@@ -492,6 +491,10 @@ export function MatchesPage() {
                     return (
                         <div
                           key={match.id}
+                          onClick={() => {
+                            posthog.capture('match_card_clicked', { match_id: match.id })
+                            requireAuth(() => setSelectedMatchId(match.id))
+                          }}
                           style={{
                             padding: '12px 16px',
                             borderBottom:
@@ -503,6 +506,7 @@ export function MatchesPage() {
                             flexDirection: 'column',
                             gap: 12,
                             transition: 'background 0.15s',
+                            cursor: 'pointer',
                           }}
                         >
                           <div
@@ -599,32 +603,26 @@ export function MatchesPage() {
                           </div>
                         </div>
 
-                        {/* Botoes de Acao */}
-                        <div style={{ display: 'flex', gap: 8 }}>
-                          <Button 
-                            style={{ flex: 1, borderRadius: 8 }} 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              posthog.capture('match_view_details_clicked', { match_id: match.id })
-                              requireAuth(() => setSelectedMatchId(match.id))
+                        <div
+                          style={{
+                            marginTop: 12,
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <Text
+                            strong
+                            style={{
+                              fontSize: 12,
+                              color: token.colorPrimary,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 4,
                             }}
                           >
-                            Ver detalhes
-                          </Button>
-                          {isAdmin && (
-                            <Button 
-                              type="primary"
-                              ghost
-                              style={{ flex: 1, borderRadius: 8 }} 
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                posthog.capture('match_edit_clicked', { match_id: match.id })
-                                requireAuth(() => navigate(`/${slug || 'app'}/matches/${match.id}`))
-                              }}
-                            >
-                              Editar jogo
-                            </Button>
-                          )}
+                            Ver detalhes <RightOutlined style={{ fontSize: 9 }} />
+                          </Text>
                         </div>
                       </div>
                     )

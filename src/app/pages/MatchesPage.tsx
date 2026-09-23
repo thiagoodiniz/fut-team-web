@@ -490,40 +490,29 @@ export function MatchesPage() {
                     const hasScore = match.ourScore !== null && match.theirScore !== null
 
                     return (
-                      <div
-                        key={match.id}
-                        style={{
-                          padding: '12px 16px',
-                          borderBottom:
-                            idx < group.data.length - 1
-                              ? `1px solid ${token.colorFillQuaternary}`
-                              : undefined,
-                          borderLeft: `3px solid ${accentColor}`,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          gap: 12,
-                          transition: 'background 0.15s',
-                        }}
-                        onClick={() => {
-                          posthog.capture('match_list_item_clicked', {
-                            match_id: match.id,
-                            opponent: match.opponent,
-                          })
-                          requireAuth(() =>
-                            navigate(`/${slug || 'app'}/matches/${match.id}`),
-                          )
-                        }}
-                      >
                         <div
+                          key={match.id}
                           style={{
+                            padding: '12px 16px',
+                            borderBottom:
+                              idx < group.data.length - 1
+                                ? `1px solid ${token.colorFillQuaternary}`
+                                : undefined,
+                            borderLeft: `3px solid ${accentColor}`,
                             display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'flex-start',
+                            flexDirection: 'column',
                             gap: 12,
+                            transition: 'background 0.15s',
                           }}
                         >
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              gap: 12,
+                            }}
+                          >
                           <div style={{ minWidth: 0, flex: 1 }}>
                             <Text
                               strong
@@ -611,7 +600,7 @@ export function MatchesPage() {
                         </div>
 
                         {/* Botoes de Acao */}
-                        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+                        <div style={{ display: 'flex', gap: 8 }}>
                           <Button 
                             style={{ flex: 1, borderRadius: 8 }} 
                             onClick={(e) => {

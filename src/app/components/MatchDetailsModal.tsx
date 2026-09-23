@@ -101,40 +101,42 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {/* Cabeçalho */}
           <div style={{ textAlign: 'center' }}>
-            <div
-              style={{
-                display: 'inline-block',
-                background:
-                  match.result === 'win'
-                    ? token.colorSuccessBg
-                    : match.result === 'loss'
-                      ? token.colorErrorBg
-                      : match.result === 'draw'
-                        ? token.colorWarningBg
-                        : token.colorFillQuaternary,
-                color:
-                  match.result === 'win'
-                    ? token.colorSuccess
-                    : match.result === 'loss'
-                      ? token.colorError
-                      : match.result === 'draw'
-                        ? token.colorWarning
-                        : token.colorTextSecondary,
-                padding: '4px 12px',
-                borderRadius: 16,
-                fontWeight: 700,
-                fontSize: 12,
-                marginBottom: 8,
-              }}
-            >
-              {match.result === 'win'
-                ? 'VITÓRIA'
-                : match.result === 'loss'
-                  ? 'DERROTA'
-                  : match.result === 'draw'
-                    ? 'EMPATE'
-                    : 'A JOGAR'}
-            </div>
+            {match.result && match.result !== 'none' && (
+              <div
+                style={{
+                  display: 'inline-block',
+                  background:
+                    match.result === 'win'
+                      ? token.colorSuccessBg
+                      : match.result === 'loss'
+                        ? token.colorErrorBg
+                        : match.result === 'draw'
+                          ? token.colorWarningBg
+                          : token.colorFillQuaternary,
+                  color:
+                    match.result === 'win'
+                      ? token.colorSuccess
+                      : match.result === 'loss'
+                        ? token.colorError
+                        : match.result === 'draw'
+                          ? token.colorWarning
+                          : token.colorTextSecondary,
+                  padding: '4px 12px',
+                  borderRadius: 16,
+                  fontWeight: 700,
+                  fontSize: 12,
+                  marginBottom: 8,
+                }}
+              >
+                {match.result === 'win'
+                  ? 'VITÓRIA'
+                  : match.result === 'loss'
+                    ? 'DERROTA'
+                    : match.result === 'draw'
+                      ? 'EMPATE'
+                      : ''}
+              </div>
+            )}
 
             <Text strong style={{ display: 'block', fontSize: 24, lineHeight: 1.2 }}>
               {match.opponent}
@@ -172,12 +174,12 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
             <div style={{ display: 'flex', justifyContent: 'center', gap: 16, alignItems: 'center', marginTop: 16 }}>
               <div style={{ textAlign: 'right' }}>
                 <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>Nós</Text>
-                <Text strong style={{ fontSize: 36, lineHeight: 1 }}>{match.goalsFor ?? '-'}</Text>
+                <Text strong style={{ fontSize: 36, lineHeight: 1 }}>{match.ourScore ?? '-'}</Text>
               </div>
               <Text type="secondary" style={{ fontSize: 24 }}>×</Text>
               <div style={{ textAlign: 'left' }}>
                 <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>Eles</Text>
-                <Text strong style={{ fontSize: 36, lineHeight: 1 }}>{match.goalsAgainst ?? '-'}</Text>
+                <Text strong style={{ fontSize: 36, lineHeight: 1 }}>{match.theirScore ?? '-'}</Text>
               </div>
             </div>
           </div>
@@ -205,27 +207,65 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
             <div>
               <div style={{ padding: '16px', background: token.colorFillQuaternary, borderRadius: 12 }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-                  {unassignedPresences.map((p) => (
-                    <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <PlayerAvatar playerId={p.player.id} name={p.player.nickname || p.player.name} size={32} />
-                      <div>
-                        <Text strong style={{ fontSize: 13, display: 'block' }}>
-                          {p.player.nickname || p.player.name}
-                        </Text>
+                  {unassignedPresences.map((p) => {
+                    const goalsCount = goals.filter((g) => g.playerId === p.player.id && !g.ownGoal).length
+                    const assistsCount = goals.filter((g) => g.assistantId === p.player.id).length
+
+                    return (
+                      <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ position: 'relative' }}>
+                          <PlayerAvatar playerId={p.player.id} name={p.player.nickname || p.player.name} size={32} />
+                          {goalsCount > 0 && (
+                            <div style={{ position: 'absolute', top: -4, right: -4, background: '#fff', borderRadius: 10, padding: '1px 3px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.3)', border: '1px solid #d9d9d9', zIndex: 10 }}>
+                              <span style={{ fontSize: 9 }}>⚽</span>
+                              {goalsCount > 1 && <Text strong style={{ fontSize: 8, marginLeft: 1, color: '#000', lineHeight: 1 }}>{goalsCount}</Text>}
+                            </div>
+                          )}
+                          {assistsCount > 0 && (
+                            <div style={{ position: 'absolute', bottom: -4, right: -4, background: '#fff', borderRadius: 10, padding: '1px 3px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.3)', border: '1px solid #d9d9d9', zIndex: 10 }}>
+                              <span style={{ fontSize: 9 }}>👟</span>
+                              {assistsCount > 1 && <Text strong style={{ fontSize: 8, marginLeft: 1, color: '#000', lineHeight: 1 }}>{assistsCount}</Text>}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <Text strong style={{ fontSize: 13, display: 'block' }}>
+                            {p.player.nickname || p.player.name}
+                          </Text>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                  {unassignedLoaned.map((name, i) => (
-                    <div key={`loaned-${i}`} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: APP_COLORS.primary, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                        {name[0]?.toUpperCase()}
+                    )
+                  })}
+                  {unassignedLoaned.map((name, i) => {
+                    const goalsCount = goals.filter((g) => g.loanedPlayerName === name && !g.ownGoal).length
+                    const assistsCount = goals.filter((g) => g.loanedAssistantName === name).length
+
+                    return (
+                      <div key={`loaned-${i}`} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ position: 'relative' }}>
+                          <div style={{ width: 32, height: 32, borderRadius: '50%', background: APP_COLORS.primary, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                            {name[0]?.toUpperCase()}
+                          </div>
+                          {goalsCount > 0 && (
+                            <div style={{ position: 'absolute', top: -4, right: -4, background: '#fff', borderRadius: 10, padding: '1px 3px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.3)', border: '1px solid #d9d9d9', zIndex: 10 }}>
+                              <span style={{ fontSize: 9 }}>⚽</span>
+                              {goalsCount > 1 && <Text strong style={{ fontSize: 8, marginLeft: 1, color: '#000', lineHeight: 1 }}>{goalsCount}</Text>}
+                            </div>
+                          )}
+                          {assistsCount > 0 && (
+                            <div style={{ position: 'absolute', bottom: -4, right: -4, background: '#fff', borderRadius: 10, padding: '1px 3px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.3)', border: '1px solid #d9d9d9', zIndex: 10 }}>
+                              <span style={{ fontSize: 9 }}>👟</span>
+                              {assistsCount > 1 && <Text strong style={{ fontSize: 8, marginLeft: 1, color: '#000', lineHeight: 1 }}>{assistsCount}</Text>}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <Text strong style={{ fontSize: 13, display: 'block' }}>{name}</Text>
+                          <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>Emprestado</Text>
+                        </div>
                       </div>
-                      <div>
-                        <Text strong style={{ fontSize: 13, display: 'block' }}>{name}</Text>
-                        <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>Emprestado</Text>
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             </div>

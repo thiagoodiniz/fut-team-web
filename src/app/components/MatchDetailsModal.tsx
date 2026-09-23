@@ -74,21 +74,25 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
     <Modal
       open={!!matchId}
       onCancel={onClose}
+      style={{ top: 20 }}
       footer={
-        isAdmin ? (
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            onClick={() => {
-              onClose()
-              navigate(`/${slug || 'app'}/matches/${matchId}`)
-            }}
-          >
-            Editar jogo
-          </Button>
-        ) : null
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+          <Button onClick={onClose}>Fechar</Button>
+          {isAdmin && (
+            <Button
+              type="primary"
+              icon={<EditOutlined />}
+              onClick={() => {
+                onClose()
+                navigate(`/${slug || 'app'}/matches/${matchId}`)
+              }}
+            >
+              Editar jogo
+            </Button>
+          )}
+        </div>
       }
-      styles={{ body: { padding: '20px 16px', maxHeight: '80vh', overflowY: 'auto' } }}
+      styles={{ body: { padding: '16px 16px', maxHeight: '80vh', overflowY: 'auto' } }}
       title="Detalhes da partida"
       width={480}
       destroyOnClose
@@ -98,7 +102,7 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
           <Spin />
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* Cabeçalho */}
           <div style={{ textAlign: 'center' }}>
             {match.result && match.result !== 'none' && (
@@ -121,11 +125,11 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
                         : match.result === 'draw'
                           ? token.colorWarning
                           : token.colorTextSecondary,
-                  padding: '4px 12px',
-                  borderRadius: 16,
+                  padding: '2px 8px',
+                  borderRadius: 12,
                   fontWeight: 700,
-                  fontSize: 12,
-                  marginBottom: 8,
+                  fontSize: 10,
+                  marginBottom: 4,
                 }}
               >
                 {match.result === 'win'
@@ -138,7 +142,7 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
               </div>
             )}
 
-            <Text strong style={{ display: 'block', fontSize: 24, lineHeight: 1.2 }}>
+            <Text strong style={{ display: 'block', fontSize: 20, lineHeight: 1.2 }}>
               {match.opponent}
             </Text>
 
@@ -146,40 +150,40 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
               style={{
                 display: 'flex',
                 justifyContent: 'center',
-                gap: 8,
-                marginTop: 8,
+                gap: 6,
+                marginTop: 6,
                 flexWrap: 'wrap',
               }}
             >
-              <Tag icon={<CalendarOutlined />} style={{ margin: 0 }}>
+              <Tag icon={<CalendarOutlined />} style={{ margin: 0, fontSize: 11, padding: '0 6px', lineHeight: '20px' }}>
                 {new Date(match.date).toLocaleDateString('pt-BR')}
               </Tag>
               {match.time && (
-                <Tag icon={<CalendarOutlined />} style={{ margin: 0 }}>
+                <Tag icon={<CalendarOutlined />} style={{ margin: 0, fontSize: 11, padding: '0 6px', lineHeight: '20px' }}>
                   {match.time}
                 </Tag>
               )}
               {match.competition && (
-                <Tag icon={<TrophyOutlined />} style={{ margin: 0 }}>
+                <Tag icon={<TrophyOutlined />} style={{ margin: 0, fontSize: 11, padding: '0 6px', lineHeight: '20px' }}>
                   {match.competition}
                 </Tag>
               )}
               {match.phase && (
-                <Tag icon={<ProfileOutlined />} style={{ margin: 0 }}>
+                <Tag icon={<ProfileOutlined />} style={{ margin: 0, fontSize: 11, padding: '0 6px', lineHeight: '20px' }}>
                   {match.phase}
                 </Tag>
               )}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 16, alignItems: 'center', marginTop: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 16, alignItems: 'center', marginTop: 12 }}>
               <div style={{ textAlign: 'right' }}>
-                <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>Nós</Text>
-                <Text strong style={{ fontSize: 36, lineHeight: 1 }}>{match.ourScore ?? '-'}</Text>
+                <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: -4 }}>Nós</Text>
+                <Text strong style={{ fontSize: 28, lineHeight: 1 }}>{match.ourScore ?? '-'}</Text>
               </div>
-              <Text type="secondary" style={{ fontSize: 24 }}>×</Text>
+              <Text type="secondary" style={{ fontSize: 20 }}>×</Text>
               <div style={{ textAlign: 'left' }}>
-                <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>Eles</Text>
-                <Text strong style={{ fontSize: 36, lineHeight: 1 }}>{match.theirScore ?? '-'}</Text>
+                <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: -4 }}>Eles</Text>
+                <Text strong style={{ fontSize: 28, lineHeight: 1 }}>{match.theirScore ?? '-'}</Text>
               </div>
             </div>
           </div>

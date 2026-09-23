@@ -125,8 +125,12 @@ export function MatchDetailsPage() {
   }
 
   React.useEffect(() => {
+    if (!isAdmin) {
+      navigate('/app/matches', { replace: true })
+      return
+    }
     load()
-  }, [id])
+  }, [id, isAdmin, navigate])
 
   React.useEffect(() => {
     if (match?.seasonId) {

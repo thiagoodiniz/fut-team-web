@@ -17,6 +17,8 @@ import { listMatches, type MatchDTO } from '../../services/matches.service'
 import { getPublicMatches } from '../../services/public.service'
 import { CreateMatchModal } from '../components/CreateMatchModal'
 import { MonthSummaryModal } from '../components/MonthSummaryModal'
+import { MatchDetailsModal } from '../components/MatchDetailsModal'
+import { Button } from 'antd'
 
 const { Text, Title } = Typography
 
@@ -52,6 +54,7 @@ export function MatchesPage() {
   const [filter, setFilter] = React.useState('')
   const [createModalOpen, setCreateModalOpen] = React.useState(false)
   const [summaryModalOpen, setSummaryModalOpen] = React.useState(false)
+  const [selectedMatchId, setSelectedMatchId] = React.useState<string | null>(null)
   const [selectedMonthGroup, setSelectedMonthGroup] = React.useState<{
     monthYear: string
     data: MatchDTO[]
@@ -513,152 +516,126 @@ export function MatchesPage() {
                           )
                         }}
                       >
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <Text
-                            strong
-                            style={{
-                              display: 'block',
-                              fontSize: 14,
-                              lineHeight: 1.3,
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                            }}
-                          >
-                            {opponent}
-                          </Text>
-                          <div
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 8,
-                              marginTop: 4,
-                              flexWrap: 'wrap',
-                            }}
-                          >
-                            <div
-                              style={{ display: 'flex', alignItems: 'center', gap: 4 }}
-                            >
-                              <CalendarOutlined
-                                style={{ fontSize: 10, color: token.colorTextSecondary }}
-                              />
-                              <Text type="secondary" style={{ fontSize: 11 }}>
-                                {dateLabel}
-                              </Text>
-                            </div>
-                            {(match.competition || match.competitionPhase) && (
-                              <div
-                                style={{ display: 'flex', alignItems: 'center', gap: 4 }}
-                              >
-                                <TrophyOutlined
-                                  style={{
-                                    fontSize: 10,
-                                    color: token.colorTextSecondary,
-                                  }}
-                                />
-                                <Text
-                                  type="secondary"
-                                  style={{
-                                    fontSize: 11,
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    maxWidth: 120,
-                                  }}
-                                >
-                                  {[match.competition, match.competitionPhase]
-                                    .filter(Boolean)
-                                    .join(' - ')}
-                                </Text>
-                              </div>
-                            )}
-                            {match.location && (
-                              <div
-                                style={{ display: 'flex', alignItems: 'center', gap: 4 }}
-                              >
-                                <EnvironmentOutlined
-                                  style={{
-                                    fontSize: 10,
-                                    color: token.colorTextSecondary,
-                                  }}
-                                />
-                                <Text
-                                  type="secondary"
-                                  style={{
-                                    fontSize: 11,
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    maxWidth: 120,
-                                  }}
-                                >
-                                  {match.location}
-                                </Text>
-                              </div>
-                            )}
-                            <div
-                              style={{ display: 'flex', alignItems: 'center', gap: 4 }}
-                            >
-                              <UserOutlined
-                                style={{ fontSize: 10, color: token.colorTextSecondary }}
-                              />
-                              <Text type="secondary" style={{ fontSize: 11 }}>
-                                {(match.presences?.length || 0) +
-                                  (match.loanedPlayers?.length || 0)}
-                              </Text>
-                            </div>
-                            {hasScore && match.ourScore! > (match.goals?.length || 0) && (
-                              <Tag
-                                color="warning"
-                                style={{
-                                  margin: 0,
-                                  fontSize: 10,
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 4,
-                                  lineHeight: '16px',
-                                  padding: '0 4px',
-                                }}
-                              >
-                                <WarningOutlined /> Gols não atribuídos
-                              </Tag>
-                            )}
-                          </div>
-                        </div>
-
                         <div
                           style={{
                             display: 'flex',
-                            alignItems: 'center',
-                            gap: 10,
-                            flexShrink: 0,
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
+                            gap: 12,
                           }}
                         >
-                          <div
-                            style={{
-                              background: hasScore
-                                ? match.ourScore! > match.theirScore!
-                                  ? isDark ? 'rgba(34, 197, 94, 0.15)' : '#dcfce7'
-                                  : match.ourScore! < match.theirScore!
-                                    ? isDark ? 'rgba(239, 68, 68, 0.15)' : '#fee2e2'
-                                    : isDark ? 'rgba(250, 204, 21, 0.15)' : '#fef3c7'
-                                : token.colorFillSecondary,
-                              color: accentColor,
-                              border: `1px solid ${withAlpha(accentColor, hasScore ? 0.3 : 0.15)}`,
-                              fontSize: 13,
-                              fontWeight: 700,
-                              lineHeight: '22px',
-                              padding: '2px 10px',
-                              borderRadius: 8,
-                              minWidth: 54,
-                              textAlign: 'center',
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <Text
+                              strong
+                              style={{
+                                display: 'block',
+                                fontSize: 14,
+                                lineHeight: 1.3,
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                              }}
+                            >
+                              {opponent}
+                            </Text>
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8,
+                                marginTop: 4,
+                                flexWrap: 'wrap',
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                <CalendarOutlined style={{ fontSize: 10, color: token.colorTextSecondary }} />
+                                <Text type="secondary" style={{ fontSize: 11 }}>{dateLabel}</Text>
+                              </div>
+                              {(match.competition || match.competitionPhase) && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                  <TrophyOutlined style={{ fontSize: 10, color: token.colorTextSecondary }} />
+                                  <Text type="secondary" style={{ fontSize: 11, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>
+                                    {[match.competition, match.competitionPhase].filter(Boolean).join(' - ')}
+                                  </Text>
+                                </div>
+                              )}
+                              {match.location && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                  <EnvironmentOutlined style={{ fontSize: 10, color: token.colorTextSecondary }} />
+                                  <Text type="secondary" style={{ fontSize: 11, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>
+                                    {match.location}
+                                  </Text>
+                                </div>
+                              )}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                <UserOutlined style={{ fontSize: 10, color: token.colorTextSecondary }} />
+                                <Text type="secondary" style={{ fontSize: 11 }}>
+                                  {(match.presences?.length || 0) + (match.loanedPlayers?.length || 0)}
+                                </Text>
+                              </div>
+                              {hasScore && match.ourScore! > (match.goals?.length || 0) && (
+                                <Tag
+                                  color="warning"
+                                  style={{ margin: 0, fontSize: 10, display: 'flex', alignItems: 'center', gap: 4, lineHeight: '16px', padding: '0 4px' }}
+                                >
+                                  <WarningOutlined /> Gols não atribuídos
+                                </Tag>
+                              )}
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                            <div
+                              style={{
+                                background: hasScore
+                                  ? match.ourScore! > match.theirScore!
+                                    ? isDark ? 'rgba(34, 197, 94, 0.15)' : '#dcfce7'
+                                    : match.ourScore! < match.theirScore!
+                                      ? isDark ? 'rgba(239, 68, 68, 0.15)' : '#fee2e2'
+                                      : isDark ? 'rgba(250, 204, 21, 0.15)' : '#fef3c7'
+                                  : token.colorFillSecondary,
+                                color: accentColor,
+                                border: `1px solid ${withAlpha(accentColor, hasScore ? 0.3 : 0.15)}`,
+                                fontSize: 13,
+                                fontWeight: 700,
+                                lineHeight: '22px',
+                                padding: '2px 10px',
+                                borderRadius: 8,
+                                minWidth: 54,
+                                textAlign: 'center',
+                              }}
+                            >
+                              {hasScore ? `${match.ourScore} × ${match.theirScore}` : '–'}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Botoes de Acao */}
+                        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+                          <Button 
+                            style={{ flex: 1, borderRadius: 8 }} 
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              posthog.capture('match_view_details_clicked', { match_id: match.id })
+                              requireAuth(() => setSelectedMatchId(match.id))
                             }}
                           >
-                            {hasScore ? `${match.ourScore} × ${match.theirScore}` : '–'}
-                          </div>
-                          <RightOutlined
-                            style={{ fontSize: 11, color: token.colorTextQuaternary }}
-                          />
+                            Ver detalhes
+                          </Button>
+                          {isAdmin && (
+                            <Button 
+                              type="primary"
+                              ghost
+                              style={{ flex: 1, borderRadius: 8 }} 
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                posthog.capture('match_edit_clicked', { match_id: match.id })
+                                requireAuth(() => navigate(`/${slug || 'app'}/matches/${match.id}`))
+                              }}
+                            >
+                              Editar jogo
+                            </Button>
+                          )}
                         </div>
                       </div>
                     )
@@ -707,6 +684,11 @@ export function MatchesPage() {
           transform: 'translateX(50%)',
           bottom: isPWA ? 124 : 92,
         }}
+      />
+
+      <MatchDetailsModal 
+        matchId={selectedMatchId} 
+        onClose={() => setSelectedMatchId(null)} 
       />
 
       <AuthGateModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />

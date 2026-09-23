@@ -1,0 +1,237 @@
+import React from 'react'
+import { Modal, Typography, Tag, theme, Spin, Button, Empty } from 'antd'
+import { CalendarOutlined, EditOutlined, EnvironmentOutlined, ProfileOutlined, TrophyOutlined } from '@ant-design/icons'
+import { useNavigate, useParams } from 'react-router-dom'
+import { getMatchById, type MatchDTO } from '../../services/matches.service'
+import { getMatchLineup, type LineupData } from '../../services/lineup.service'
+import { listMatchPresences, type PresenceDTO } from '../../services/presences.service'
+import { listMatchGoals, type GoalDTO } from '../../services/goals.service'
+import { FootballPitch } from './lineup/FootballPitch'
+import { PlayerAvatar } from '../components/PlayerAvatar'
+import { useTeam } from '../contexts/TeamContext'
+import { APP_COLORS } from '../../theme/theme'
+
+const { Text } = Typography
+
+interface MatchDetailsModalProps {
+  matchId: string | null
+  onClose: () => void
+}
+
+export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) {
+  const [loading, setLoading] = React.useState(false)
+  const [match, setMatch] = React.useState<MatchDTO | null>(null)
+  const [lineup, setLineup] = React.useState<LineupData | null>(null)
+  const [presences, setPresences] = React.useState<PresenceDTO[]>([])
+  const [goals, setGoals] = React.useState<GoalDTO[]>([])
+
+  const { isAdmin } = useTeam()
+  const { token } = theme.useToken()
+  const navigate = useNavigate()
+  const { slug } = useParams<{ slug: string }>()
+
+  React.useEffect(() => {
+    if (matchId) {
+      load(matchId)
+    } else {
+      setMatch(null)
+      setLineup(null)
+      setPresences([])
+      setGoals([])
+    }
+  }, [matchId])
+
+  async function load(id: string) {
+    setLoading(true)
+    try {
+      const [matchData, lineupData, presencesData, goalsData] = await Promise.all([
+        getMatchById(id),
+        getMatchLineup(id).catch(() => null),
+        listMatchPresences(id),
+        listMatchGoals(id),
+      ])
+      setMatch(matchData)
+      setLineup(lineupData)
+      setPresences(presencesData)
+      setGoals(goalsData)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Identificar quem está presente mas não está escalado
+  const presentPlayers = presences.filter((p) => p.present)
+  const lineupPlayerIds = Object.values(lineup?.slots || {}).map(s => s?.playerId).filter(Boolean)
+  const lineupLoanedNames = Object.values(lineup?.slots || {}).map(s => s?.loanedPlayerName).filter(Boolean)
+
+  const unassignedPresences = presentPlayers.filter(p => !lineupPlayerIds.includes(p.playerId))
+  const loanedPlayers = match?.loanedPlayers || []
+  const unassignedLoaned = loanedPlayers.filter(name => !lineupLoanedNames.includes(name))
+
+  const hasBench = unassignedPresences.length > 0 || unassignedLoaned.length > 0
+
+  return (
+    <Modal
+      open={!!matchId}
+      onCancel={onClose}
+      footer={
+        isAdmin ? (
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => {
+              onClose()
+              navigate(`/${slug || 'app'}/matches/${matchId}`)
+            }}
+          >
+            Editar jogo
+          </Button>
+        ) : null
+      }
+      styles={{ body: { padding: '20px 16px', maxHeight: '80vh', overflowY: 'auto' } }}
+      title="Detalhes da partida"
+      width={480}
+      destroyOnClose
+    >
+      {loading || !match ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+          <Spin />
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          {/* Cabeçalho */}
+          <div style={{ textAlign: 'center' }}>
+            <div
+              style={{
+                display: 'inline-block',
+                background:
+                  match.result === 'win'
+                    ? token.colorSuccessBg
+                    : match.result === 'loss'
+                      ? token.colorErrorBg
+                      : match.result === 'draw'
+                        ? token.colorWarningBg
+                        : token.colorFillQuaternary,
+                color:
+                  match.result === 'win'
+                    ? token.colorSuccess
+                    : match.result === 'loss'
+                      ? token.colorError
+                      : match.result === 'draw'
+                        ? token.colorWarning
+                        : token.colorTextSecondary,
+                padding: '4px 12px',
+                borderRadius: 16,
+                fontWeight: 700,
+                fontSize: 12,
+                marginBottom: 8,
+              }}
+            >
+              {match.result === 'win'
+                ? 'VITÓRIA'
+                : match.result === 'loss'
+                  ? 'DERROTA'
+                  : match.result === 'draw'
+                    ? 'EMPATE'
+                    : 'A JOGAR'}
+            </div>
+
+            <Text strong style={{ display: 'block', fontSize: 24, lineHeight: 1.2 }}>
+              {match.opponent}
+            </Text>
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 8,
+                marginTop: 8,
+                flexWrap: 'wrap',
+              }}
+            >
+              <Tag icon={<CalendarOutlined />} style={{ margin: 0 }}>
+                {new Date(match.date).toLocaleDateString('pt-BR')}
+              </Tag>
+              {match.time && (
+                <Tag icon={<CalendarOutlined />} style={{ margin: 0 }}>
+                  {match.time}
+                </Tag>
+              )}
+              {match.competition && (
+                <Tag icon={<TrophyOutlined />} style={{ margin: 0 }}>
+                  {match.competition}
+                </Tag>
+              )}
+              {match.phase && (
+                <Tag icon={<ProfileOutlined />} style={{ margin: 0 }}>
+                  {match.phase}
+                </Tag>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 16, alignItems: 'center', marginTop: 16 }}>
+              <div style={{ textAlign: 'right' }}>
+                <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>Nós</Text>
+                <Text strong style={{ fontSize: 36, lineHeight: 1 }}>{match.goalsFor ?? '-'}</Text>
+              </div>
+              <Text type="secondary" style={{ fontSize: 24 }}>×</Text>
+              <div style={{ textAlign: 'left' }}>
+                <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>Eles</Text>
+                <Text strong style={{ fontSize: 36, lineHeight: 1 }}>{match.goalsAgainst ?? '-'}</Text>
+              </div>
+            </div>
+          </div>
+
+          {/* Escalação */}
+          <div>
+            <Text strong style={{ display: 'block', marginBottom: 16, fontSize: 16 }}>
+              Escalação
+            </Text>
+            {lineup ? (
+              <FootballPitch
+                formation={lineup.formation}
+                lineup={lineup.slots}
+                presences={presentPlayers}
+                matchGoals={goals}
+                isEditing={false}
+              />
+            ) : (
+              <Empty description="Escalação não definida" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            )}
+          </div>
+
+          {/* Banco (Não escalados) */}
+          {hasBench && (
+            <div>
+              <div style={{ padding: '16px', background: token.colorFillQuaternary, borderRadius: 12 }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                  {unassignedPresences.map((p) => (
+                    <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <PlayerAvatar playerId={p.player.id} name={p.player.nickname || p.player.name} size={32} />
+                      <div>
+                        <Text strong style={{ fontSize: 13, display: 'block' }}>
+                          {p.player.nickname || p.player.name}
+                        </Text>
+                      </div>
+                    </div>
+                  ))}
+                  {unassignedLoaned.map((name, i) => (
+                    <div key={`loaned-${i}`} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: APP_COLORS.primary, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                        {name[0]?.toUpperCase()}
+                      </div>
+                      <div>
+                        <Text strong style={{ fontSize: 13, display: 'block' }}>{name}</Text>
+                        <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>Emprestado</Text>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </Modal>
+  )
+}

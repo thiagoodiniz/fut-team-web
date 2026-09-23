@@ -2,11 +2,13 @@ import { type FormationId, FORMATION_SLOTS, type SlotDef } from './formations'
 import { PlayerSlot } from './PlayerSlot'
 import type { LineupData } from '../../../services/lineup.service'
 import type { PresenceDTO } from '../../../services/presences.service'
+import type { GoalDTO } from '../../../services/goals.service'
 
 interface FootballPitchProps {
   formation: FormationId
   lineup: LineupData['slots']
   presences: PresenceDTO[]
+  matchGoals?: GoalDTO[]
   isEditing: boolean
   onSlotClick?: (slot: SlotDef) => void
 }
@@ -38,6 +40,7 @@ export function FootballPitch({
   formation,
   lineup,
   presences,
+  matchGoals = [],
   isEditing,
   onSlotClick,
 }: FootballPitchProps) {
@@ -90,6 +93,18 @@ export function FootballPitch({
                   lineup,
                   presences,
                 )
+
+                let goalsCount = 0
+                let assistsCount = 0
+
+                if (playerId) {
+                  goalsCount = matchGoals.filter((g) => g.playerId === playerId && !g.ownGoal).length
+                  assistsCount = matchGoals.filter((g) => g.assistantId === playerId).length
+                } else if (name && lineup[slot.key]?.loanedPlayerName) {
+                  goalsCount = matchGoals.filter((g) => g.loanedPlayerName === lineup[slot.key]?.loanedPlayerName && !g.ownGoal).length
+                  assistsCount = matchGoals.filter((g) => g.loanedAssistantName === lineup[slot.key]?.loanedPlayerName).length
+                }
+
                 return (
                   <PlayerSlot
                     key={slot.key}
@@ -97,6 +112,8 @@ export function FootballPitch({
                     label={slot.label}
                     playerName={name}
                     playerId={playerId}
+                    goalsCount={goalsCount}
+                    assistsCount={assistsCount}
                     isEditing={isEditing}
                     onClick={() => onSlotClick?.(slot)}
                   />

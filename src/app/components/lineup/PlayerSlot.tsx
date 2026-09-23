@@ -24,8 +24,8 @@ export function PlayerSlot({
   const isEmpty = !playerName
   const { clubColors } = useAppTheme()
   
-  const primaryColor = clubColors.primary
-  const secondaryColor = clubColors.secondary
+  const primaryColor = clubColors.rawPrimary || clubColors.primary
+  const secondaryColor = clubColors.rawSecondary || clubColors.secondary
 
   const SIZE = 52
 

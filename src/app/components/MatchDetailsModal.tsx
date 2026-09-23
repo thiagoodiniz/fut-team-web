@@ -155,6 +155,7 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
                 {[
                   new Date(match.date).toLocaleDateString('pt-BR'),
                   match.time,
+                  match.location,
                   match.competition,
                   match.phase
                 ].filter(Boolean).join(' • ')}

@@ -808,28 +808,12 @@ export function HomePage() {
                         paddingTop: 6,
                         borderTop: `1px solid ${token.colorFillQuaternary}`,
                         display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                        gap: 12,
+                        justifyContent: 'flex-start',
                       }}
                     >
-                      <div style={{ flexShrink: 0, marginTop: 1 }}>
-                        <Text style={{ fontSize: 11, color: token.colorPrimary, fontWeight: 500 }}>
-                          Ver detalhes <RightOutlined style={{ fontSize: 9 }} />
-                        </Text>
-                      </div>
-                      {item.scorers.length > 0 && (
-                        <div style={{ flex: 1, textAlign: 'right' }}>
-                          <Text
-                            style={{
-                              fontSize: 11,
-                              color: token.colorTextSecondary,
-                            }}
-                          >
-                            {item.scorers.map((s: string) => `⚽ ${s}`).join(', ')}
-                          </Text>
-                        </div>
-                      )}
+                      <Text style={{ fontSize: 11, color: token.colorPrimary, fontWeight: 500 }}>
+                        Ver detalhes <RightOutlined style={{ fontSize: 9 }} />
+                      </Text>
                     </div>
                   </div>
                 )

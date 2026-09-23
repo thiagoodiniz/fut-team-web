@@ -753,24 +753,21 @@ export function HomePage() {
                       <Text strong style={{ fontSize: 14 }}>
                         {item.opponent}
                       </Text>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div
-                          style={{
-                            background: badgeBg,
-                            border: `1px solid ${badgeBorder}`,
-                            color: accentColor,
-                            fontSize: 13,
-                            fontWeight: 700,
-                            lineHeight: '20px',
-                            padding: '2px 10px',
-                            borderRadius: 8,
-                            minWidth: 54,
-                            textAlign: 'center',
-                          }}
-                        >
-                          {item.ourScore} × {item.theirScore}
-                        </div>
-                        <RightOutlined style={{ fontSize: 10, color: token.colorTextTertiary }} />
+                      <div
+                        style={{
+                          background: badgeBg,
+                          border: `1px solid ${badgeBorder}`,
+                          color: accentColor,
+                          fontSize: 13,
+                          fontWeight: 700,
+                          lineHeight: '20px',
+                          padding: '2px 10px',
+                          borderRadius: 8,
+                          minWidth: 54,
+                          textAlign: 'center',
+                        }}
+                      >
+                        {item.ourScore} × {item.theirScore}
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
@@ -805,28 +802,34 @@ export function HomePage() {
                         </div>
                       )}
                     </div>
-                    {item.scorers.length > 0 && (
-                      <div
-                        style={{
-                          marginTop: 6,
-                          paddingTop: 6,
-                          borderTop: `1px solid ${token.colorFillQuaternary}`,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            fontSize: 11,
-                            color: token.colorTextSecondary,
-                          }}
-                        >
-                          {item.scorers.map((s: string) => `⚽ ${s}`).join(', ')}
+                    <div
+                      style={{
+                        marginTop: 6,
+                        paddingTop: 6,
+                        borderTop: `1px solid ${token.colorFillQuaternary}`,
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
+                        gap: 12,
+                      }}
+                    >
+                      <div style={{ flexShrink: 0, marginTop: 1 }}>
+                        <Text style={{ fontSize: 11, color: token.colorPrimary, fontWeight: 500 }}>
+                          Ver detalhes <RightOutlined style={{ fontSize: 9 }} />
                         </Text>
                       </div>
-                    )}
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 2 }}>
-                      <Text style={{ fontSize: 11, color: token.colorPrimary, fontWeight: 500 }}>
-                        Ver detalhes <RightOutlined style={{ fontSize: 9 }} />
-                      </Text>
+                      {item.scorers.length > 0 && (
+                        <div style={{ flex: 1, textAlign: 'right' }}>
+                          <Text
+                            style={{
+                              fontSize: 11,
+                              color: token.colorTextSecondary,
+                            }}
+                          >
+                            {item.scorers.map((s: string) => `⚽ ${s}`).join(', ')}
+                          </Text>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )

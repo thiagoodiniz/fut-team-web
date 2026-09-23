@@ -1,5 +1,5 @@
 import React from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { Button, Select, Typography, message, Skeleton, Empty, theme, Tag } from 'antd'
 import { SaveOutlined } from '@ant-design/icons'
 import { getMatchById, type MatchDTO } from '../../services/matches.service'
@@ -27,6 +27,7 @@ const { Option } = Select
 
 export function LineupPage() {
   const { id, slug } = useParams<{ id: string; slug?: string }>()
+  const navigate = useNavigate()
   const { isAdmin } = useTeam()
   const { token } = theme.useToken()
   const isPWA = useIsPWA()

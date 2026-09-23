@@ -1,6 +1,6 @@
 import { Typography } from 'antd'
 import { PlayerAvatar } from '../PlayerAvatar'
-import { useOptionalTeam } from '../../contexts/TeamContext'
+import { useAppTheme } from '../../../../theme/ThemeProvider'
 
 const { Text } = Typography
 
@@ -22,10 +22,10 @@ export function PlayerSlot({
   onClick,
 }: PlayerSlotProps) {
   const isEmpty = !playerName
-  const team = useOptionalTeam()
+  const { clubColors } = useAppTheme()
   
-  const primaryColor = team?.primaryColor || '#1677ff'
-  const secondaryColor = team?.secondaryColor || '#fff'
+  const primaryColor = clubColors.primary
+  const secondaryColor = clubColors.secondary
 
   const SIZE = 52
 

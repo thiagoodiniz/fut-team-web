@@ -89,6 +89,79 @@ export function PlayersPage() {
 
   const activeCount = players.filter((p) => p.active).length
 
+  const PlayerItem = ({ player, isLast }: { player: PlayerDTO, isLast: boolean }) => (
+    <div
+      onClick={() => {
+        posthog.capture('player_item_clicked', {
+          player_id: player.id,
+          name: player.name,
+        })
+        requireAuth(() => {
+          setEditingPlayer(player)
+          setModalOpen(true)
+        })
+      }}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '12px 20px',
+        borderBottom: !isLast ? `1px solid ${token.colorFillQuaternary}` : 'none',
+        opacity: player.active ? 1 : 0.5,
+        cursor: 'pointer',
+        transition: 'background 0.15s',
+      }}
+    >
+      <PlayerAvatar
+        playerId={player.id}
+        name={player.nickname || player.name}
+        size={44}
+      />
+
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          <Text strong style={{ fontSize: 14 }}>
+            {player.nickname || player.name}
+          </Text>
+          {player.positions && player.positions.length > 0 && (
+            <Tag style={{ margin: 0, fontSize: 11, borderRadius: 6 }}>
+              {player.positions.join(', ')}
+            </Tag>
+          )}
+          {!player.active && (
+            <Tag color="default" style={{ margin: 0, fontSize: 11, borderRadius: 6 }}>
+              Inativo
+            </Tag>
+          )}
+        </div>
+        {player.nickname && (
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            {player.name}
+          </Text>
+        )}
+      </div>
+
+      {isActiveSeason && isAdmin ? (
+        <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+          <span onClick={(e) => e.stopPropagation()}>
+            <Switch
+              checked={player.active}
+              onChange={() => toggleActive(player)}
+              loading={updatingPlayerId === player.id}
+              size="small"
+            />
+          </span>
+          <Text type="secondary" style={{ fontSize: 10 }}>Clique para editar</Text>
+        </div>
+      ) : (
+        <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+          <RightOutlined style={{ fontSize: 12, color: token.colorTextSecondary }} />
+          <Text type="secondary" style={{ fontSize: 10 }}>Ver detalhes</Text>
+        </div>
+      )}
+    </div>
+  )
+
   return (
     <div style={{ paddingBottom: 80 }}>
       {/* Search + count */}
@@ -136,7 +209,8 @@ export function PlayersPage() {
         <Empty description="Nenhum jogador encontrado" />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-          {Object.entries(groupPlayersByPosition(filteredPlayers)).map(([groupName, groupPlayers]) => (
+          {/* Jogadores Ativos agrupados por posição */}
+          {Object.entries(groupPlayersByPosition(filteredPlayers.filter(p => p.active))).map(([groupName, groupPlayers]) => (
             <div key={groupName}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                 <div style={{ flex: 1, height: 1, background: token.colorBorderSecondary }} />
@@ -154,117 +228,41 @@ export function PlayersPage() {
                 }}
               >
                 {groupPlayers.map((player, i) => (
-            <div
-              key={player.id}
-              onClick={() => {
-                posthog.capture('player_item_clicked', {
-                  player_id: player.id,
-                  name: player.name,
-                })
-                requireAuth(() => {
-                  setEditingPlayer(player)
-                  setModalOpen(true)
-                })
-              }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                padding: '12px 20px',
-                borderBottom:
-                  i < groupPlayers.length - 1
-                    ? `1px solid ${token.colorFillQuaternary}`
-                    : 'none',
-                opacity: player.active ? 1 : 0.5,
-                cursor: 'pointer',
-                transition: 'background 0.15s',
-              }}
-            >
-              <PlayerAvatar
-                playerId={player.id}
-                name={player.nickname || player.name}
-                size={44}
-              />
-
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <Text strong style={{ fontSize: 14 }}>
-                    {player.nickname || player.name}
-                  </Text>
-                  {player.positions && player.positions.length > 0 && (
-                    <Tag style={{ margin: 0, fontSize: 11, borderRadius: 6 }}>
-                      {player.positions.join(', ')}
-                    </Tag>
-                  )}
-                  {!player.active && (
-                    <Tag
-                      color="default"
-                      style={{ margin: 0, fontSize: 11, borderRadius: 6 }}
-                    >
-                      Inativo
-                    </Tag>
-                  )}
-                </div>
-                {player.nickname && (
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    {player.name}
-                  </Text>
-                )}
+                  <PlayerItem key={player.id} player={player} isLast={i === groupPlayers.length - 1} />
+                ))}
               </div>
+            </div>
+          ))}
 
-              {isActiveSeason && isAdmin ? (
+          {/* Jogadores Inativos */}
+          {(() => {
+            const inativos = filteredPlayers.filter(p => !p.active)
+            if (inativos.length === 0) return null
+            return (
+              <div key="inativos">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <div style={{ flex: 1, height: 1, background: token.colorBorderSecondary }} />
+                  <Text type="secondary" style={{ fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Inativos
+                  </Text>
+                  <div style={{ flex: 1, height: 1, background: token.colorBorderSecondary }} />
+                </div>
                 <div
                   style={{
-                    flexShrink: 0,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-end',
-                    gap: 8,
+                    background: token.colorBgContainer,
+                    border: `1px solid ${token.colorBorderSecondary}`,
+                    borderRadius: 16,
+                    overflow: 'hidden',
                   }}
                 >
-                  <span onClick={(e) => e.stopPropagation()}>
-                    <Switch
-                      checked={player.active}
-                      onChange={() => toggleActive(player)}
-                      loading={updatingPlayerId === player.id}
-                      size="small"
-                    />
-                  </span>
-                  <Text type="secondary" style={{ fontSize: 10 }}>
-                    Clique para ver detalhes
-                  </Text>
+                  {inativos.map((player, i) => (
+                    <PlayerItem key={player.id} player={player} isLast={i === inativos.length - 1} />
+                  ))}
                 </div>
-              ) : (
-                <div
-                      style={{
-                        flexShrink: 0,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-end',
-                        gap: 8,
-                      }}
-                    >
-                      <RightOutlined
-                        style={{ fontSize: 12, color: token.colorTextSecondary }}
-                      />
-                      <Text type="secondary" style={{ fontSize: 10 }}>
-                        Clique para ver detalhes
-                      </Text>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+              </div>
+            )
+          })()}
+        </div>
       )}
 
       {isActiveSeason && isAdmin && (

@@ -14,6 +14,7 @@ import {
   Skeleton,
   AutoComplete,
   Alert,
+  Tooltip,
 } from 'antd'
 import posthog from 'posthog-js'
 import {
@@ -24,6 +25,7 @@ import {
   PlusOutlined,
   CloseOutlined,
   TrophyOutlined,
+  ProfileOutlined,
 } from '@ant-design/icons'
 
 import {
@@ -45,6 +47,7 @@ import {
   updateMatchPresences,
   type PresenceDTO,
 } from '../../services/presences.service'
+import { getMatchLineup } from '../../services/lineup.service'
 import { AddGoalModal } from '../components/AddGoalModal'
 import { PlayerAvatar } from '../components/PlayerAvatar'
 import { EditMatchModal } from '../components/EditMatchModal'
@@ -96,6 +99,7 @@ export function MatchDetailsPage() {
   >([])
   const [newLoanedPlayer, setNewLoanedPlayer] = React.useState('')
   const [addingLoanedPlayer, setAddingLoanedPlayer] = React.useState(false)
+  const [hasLineup, setHasLineup] = React.useState(false)
 
   async function load() {
     if (!id) return
@@ -103,15 +107,17 @@ export function MatchDetailsPage() {
     try {
       setLoading(true)
 
-      const [matchData, goalsData, presencesData] = await Promise.all([
+      const [matchData, goalsData, presencesData, lineupData] = await Promise.all([
         getMatchById(id),
         listMatchGoals(id),
         listMatchPresences(id),
+        getMatchLineup(id).catch(() => null),
       ])
 
       setMatch(matchData)
       setGoals(goalsData)
       setPresences(presencesData)
+      setHasLineup(!!lineupData)
     } finally {
       setLoading(false)
     }
@@ -505,6 +511,34 @@ export function MatchDetailsPage() {
               Editar placar ou informações do jogo
             </Button>
           )}
+
+          {/* Botão de formação */}
+          <div style={{ marginTop: 8 }}>
+            {isAdmin ? (
+              <Button
+                block
+                icon={<ProfileOutlined style={{ fontSize: 16 }} />}
+                onClick={() => navigate(`lineup`)}
+                style={{ height: 40, borderRadius: 8 }}
+              >
+                Editar Formação
+              </Button>
+            ) : (
+              <Tooltip
+                title={!hasLineup ? 'Formação não definida pelo administrador' : undefined}
+              >
+                <Button
+                  block
+                  disabled={!hasLineup}
+                  icon={<ProfileOutlined style={{ fontSize: 16 }} />}
+                  onClick={() => navigate(`lineup`)}
+                  style={{ height: 40, borderRadius: 8 }}
+                >
+                  Ver Formação
+                </Button>
+              </Tooltip>
+            )}
+          </div>
 
         </div>
       </div>

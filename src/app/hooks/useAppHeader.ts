@@ -1,4 +1,4 @@
-﻿import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 export function useAppHeader() {
   const { pathname } = useLocation()
@@ -10,7 +10,8 @@ export function useAppHeader() {
 }
 
 function getHeaderTitle(pathname: string) {
-  if (/\/matches\/[^\/]+$/.test(pathname)) return 'Detalhes do jogo'
+  if (/\/matches\/[^/]+\/lineup/.test(pathname)) return 'Formação'
+  if (/\/matches\/[^/]+$/.test(pathname)) return 'Detalhes do jogo'
   if (/\/matches/.test(pathname)) return 'Jogos'
   if (/\/players/.test(pathname)) return 'Jogadores'
   if (/\/seasons/.test(pathname)) return 'Temporadas'
@@ -23,7 +24,8 @@ function getHeaderTitle(pathname: string) {
 }
 
 function shouldShowBack(pathname: string) {
-  if (/\/matches\/[^\/]+$/.test(pathname)) return true
+  if (/\/matches\/[^/]+\/lineup/.test(pathname)) return true
+  if (/\/matches\/[^/]+$/.test(pathname)) return true
   if (/\/ranking\//.test(pathname)) return true
   if (/\/team\/members/.test(pathname)) return true
   if (/\/team\/settings/.test(pathname)) return true

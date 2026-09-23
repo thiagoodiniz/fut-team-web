@@ -5,6 +5,15 @@ O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-09-22
+
+### Adicionado
+- **Formação do Time:**
+  - Nova tela de edição de formação tática na partida (`/matches/:id/lineup`).
+  - Campo virtual interativo (*Football Pitch*) com suporte a 8 esquemas táticos (ex: 4-3-3, 4-4-2, 3-5-2).
+  - Gaveta de seleção inteligente que sugere jogadores que atuam na posição solicitada (ex: Zagueiros e Laterais na defesa).
+  - Acesso público para visualizar a escalação sem necessidade de login.
+
 ## [2.4.0] - 2026-09-22
 
 ### Adicionado

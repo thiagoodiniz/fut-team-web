@@ -8,6 +8,7 @@ import { PublicAppShell } from './app/layout/PublicAppShell'
 import { HomePage } from './app/pages/HomePage'
 import { MatchesPage } from './app/pages/MatchesPage'
 import { MatchDetailsPage } from './app/pages/MatchDetailsPage'
+import { LineupPage } from './app/pages/LineupPage'
 import { PlayersPage } from './app/pages/PlayersPage'
 import { TeamPage } from './app/pages/TeamPage'
 import { TeamSettingsPage } from './app/pages/TeamSettingsPage'
@@ -63,6 +64,7 @@ export const router = createBrowserRouter([
           { path: 'home', element: <HomePage /> },
           { path: 'matches', element: <MatchesPage /> },
           { path: 'matches/:id', element: <MatchDetailsPage /> },
+          { path: 'matches/:id/lineup', element: <LineupPage /> },
           { path: 'players', element: <PlayersPage /> },
           { path: 'team', element: <TeamPage /> },
           { path: 'team/settings', element: <TeamSettingsPage /> },
@@ -98,6 +100,7 @@ export const router = createBrowserRouter([
           { path: 'home', element: <Navigate to="../" replace /> },
           { path: 'matches', element: <MatchesPage /> },
           { path: 'matches/:id', element: <MatchDetailsPage /> },
+          { path: 'matches/:id/lineup', element: <LineupPage /> },
           { path: 'players', element: <PlayersPage /> },
           { path: 'team', element: <TeamPage /> },
           { path: 'team/settings', element: <TeamSettingsPage /> },

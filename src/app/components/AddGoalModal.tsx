@@ -11,6 +11,7 @@ import {
   Tag,
 } from 'antd'
 import { MinusCircleOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons'
+import { DrawerSelect } from './DrawerSelect'
 
 const { Text } = Typography
 
@@ -164,15 +165,16 @@ export function AddGoalModal({
               },
             ]}
           >
-            <Select
+            <DrawerSelect
+              title="Quem marcou"
               placeholder={
                 hasNonOwnGoals ? 'Selecione o jogador' : 'Não se aplica para gol contra'
               }
+              searchPlaceholder="Buscar jogador..."
               options={players}
-              showSearch
-              optionFilterProp="label"
               disabled={!hasNonOwnGoals}
-              allowClear
+              showRemove
+              removeLabel="Limpar seleção"
             />
           </Form.Item>
 
@@ -260,13 +262,14 @@ export function AddGoalModal({
                         name={[field.name, 'assistantId']}
                         style={{ flex: 2, margin: 0 }}
                       >
-                        <Select
+                        <DrawerSelect
+                          title="Assistência"
                           placeholder="Assistência (opcional)"
+                          searchPlaceholder="Buscar jogador..."
                           options={players.filter((p) => p.value !== selectedPlayerId)}
-                          showSearch
-                          optionFilterProp="label"
                           disabled={!selectedPlayerId}
-                          allowClear
+                          showRemove
+                          removeLabel="Remover assistência"
                         />
                       </Form.Item>
                     )}

@@ -1,5 +1,6 @@
 import React from 'react'
 import { Modal, Form, Select, InputNumber, Checkbox, Typography, theme } from 'antd'
+import { DrawerSelect } from './DrawerSelect'
 
 const { Text } = Typography
 
@@ -114,13 +115,14 @@ export function EditGoalModal({
           </Form.Item>
 
           <Form.Item name="assistantId" label="Assistência" style={{ flex: 2 }}>
-            <Select
-              placeholder={goal.ownGoal ? 'N/A' : 'Selecione'}
-              options={players.filter((p) => p.value !== goal.scorerId)}
-              showSearch
-              optionFilterProp="label"
-              allowClear
-              disabled={goal.ownGoal}
+            <DrawerSelect
+              title="Assistência"
+              placeholder={goal?.ownGoal ? 'N/A' : 'Selecione'}
+              searchPlaceholder="Buscar jogador..."
+              options={players.filter((p) => p.value !== goal?.scorerId)}
+              disabled={goal?.ownGoal}
+              showRemove
+              removeLabel="Remover assistência"
             />
           </Form.Item>
         </div>

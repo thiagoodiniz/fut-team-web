@@ -29,6 +29,7 @@ import {
 import { clearPlayerPhotoCache, getPlayerPhoto } from '../../services/image.service'
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
+import { DrawerSelect } from './DrawerSelect'
 
 const { Text } = Typography
 
@@ -455,11 +456,13 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
             style={{ flex: 1 }}
             rules={[{ required: true, message: 'Selecione ao menos uma posição' }]}
           >
-            <Select
-              mode="multiple"
+            <DrawerSelect
+              multiple
+              title="Escolher posições"
               placeholder="Selecione"
+              searchPlaceholder="Buscar posição..."
               options={positions.map((p) => ({ label: p, value: p }))}
-              allowClear
+              disabled={isReadOnly}
             />
           </Form.Item>
           <Form.Item label="Número" name="number" style={{ width: 90 }}>

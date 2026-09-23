@@ -32,6 +32,7 @@ import { PlayerAvatar } from '../components/PlayerAvatar'
 import { TeamLogo } from '../components/TeamLogo'
 import { useIsPWA } from '../hooks/useIsPWA'
 import { useAppTheme } from '../../theme/ThemeProvider'
+import { MatchDetailsModal } from '../components/MatchDetailsModal'
 import { APP_COLORS } from '../../theme/theme'
 import posthog from 'posthog-js'
 
@@ -69,6 +70,7 @@ export function HomePage() {
   const [topScorersData, setTopScorersData] = React.useState<any>(null)
   const [topAssistantsData, setTopAssistantsData] = React.useState<any>(null)
   const [attendanceData, setAttendanceData] = React.useState<any>(null)
+  const [selectedMatchId, setSelectedMatchId] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     let active = true;
@@ -723,27 +725,18 @@ export function HomePage() {
                 return (
                   <div
                     key={index}
-                    onClick={() => {
-                      posthog.capture('last_match_card_clicked', { match_id: item.id })
-                      requireAuth(() =>
-                        navigate(
-                          slug
-                            ? `/${slug}/matches/${item.id}`
-                            : `/app/matches/${item.id}`,
-                        ),
-                      )
-                    }}
                     style={{
                       background: token.colorBgContainer,
                       border: `1px solid ${token.colorBorderSecondary}`,
                       borderLeft: `4px solid ${accentColor}`,
                       borderRadius: 12,
                       padding: '12px 14px',
-                      cursor: 'pointer',
                       boxShadow: isDark
                         ? '0 2px 8px rgba(0,0,0,0.15)'
                         : '0 1px 3px rgba(0,0,0,0.02)',
-                      transition: 'opacity 0.15s, transform 0.15s',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 12,
                     }}
                   >
                     <div
@@ -751,7 +744,6 @@ export function HomePage() {
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        marginBottom: 6,
                       }}
                     >
                       <Text strong style={{ fontSize: 14 }}>
@@ -809,8 +801,7 @@ export function HomePage() {
                     {item.scorers.length > 0 && (
                       <div
                         style={{
-                          marginTop: 6,
-                          paddingTop: 6,
+                          paddingTop: 8,
                           borderTop: `1px solid ${token.colorFillQuaternary}`,
                         }}
                       >
@@ -824,6 +815,18 @@ export function HomePage() {
                         </Text>
                       </div>
                     )}
+                    
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <Button 
+                        style={{ flex: 1, borderRadius: 8 }} 
+                        onClick={() => {
+                          posthog.capture('last_match_card_details_clicked', { match_id: item.id })
+                          requireAuth(() => setSelectedMatchId(item.id))
+                        }}
+                      >
+                        Ver detalhes
+                      </Button>
+                    </div>
                   </div>
                 )
               })}
@@ -1269,6 +1272,11 @@ export function HomePage() {
       />
 
       <AuthGateModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
+      <MatchDetailsModal
+        matchId={selectedMatchId}
+        onClose={() => setSelectedMatchId(null)}
+      />
     </div>
   )
 }

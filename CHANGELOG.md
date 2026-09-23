@@ -5,6 +5,24 @@ O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [2.6.0] - 2026-09-23
+
+### Adicionado
+- **Múltiplas Posições:** Jogadores agora podem atuar em mais de uma posição (seleção múltipla na criação e edição do jogador).
+- **Ordenação Inteligente:** Jogadores na listagem de Elenco e na aba de Presenças do jogo agora são agrupados taticamente (Goleiros, Zagueiros, Laterais, Meio-campo, Atacantes) e ordenados alfabeticamente.
+- **Badge de Gols e Assistências:** O campinho tático agora exibe bolinhas indicadoras (`⚽` e `👟`) em cima da foto do jogador caso ele tenha marcado gol ou dado assistência naquela partida específica.
+- **Modal de Detalhes da Partida:** 
+  - Nova visualização compacta e moderna das partidas (aberta via listagem de Jogos ou cards da Home), acessível para todos os jogadores.
+  - Exibe o campinho da partida com a escalação.
+  - Lista os jogadores "no banco" (ausentes da escalação, mas com presença marcada) ou convidados/emprestados, devidamente organizados por posição.
+- **Gaveta Genérica (SelectionDrawer):** Novo componente base *bottom-sheet* criado para uniformizar seleções no mobile. Substituiu selects nativos complexos na escolha de posições, autor do gol e autor da assistência.
+
+### Modificado
+- **Tela de Gerenciamento da Partida:** A antiga tela de detalhes do jogo (onde se registram presenças e gols) foi restrita exclusivamente para acesso de administradores.
+- **Cards de Últimos Jogos (Home):** Otimizados. Ao invés de navegar para a edição, agora eles abrem o novo Modal Público de Detalhes. A lista de artilheiros explícita foi substituída por um design mais fluído focado na abertura do modal.
+- **Limpar Escalação:** Botão "Limpar" inserido nativamente na tela da prancheta tática sem *prompt* obstrutivo de JavaScript.
+- Apelido do jogador agora é opcional na API.
+
 ## [2.5.0] - 2026-09-22
 
 ### Adicionado

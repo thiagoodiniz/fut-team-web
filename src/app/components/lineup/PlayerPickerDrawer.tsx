@@ -4,7 +4,7 @@ import { CloseCircleFilled, SearchOutlined } from '@ant-design/icons'
 import { PlayerAvatar } from '../PlayerAvatar'
 import type { PresenceDTO } from '../../../services/presences.service'
 import type { SlotDef } from './formations'
-import { getZone } from './formations'
+import { getZone, hasZoneMatch } from './formations'
 import type { LineupData } from '../../../services/lineup.service'
 
 const { Text } = Typography
@@ -56,15 +56,17 @@ export function PlayerPickerDrawer({
   const currentEntry = lineup[slot.key]
 
   // Helper para saber se a posição bate exatamente com a intenção do slot
-  function isExactPositionMatch(slotLabel: string, playerPos?: string | null) {
-    if (!playerPos) return false
-    const pos = playerPos.toUpperCase()
-    if (slotLabel === 'GOL' && pos === 'GOLEIRO') return true
-    if (['LE', 'LD', 'AE', 'AD'].includes(slotLabel) && pos === 'LATERAL') return true
-    if (['ZAG'].includes(slotLabel) && pos === 'ZAGUEIRO') return true
-    if (['VOL', 'MC', 'ME', 'MD', 'MAE', 'MEI', 'MAD'].includes(slotLabel) && pos === 'MEIO-CAMPO') return true
-    if (['CA', 'PTE', 'PTD'].includes(slotLabel) && pos === 'ATACANTE') return true
-    return false
+  function isExactPositionMatch(slotLabel: string, playerPos?: string[] | null) {
+    if (!playerPos || playerPos.length === 0) return false
+    return playerPos.some(pos => {
+      const p = pos.toUpperCase()
+      if (slotLabel === 'GOL' && p === 'GOLEIRO') return true
+      if (['LE', 'LD', 'AE', 'AD'].includes(slotLabel) && p === 'LATERAL') return true
+      if (['ZAG'].includes(slotLabel) && p === 'ZAGUEIRO') return true
+      if (['VOL', 'MC', 'ME', 'MD', 'MAE', 'MEI', 'MAD'].includes(slotLabel) && p === 'MEIO-CAMPO') return true
+      if (['CA', 'PTE', 'PTD'].includes(slotLabel) && p === 'ATACANTE') return true
+      return false
+    })
   }
 
   // Ordenar jogadores presentes:
@@ -73,14 +75,12 @@ export function PlayerPickerDrawer({
   // 3. Ordem alfabética
   const slotZone = slot.zone
   const sortedPresences = [...presentPresences].sort((a, b) => {
-    const aExact = isExactPositionMatch(slot.label, a.player?.position) ? 0 : 1
-    const bExact = isExactPositionMatch(slot.label, b.player?.position) ? 0 : 1
+    const aExact = isExactPositionMatch(slot.label, a.player?.positions) ? 0 : 1
+    const bExact = isExactPositionMatch(slot.label, b.player?.positions) ? 0 : 1
     if (aExact !== bExact) return aExact - bExact
 
-    const zA = getZone(a.player?.position)
-    const zB = getZone(b.player?.position)
-    const aMatch = zA === slotZone ? 0 : 1
-    const bMatch = zB === slotZone ? 0 : 1
+    const aMatch = hasZoneMatch(slotZone, a.player?.positions) ? 0 : 1
+    const bMatch = hasZoneMatch(slotZone, b.player?.positions) ? 0 : 1
     if (aMatch !== bMatch) return aMatch - bMatch
 
     // dentro do mesmo grupo, ordenar por nome
@@ -204,7 +204,8 @@ export function PlayerPickerDrawer({
             ? presence!.player?.nickname || presence!.player?.name || 'Jogador'
             : option.name
           const subName = isPlayer && presence!.player?.nickname ? presence!.player?.name : undefined
-          const position = isPlayer ? presence!.player?.position : null
+          const positionsArray = isPlayer ? presence!.player?.positions || [] : []
+          const positionStr = positionsArray.join(', ')
           const playerId = isPlayer ? presence!.playerId : undefined
 
           const isAllocated = isPlayer
@@ -216,8 +217,7 @@ export function PlayerPickerDrawer({
             : currentEntry?.loanedPlayerName === option.name
 
           const slotZone = slot.zone
-          const playerZone = isPlayer ? getZone(position) : null
-          const isCompatible = playerZone === slotZone
+          const isCompatible = isPlayer ? hasZoneMatch(slotZone, positionsArray) : false
 
           return (
             <div
@@ -267,12 +267,12 @@ export function PlayerPickerDrawer({
                       {subName}
                     </Text>
                   )}
-                  {subName && position && (
+                  {subName && positionStr && (
                     <Text type="secondary" style={{ fontSize: 10 }}>
                       •
                     </Text>
                   )}
-                  {isPlayer && position && (
+                  {isPlayer && positionStr && (
                     <Text
                       style={{
                         fontSize: 11,
@@ -281,7 +281,7 @@ export function PlayerPickerDrawer({
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {position}
+                      {positionStr}
                       {isCompatible ? ' ✓' : ''}
                     </Text>
                   )}

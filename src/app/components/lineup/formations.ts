@@ -48,6 +48,11 @@ export function getZone(position?: string | null): PositionZone | null {
   return POSITION_ZONE_MAP[position.toUpperCase()] ?? null
 }
 
+export function hasZoneMatch(zone: PositionZone, positions?: string[] | null): boolean {
+  if (!positions || positions.length === 0) return false
+  return positions.some(p => getZone(p) === zone)
+}
+
 // ─── Slots por formação ────────────────────────────────────────────────────────
 // Cada slot: { key, label, zone, row (0=ataque, higher=defesa), col (-1..1) }
 

@@ -105,7 +105,7 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
         form.setFieldsValue({
           name: player.name,
           nickname: player.nickname,
-          position: player.position,
+          positions: player.positions,
           number: player.number,
         })
         // Load photo
@@ -203,9 +203,9 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
             <Skeleton active paragraph={{ rows: 1 }} title={false} />
           ) : stats ? (
             <div
-              style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}
             >
-              {/* Presenças */}
+              {/* Presenças e Frequência */}
               <div style={{ textAlign: 'center' }}>
                 <div
                   style={{
@@ -237,9 +237,30 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
                 <Text type="secondary" style={{ fontSize: 12 }}>
                   /{stats.totalMatches}
                 </Text>
+                
+                {/* Frequência agregada */}
+                <div style={{ marginTop: -2 }}>
+                  <Text
+                    strong
+                    style={{
+                      fontSize: 11,
+                      color:
+                        stats.totalMatches > 0 &&
+                        stats.presences / stats.totalMatches >= 0.7
+                          ? token.colorSuccess
+                          : stats.totalMatches > 0 &&
+                              stats.presences / stats.totalMatches >= 0.4
+                            ? token.colorWarning
+                            : token.colorError,
+                    }}
+                  >
+                    ({stats.totalMatches > 0 ? Math.round((stats.presences / stats.totalMatches) * 100) : 0}%)
+                  </Text>
+                </div>
+
                 <div style={{ marginTop: 2 }}>
                   <Link
-                    to={`/app/ranking/attendance/${player.id}/matches`}
+                    to={slug ? `/${slug}/ranking/attendance/${player.id}/matches` : `/app/ranking/attendance/${player.id}/matches`}
                     onClick={onClose}
                     style={{ fontSize: 11 }}
                   >
@@ -345,54 +366,6 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
                   </div>
                 )}
               </div>
-
-
-              {/* Frequência */}
-              <div style={{ textAlign: 'center' }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 4,
-                    marginBottom: 2,
-                  }}
-                >
-                  <TrophyOutlined
-                    style={{ fontSize: 12, color: token.colorTextSecondary }}
-                  />
-                  <Text
-                    style={{
-                      fontSize: 10,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      color: token.colorTextSecondary,
-                      fontWeight: 600,
-                    }}
-                  >
-                    Frequência
-                  </Text>
-                </div>
-                <Text
-                  strong
-                  style={{
-                    fontSize: 20,
-                    color:
-                      stats.totalMatches > 0 &&
-                      stats.presences / stats.totalMatches >= 0.7
-                        ? token.colorSuccess
-                        : stats.totalMatches > 0 &&
-                            stats.presences / stats.totalMatches >= 0.4
-                          ? token.colorWarning
-                          : token.colorError,
-                  }}
-                >
-                  {stats.totalMatches > 0
-                    ? Math.round((stats.presences / stats.totalMatches) * 100)
-                    : 0}
-                  %
-                </Text>
-              </div>
             </div>
           ) : null}
         </div>
@@ -476,8 +449,14 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
         </Form.Item>
 
         <div style={{ display: 'flex', gap: 12 }}>
-          <Form.Item label="Posição" name="position" style={{ flex: 1 }}>
+          <Form.Item
+            label="Posição"
+            name="positions"
+            style={{ flex: 1 }}
+            rules={[{ required: true, message: 'Selecione ao menos uma posição' }]}
+          >
             <Select
+              mode="multiple"
               placeholder="Selecione"
               options={positions.map((p) => ({ label: p, value: p }))}
               allowClear

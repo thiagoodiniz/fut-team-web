@@ -48,6 +48,7 @@ import {
   type PresenceDTO,
 } from '../../services/presences.service'
 import { getMatchLineup } from '../../services/lineup.service'
+import { groupPlayersByPosition } from '../../utils/playerSort'
 import { AddGoalModal } from '../components/AddGoalModal'
 import { PlayerAvatar } from '../components/PlayerAvatar'
 import { EditMatchModal } from '../components/EditMatchModal'
@@ -797,64 +798,76 @@ export function MatchDetailsPage() {
                 <Empty description="Nenhum jogador encontrado" />
               </div>
             ) : (
-              filteredPresences.map((p, i) => (
-                <div
-                  key={p.playerId}
-                  onClick={() => {
-                    if (!isActiveSeason || !isAdmin) return
-                    posthog.capture('toggle_presence_clicked', {
-                      player_id: p.playerId,
-                      present: !p.present,
-                    })
-                    togglePresence(p.playerId, !p.present)
-                  }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '12px 20px',
-                    borderBottom:
-                      i < filteredPresences.length - 1
-                        ? `1px solid ${token.colorFillQuaternary}`
-                        : 'none',
-                    opacity: p.present ? 1 : 0.6,
-                    cursor: isActiveSeason && isAdmin ? 'pointer' : 'default',
-                    transition: 'opacity 0.2s',
-                  }}
-                >
-                  <div
-                    style={{
-                      minWidth: 0,
-                      flex: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
-                    }}
-                  >
-                    <PlayerAvatar
-                      playerId={p.player.id}
-                      name={p.player.nickname || p.player.name}
-                      size={34}
-                    />
-                    <div style={{ minWidth: 0 }}>
-                      <Text strong style={{ display: 'block' }}>
-                        {p.player.nickname || p.player.name}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {Object.entries(groupPlayersByPosition(filteredPresences)).map(([groupName, groupPresences]) => (
+                  <div key={groupName}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, padding: '0 20px' }}>
+                      <Text type="secondary" style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        {groupName}
                       </Text>
-                      {p.player.nickname && (
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                          {p.player.name}
-                        </Text>
-                      )}
+                      <div style={{ flex: 1, height: 1, background: token.colorBorderSecondary }} />
                     </div>
+                    {groupPresences.map((p, i) => (
+                      <div
+                        key={p.playerId}
+                        onClick={() => {
+                          if (!isActiveSeason || !isAdmin) return
+                          posthog.capture('toggle_presence_clicked', {
+                            player_id: p.playerId,
+                            present: !p.present,
+                          })
+                          togglePresence(p.playerId, !p.present)
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 12,
+                          padding: '12px 20px',
+                          borderBottom:
+                            i < groupPresences.length - 1
+                              ? `1px solid ${token.colorFillQuaternary}`
+                              : 'none',
+                          opacity: p.present ? 1 : 0.6,
+                          cursor: isActiveSeason && isAdmin ? 'pointer' : 'default',
+                          transition: 'opacity 0.2s',
+                        }}
+                      >
+                        <div
+                          style={{
+                            minWidth: 0,
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10,
+                          }}
+                        >
+                          <PlayerAvatar
+                            playerId={p.player.id}
+                            name={p.player.nickname || p.player.name}
+                            size={34}
+                          />
+                          <div style={{ minWidth: 0 }}>
+                            <Text strong style={{ display: 'block' }}>
+                              {p.player.nickname || p.player.name}
+                            </Text>
+                            {p.player.nickname && (
+                              <Text type="secondary" style={{ fontSize: 12 }}>
+                                {p.player.name}
+                              </Text>
+                            )}
+                          </div>
+                        </div>
+                        <Switch
+                          checked={p.present}
+                          disabled={!isActiveSeason || !isAdmin}
+                          onClick={(_, event) => event.stopPropagation()}
+                          onChange={(val) => togglePresence(p.playerId, val)}
+                        />
+                      </div>
+                    ))}
                   </div>
-                  <Switch
-                    checked={p.present}
-                    disabled={!isActiveSeason || !isAdmin}
-                    onClick={(_, event) => event.stopPropagation()}
-                    onChange={(val) => togglePresence(p.playerId, val)}
-                  />
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </div>
         )}

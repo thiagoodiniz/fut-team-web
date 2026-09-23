@@ -1,5 +1,6 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
+import { groupPlayersByPosition } from '../../utils/playerSort'
 import { useAuthGate } from '../hooks/useAuthGate'
 import { AuthGateModal } from '../components/AuthGateModal'
 import {
@@ -134,15 +135,25 @@ export function PlayersPage() {
       ) : filteredPlayers.length === 0 ? (
         <Empty description="Nenhum jogador encontrado" />
       ) : (
-        <div
-          style={{
-            background: token.colorBgContainer,
-            border: `1px solid ${token.colorBorderSecondary}`,
-            borderRadius: 16,
-            overflow: 'hidden',
-          }}
-        >
-          {filteredPlayers.map((player, i) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          {Object.entries(groupPlayersByPosition(filteredPlayers)).map(([groupName, groupPlayers]) => (
+            <div key={groupName}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                <div style={{ flex: 1, height: 1, background: token.colorBorderSecondary }} />
+                <Text type="secondary" style={{ fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  {groupName}
+                </Text>
+                <div style={{ flex: 1, height: 1, background: token.colorBorderSecondary }} />
+              </div>
+              <div
+                style={{
+                  background: token.colorBgContainer,
+                  border: `1px solid ${token.colorBorderSecondary}`,
+                  borderRadius: 16,
+                  overflow: 'hidden',
+                }}
+              >
+                {groupPlayers.map((player, i) => (
             <div
               key={player.id}
               onClick={() => {
@@ -161,7 +172,7 @@ export function PlayersPage() {
                 gap: 12,
                 padding: '12px 20px',
                 borderBottom:
-                  i < filteredPlayers.length - 1
+                  i < groupPlayers.length - 1
                     ? `1px solid ${token.colorFillQuaternary}`
                     : 'none',
                 opacity: player.active ? 1 : 0.5,
@@ -187,9 +198,9 @@ export function PlayersPage() {
                   <Text strong style={{ fontSize: 14 }}>
                     {player.nickname || player.name}
                   </Text>
-                  {player.position && (
+                  {player.positions && player.positions.length > 0 && (
                     <Tag style={{ margin: 0, fontSize: 11, borderRadius: 6 }}>
-                      {player.position}
+                      {player.positions.join(', ')}
                     </Tag>
                   )}
                   {!player.active && (
@@ -232,25 +243,28 @@ export function PlayersPage() {
                 </div>
               ) : (
                 <div
-                  style={{
-                    flexShrink: 0,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-end',
-                    gap: 8,
-                  }}
-                >
-                  <RightOutlined
-                    style={{ fontSize: 12, color: token.colorTextSecondary }}
-                  />
-                  <Text type="secondary" style={{ fontSize: 10 }}>
-                    Clique para ver detalhes
-                  </Text>
+                      style={{
+                        flexShrink: 0,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-end',
+                        gap: 8,
+                      }}
+                    >
+                      <RightOutlined
+                        style={{ fontSize: 12, color: token.colorTextSecondary }}
+                      />
+                      <Text type="secondary" style={{ fontSize: 10 }}>
+                        Clique para ver detalhes
+                      </Text>
+                    </div>
+                  )}
                 </div>
-              )}
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
+      </div>
       )}
 
       {isActiveSeason && isAdmin && (

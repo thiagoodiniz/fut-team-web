@@ -1,7 +1,7 @@
 import React from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Button, Select, Typography, message, Skeleton, Empty, theme, Tag } from 'antd'
-import { SaveOutlined } from '@ant-design/icons'
+import { SaveOutlined, DeleteOutlined } from '@ant-design/icons'
 import { getMatchById, type MatchDTO } from '../../services/matches.service'
 import {
   getMatchLineup,
@@ -240,19 +240,31 @@ export function LineupPage() {
         ))}
       </div>
 
-      {/* Botão salvar — só admin */}
+      {/* Botões de ação — só admin */}
       {isAdmin && (
-        <Button
-          type="primary"
-          block
-          size="large"
-          icon={<SaveOutlined />}
-          loading={saving}
-          onClick={handleSave}
-          style={{ borderRadius: 12, height: 48 }}
-        >
-          Salvar Formação
-        </Button>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <Button
+            danger
+            block
+            size="large"
+            icon={<DeleteOutlined />}
+            onClick={() => setSlots({})}
+            style={{ borderRadius: 12, height: 48, flex: 1 }}
+          >
+            Limpar
+          </Button>
+          <Button
+            type="primary"
+            block
+            size="large"
+            icon={<SaveOutlined />}
+            loading={saving}
+            onClick={handleSave}
+            style={{ borderRadius: 12, height: 48, flex: 2 }}
+          >
+            Salvar Formação
+          </Button>
+        </div>
       )}
 
       {/* Aviso de view-only para usuário comum */}

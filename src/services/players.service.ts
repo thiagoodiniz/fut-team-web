@@ -5,7 +5,7 @@ export interface PlayerDTO {
   id: string
   name: string
   nickname?: string | null
-  position?: string | null
+  positions: string[]
   number?: number | null
   photo?: string | null
   active: boolean
@@ -23,7 +23,7 @@ export async function listPlayers(seasonId?: string): Promise<PlayerDTO[]> {
 export async function createPlayer(data: {
   name: string
   nickname?: string
-  position?: string
+  positions: string[]
   number?: number
   photo?: string | null
 }): Promise<PlayerDTO> {
@@ -37,7 +37,7 @@ export async function updatePlayer(
   data: {
     name?: string
     nickname?: string
-    position?: string
+    positions?: string[]
     number?: number
     photo?: string | null
     active?: boolean

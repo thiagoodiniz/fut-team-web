@@ -1,6 +1,6 @@
 import { Typography } from 'antd'
 import { PlayerAvatar } from '../PlayerAvatar'
-import { useAppTheme } from '../../../../theme/ThemeProvider'
+import { useAppTheme } from '../../../theme/ThemeProvider'
 
 const { Text } = Typography
 

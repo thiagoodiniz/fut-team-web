@@ -1,5 +1,5 @@
 import React from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAuthGate } from '../hooks/useAuthGate'
 import { AuthGateModal } from '../components/AuthGateModal'
 import { Typography, Input, Card, theme, FloatButton, Tag, Empty } from 'antd'
@@ -12,7 +12,9 @@ import {
   UserOutlined,
   WarningOutlined,
   TrophyOutlined,
+  EditOutlined,
 } from '@ant-design/icons'
+import { Button } from 'antd'
 import { listMatches, type MatchDTO } from '../../services/matches.service'
 import { getPublicMatches } from '../../services/public.service'
 import { CreateMatchModal } from '../components/CreateMatchModal'
@@ -40,6 +42,7 @@ import { APP_COLORS } from '../../theme/theme'
 import { withAlpha } from '../../theme/colorUtils'
 
 export function MatchesPage() {
+  const navigate = useNavigate()
   const { slug } = useParams<{ slug: string }>()
   const { requireAuth, isModalOpen, setIsModalOpen } = useAuthGate()
   const { token } = theme.useToken()
@@ -611,6 +614,23 @@ export function MatchesPage() {
                             alignItems: 'center',
                           }}
                         >
+                          <div>
+                            {isAdmin && (
+                              <Button
+                                size="small"
+                                type="default"
+                                icon={<EditOutlined />}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  posthog.capture('match_edit_clicked', { match_id: match.id })
+                                  requireAuth(() => navigate(`/${slug || 'app'}/matches/${match.id}`))
+                                }}
+                                style={{ fontSize: 12, borderRadius: 6 }}
+                              >
+                                Editar jogo
+                              </Button>
+                            )}
+                          </div>
                           <Text
                             strong
                             style={{

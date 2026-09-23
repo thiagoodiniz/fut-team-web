@@ -823,6 +823,11 @@ export function HomePage() {
                         </Text>
                       </div>
                     )}
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 2 }}>
+                      <Text style={{ fontSize: 11, color: token.colorPrimary, fontWeight: 500 }}>
+                        Ver detalhes <RightOutlined style={{ fontSize: 9 }} />
+                      </Text>
+                    </div>
                   </div>
                 )
               })}

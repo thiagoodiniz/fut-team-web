@@ -2,7 +2,7 @@ import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuthGate } from '../hooks/useAuthGate'
 import { AuthGateModal } from '../components/AuthGateModal'
-import { Typography, Input, Card, theme, FloatButton, Tag, Empty } from 'antd'
+import { Typography, Input, Card, theme, FloatButton, Tag, Empty, Tabs } from 'antd'
 import posthog from 'posthog-js'
 import {
   CalendarOutlined,
@@ -13,6 +13,7 @@ import {
   WarningOutlined,
   TrophyOutlined,
   EditOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons'
 import { Button } from 'antd'
 import { listMatches, type MatchDTO } from '../../services/matches.service'
@@ -32,6 +33,27 @@ function formatMatchDate(iso: string) {
     day: '2-digit',
     month: 'short',
   })
+}
+
+function getCountdownText(iso: string) {
+  const matchDate = new Date(iso)
+  const now = new Date()
+  const diff = matchDate.getTime() - now.getTime()
+  
+  if (diff < 0) {
+    if (matchDate.getDate() === now.getDate() && matchDate.getMonth() === now.getMonth()) {
+      return "Hoje"
+    }
+    return "Aguardando placar"
+  }
+  
+  const matchDay = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate())
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const diffDays = Math.round((matchDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+  
+  if (diffDays === 0) return "Hoje"
+  if (diffDays === 1) return "Amanhã"
+  return `Faltam ${diffDays} dias`
 }
 
 import { useSeason } from '../contexts/SeasonContext'
@@ -61,6 +83,7 @@ export function MatchesPage() {
     monthYear: string
     data: MatchDTO[]
   } | null>(null)
+  const [activeTab, setActiveTab] = React.useState<'past' | 'future'>('past')
 
   async function load() {
     if (!season) return
@@ -80,13 +103,39 @@ export function MatchesPage() {
     load()
   }, [season])
 
-  const sortedMatches = React.useMemo(() => {
-    return [...matches].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-    )
+  const { pastMatches, futureMatches } = React.useMemo(() => {
+    const past: MatchDTO[] = []
+    const future: MatchDTO[] = []
+    const now = new Date()
+    now.setHours(0,0,0,0)
+
+    matches.forEach(m => {
+      // Considered future if it has no score AND date is >= today
+      if (m.ourScore === null && m.theirScore === null && new Date(m.date) >= now) {
+        future.push(m)
+      } else {
+        past.push(m)
+      }
+    })
+
+    return { pastMatches: past, futureMatches: future }
   }, [matches])
 
-  const filteredMatches = sortedMatches.filter((match) => {
+  const sortedPastMatches = React.useMemo(() => {
+    return [...pastMatches].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    )
+  }, [pastMatches])
+  
+  const sortedFutureMatches = React.useMemo(() => {
+    return [...futureMatches].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    )
+  }, [futureMatches])
+  
+  const nextMatch = sortedFutureMatches[0]
+
+  const filteredMatches = (activeTab === 'past' ? sortedPastMatches : sortedFutureMatches).filter((match) => {
     const search = filter.toLowerCase()
     if (!search) return true
 
@@ -302,8 +351,98 @@ export function MatchesPage() {
         </div>
       </div>
 
+      {nextMatch && (
+        <div style={{ marginBottom: 4 }}>
+          <Text
+            strong
+            style={{
+              fontSize: 13,
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+              color: token.colorPrimary,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              marginBottom: 10,
+            }}
+          >
+            <ClockCircleOutlined /> Próximo Jogo
+          </Text>
+          <div
+            onClick={() => {
+              posthog.capture('next_match_card_clicked', { match_id: nextMatch.id })
+              requireAuth(() => setSelectedMatchId(nextMatch.id))
+            }}
+            style={{
+              background: `linear-gradient(135deg, ${clubColors.primary} 0%, ${
+                isDark ? '#1a1a1a' : '#ffffff'
+              } 100%)`,
+              border: `1px solid ${token.colorBorderSecondary}`,
+              borderRadius: 16,
+              padding: 2,
+              cursor: 'pointer',
+              boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.05)',
+              transition: 'transform 0.2s',
+            }}
+          >
+            <div
+              style={{
+                background: token.colorBgContainer,
+                borderRadius: 14,
+                padding: '16px 20px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 12,
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Text strong style={{ fontSize: 16, color: token.colorTextBase }}>
+                  {nextMatch.opponent || 'Adversário a definir'}
+                </Text>
+                <Tag color={clubColors.primary} style={{ margin: 0, fontWeight: 600, border: 'none' }}>
+                  {getCountdownText(nextMatch.date)}
+                </Tag>
+              </div>
+
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <CalendarOutlined style={{ color: token.colorTextSecondary }} />
+                  <Text type="secondary" style={{ fontSize: 13 }}>
+                    {formatMatchDate(nextMatch.date)}
+                  </Text>
+                </div>
+                {nextMatch.location && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <EnvironmentOutlined style={{ color: token.colorTextSecondary }} />
+                    <Text type="secondary" style={{ fontSize: 13 }}>
+                      {nextMatch.location}
+                    </Text>
+                  </div>
+                )}
+              </div>
+              
+              <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 4 }}>
+                <Text strong style={{ fontSize: 12, color: token.colorPrimary, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  Ver detalhes <RightOutlined style={{ fontSize: 9 }} />
+                </Text>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Tabs
+        activeKey={activeTab}
+        onChange={(k) => setActiveTab(k as 'past' | 'future')}
+        items={[
+          { key: 'past', label: 'Últimos Jogos' },
+          { key: 'future', label: 'Agenda' },
+        ]}
+        style={{ marginBottom: 0 }}
+      />
+
       <Input.Search
-        placeholder="Filtrar por nome, local ou competição"
+        placeholder={activeTab === 'past' ? "Filtrar resultados..." : "Filtrar agenda..."}
         allowClear
         onChange={(e) => setFilter(e.target.value)}
         style={{ width: '100%' }}
@@ -372,23 +511,25 @@ export function MatchesPage() {
                       {group.monthYear}
                     </Text>
                   </div>
-                  <Text
-                    style={{
-                      fontSize: 11,
-                      color: token.colorPrimary,
-                      fontWeight: 500,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 3,
-                    }}
-                    onClick={() => {
-                      setSelectedMonthGroup(group)
-                      requireAuth(() => setSummaryModalOpen(true))
-                    }}
-                  >
-                    Ver resumo do mês <RightOutlined style={{ fontSize: 9 }} />
-                  </Text>
+                  {activeTab === 'past' && (
+                    <Text
+                      style={{
+                        fontSize: 11,
+                        color: token.colorPrimary,
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 3,
+                      }}
+                      onClick={() => {
+                        setSelectedMonthGroup(group)
+                        requireAuth(() => setSummaryModalOpen(true))
+                      }}
+                    >
+                      Ver resumo do mês <RightOutlined style={{ fontSize: 9 }} />
+                    </Text>
+                  )}
                 </div>
 
                 {/* Month summary pills */}

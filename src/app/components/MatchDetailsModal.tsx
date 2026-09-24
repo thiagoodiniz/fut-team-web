@@ -161,6 +161,35 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
                 ].filter(Boolean).join(' • ')}
               </Text>
             </div>
+
+            {goals.length > 0 && (
+              <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
+                {goals.slice().sort((a, b) => (a.minute ?? 999) - (b.minute ?? 999)).map((g) => {
+                  const isOwnGoal = g.ownGoal
+                  const playerName = isOwnGoal
+                    ? 'Gol contra'
+                    : g.player?.nickname || g.player?.name || g.loanedPlayerName || 'Sem jogador'
+                  const assistantName = !isOwnGoal
+                    ? g.assistant?.nickname || g.assistant?.name || g.loanedAssistantName
+                    : null
+                    
+                  return (
+                    <Text key={g.id} style={{ fontSize: 13.5 }}>
+                      {g.minute !== null && g.minute !== undefined && <strong style={{ marginRight: 6, color: token.colorTextSecondary }}>{g.minute}'</strong>}
+                      {isOwnGoal ? <span style={{ marginRight: 6 }}>🔴</span> : <span style={{ marginRight: 6 }}>⚽</span>}
+                      <Text strong={!isOwnGoal}>{playerName}</Text>
+                      {assistantName && (
+                        <>
+                          <span style={{ margin: '0 6px', color: token.colorTextQuaternary }}>-</span>
+                          <span style={{ marginRight: 4 }}>👟</span>
+                          <Text>{assistantName}</Text>
+                        </>
+                      )}
+                    </Text>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
           {/* Escalação */}

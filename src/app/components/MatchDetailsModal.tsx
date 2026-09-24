@@ -25,7 +25,7 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
   const [presences, setPresences] = React.useState<PresenceDTO[]>([])
   const [goals, setGoals] = React.useState<GoalDTO[]>([])
 
-  const { isAdmin } = useTeam()
+  const { isAdmin, team } = useTeam()
   const { token } = theme.useToken()
   const navigate = useNavigate()
   const { slug } = useParams<{ slug: string }>()
@@ -140,6 +140,9 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
                   </div>
                 )
               })()}
+              <Text strong style={{ fontSize: 18, lineHeight: 1 }}>
+                {team?.name || 'Nosso Time'}
+              </Text>
               <Text strong style={{ fontSize: 24, lineHeight: 1 }}>
                 {match.ourScore ?? '-'} <span style={{ fontSize: 18, color: token.colorTextQuaternary, margin: '0 4px' }}>×</span> {match.theirScore ?? '-'}
               </Text>

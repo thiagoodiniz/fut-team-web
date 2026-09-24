@@ -5,6 +5,17 @@ O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [2.7.0] - 2026-09-24
+
+### Adicionado
+- **Agenda de Jogos:** Nova tela de partidas reorganizada com Abas ("Últimos Jogos" e "Agenda"). O próximo jogo futuro agora possui um destaque especial no topo com contagem regressiva para a data da partida.
+- **Nome do Time no Placar:** O modal público de detalhes da partida agora inclui o nome do seu time ao lado do placar.
+
+### Corrigido
+- **Ranking de Assistências Público:** Corrigida a rota 404 da API que impedia o ranking de assistências de ser carregado para visitantes.
+- **Lista de Jogadores Inativos:** Jogadores inativos na página do elenco agora não são separados por posição, aparecendo de forma compacta no fim da lista.
+- **Cards de Partida do Jogador:** Corrigida a visualização incorreta de placares sem os gols do time adversário no histórico de partidas do jogador. Modais de detalhes da partida também foram ativados nestas telas.
+
 ## [2.6.0] - 2026-09-23
 
 ### Adicionado

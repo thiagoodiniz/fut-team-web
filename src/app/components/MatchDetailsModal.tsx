@@ -105,12 +105,12 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* Cabeçalho */}
           <div style={{ textAlign: 'center' }}>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              {(() => {
-                const result = match.ourScore !== null && match.theirScore !== null 
-                  ? (match.ourScore > match.theirScore ? 'win' : match.ourScore < match.theirScore ? 'loss' : 'draw') 
-                  : 'none';
-                return result !== 'none' && (
+            {(() => {
+              const result = match.ourScore !== null && match.theirScore !== null 
+                ? (match.ourScore > match.theirScore ? 'win' : match.ourScore < match.theirScore ? 'loss' : 'draw') 
+                : 'none';
+              return result !== 'none' && (
+                <div style={{ marginBottom: 12 }}>
                   <div
                     style={{
                       display: 'inline-block',
@@ -138,8 +138,10 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
                         ? 'DERROTA'
                         : 'EMPATE'}
                   </div>
-                )
-              })()}
+                </div>
+              )
+            })()}
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
               <Text strong style={{ fontSize: 18, lineHeight: 1 }}>
                 {team?.name || 'Nosso Time'}
               </Text>
@@ -163,31 +165,37 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
             </div>
 
             {goals.length > 0 && (
-              <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
-                {goals.slice().sort((a, b) => (a.minute ?? 999) - (b.minute ?? 999)).map((g) => {
-                  const isOwnGoal = g.ownGoal
-                  const playerName = isOwnGoal
-                    ? 'Gol contra'
-                    : g.player?.nickname || g.player?.name || g.loanedPlayerName || 'Sem jogador'
-                  const assistantName = !isOwnGoal
-                    ? g.assistant?.nickname || g.assistant?.name || g.loanedAssistantName
-                    : null
-                    
-                  return (
-                    <Text key={g.id} style={{ fontSize: 13.5 }}>
-                      {g.minute !== null && g.minute !== undefined && <strong style={{ marginRight: 6, color: token.colorTextSecondary }}>{g.minute}'</strong>}
-                      {isOwnGoal ? <span style={{ marginRight: 6 }}>🔴</span> : <span style={{ marginRight: 6 }}>⚽</span>}
-                      <Text strong={!isOwnGoal}>{playerName}</Text>
-                      {assistantName && (
-                        <>
-                          <span style={{ margin: '0 6px', color: token.colorTextQuaternary }}>-</span>
-                          <span style={{ marginRight: 4 }}>👟</span>
-                          <Text>{assistantName}</Text>
-                        </>
-                      )}
-                    </Text>
-                  )
-                })}
+              <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-start' }}>
+                  {goals.slice().sort((a, b) => (a.minute ?? 999) - (b.minute ?? 999)).map((g) => {
+                    const isOwnGoal = g.ownGoal
+                    const playerName = isOwnGoal
+                      ? 'Gol contra'
+                      : g.player?.nickname || g.player?.name || g.loanedPlayerName || 'Sem jogador'
+                    const assistantName = !isOwnGoal
+                      ? g.assistant?.nickname || g.assistant?.name || g.loanedAssistantName
+                      : null
+                      
+                    return (
+                      <Text key={g.id} style={{ fontSize: 11, color: isOwnGoal ? token.colorError : 'inherit' }}>
+                        {g.minute !== null && g.minute !== undefined && (
+                          <strong style={{ marginRight: 6, color: token.colorTextSecondary }}>{g.minute}'</strong>
+                        )}
+                        <span style={{ marginRight: 6, fontSize: 10 }}>⚽</span>
+                        <Text strong={!isOwnGoal} style={{ fontSize: 11, color: isOwnGoal ? token.colorError : 'inherit' }}>
+                          {playerName}
+                        </Text>
+                        {assistantName && (
+                          <>
+                            <span style={{ margin: '0 6px', color: token.colorTextQuaternary }}>-</span>
+                            <span style={{ marginRight: 4, fontSize: 10 }}>👟</span>
+                            <Text style={{ fontSize: 11 }}>{assistantName}</Text>
+                          </>
+                        )}
+                      </Text>
+                    )
+                  })}
+                </div>
               </div>
             )}
           </div>

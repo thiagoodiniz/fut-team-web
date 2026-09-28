@@ -5,6 +5,12 @@ O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+### Adicionado
+- **Informações do Jogador:** Ao tocar em um jogador na escalação ou no banco (tanto no modo de edição quanto no modal público de visualização), agora é exibida uma aba contendo as estatísticas consolidadadas do jogador (gols/assistências na partida, total na temporada e links rápidos para rankings).
+
+### Modificado
+- **UX de Detalhes do Jogo:** A interface administrativa de gestão do jogo (`MatchDetailsPage`) foi aprimorada com botões mais claros, área de ações reestruturada e aviso dinâmico caso todos os gols do time já tenham autoria registrada.
+- **Exclusão de Partida Segura:** A ação de apagar partida foi movida para fora do modal de edição e agora possui um alerta customizado detalhando todos os dados que serão perdidos (gols, presenças e escalação).
 ## [2.7.0] - 2026-09-24
 
 ### Adicionado

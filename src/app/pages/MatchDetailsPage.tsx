@@ -15,6 +15,7 @@ import {
   AutoComplete,
   Alert,
   Tooltip,
+  Modal,
 } from 'antd'
 import posthog from 'posthog-js'
 import {
@@ -26,6 +27,8 @@ import {
   CloseOutlined,
   TrophyOutlined,
   ProfileOutlined,
+  DeleteOutlined,
+  ExclamationCircleOutlined,
 } from '@ant-design/icons'
 
 import {
@@ -92,6 +95,8 @@ export function MatchDetailsPage() {
 
   const [goalModalOpen, setGoalModalOpen] = React.useState(false)
   const [editMatchModalOpen, setEditMatchModalOpen] = React.useState(false)
+  const [deleteMatchModalOpen, setDeleteMatchModalOpen] = React.useState(false)
+  const [deletingMatch, setDeletingMatch] = React.useState(false)
   const [editingGoal, setEditingGoal] = React.useState<any | null>(null)
 
   const [creatingGoal, setCreatingGoal] = React.useState(false)
@@ -472,7 +477,9 @@ export function MatchDetailsPage() {
                   style={{ fontSize: 13, color: token.colorTextSecondary, flexShrink: 0 }}
                 />
                 <Text type="secondary" style={{ fontSize: 13 }}>
-                  {[match.competition, match.competitionPhase].filter(Boolean).join(' - ')}
+                  {[match.competition, match.competitionPhase]
+                    .filter(Boolean)
+                    .join(' - ')}
                 </Text>
               </div>
             )}
@@ -502,35 +509,61 @@ export function MatchDetailsPage() {
           ) : null}
 
           {isActiveSeason && isAdmin && (
-            <Button
-              type="primary"
-              ghost
-              block
-              icon={<EditOutlined />}
-              onClick={() => {
-                posthog.capture('edit_match_clicked', { match_id: id })
-                setEditMatchModalOpen(true)
-              }}
-              style={{ marginTop: 16, height: 40 }}
-            >
-              Editar placar ou informações do jogo
-            </Button>
+            <>
+              {/* Ações principais — lado a lado */}
+              <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+                <Button
+                  type="primary"
+                  ghost
+                  block
+                  icon={<EditOutlined />}
+                  onClick={() => {
+                    posthog.capture('edit_match_clicked', { match_id: id })
+                    setEditMatchModalOpen(true)
+                  }}
+                  style={{ height: 40, flex: 1 }}
+                >
+                  Editar jogo
+                </Button>
+                <Button
+                  block
+                  icon={<ProfileOutlined />}
+                  onClick={() => navigate(`lineup`)}
+                  style={{ height: 40, flex: 1 }}
+                >
+                  Formação
+                </Button>
+              </div>
+
+              {/* Zona de perigo */}
+              <div
+                style={{
+                  borderTop: `1px solid ${token.colorBorderSecondary}`,
+                  marginTop: 12,
+                  paddingTop: 8,
+                }}
+              >
+                <Button
+                  danger
+                  type="text"
+                  icon={<DeleteOutlined />}
+                  block
+                  size="small"
+                  onClick={() => setDeleteMatchModalOpen(true)}
+                >
+                  Excluir jogo
+                </Button>
+              </div>
+            </>
           )}
 
-          {/* Botão de formação */}
-          <div style={{ marginTop: 8 }}>
-            {isAdmin ? (
-              <Button
-                block
-                icon={<ProfileOutlined style={{ fontSize: 16 }} />}
-                onClick={() => navigate(`lineup`)}
-                style={{ height: 40, borderRadius: 8 }}
-              >
-                Editar Formação
-              </Button>
-            ) : (
+          {/* Botão Formação para não-admin */}
+          {!isAdmin && (
+            <div style={{ marginTop: 8 }}>
               <Tooltip
-                title={!hasLineup ? 'Formação não definida pelo administrador' : undefined}
+                title={
+                  !hasLineup ? 'Formação não definida pelo administrador' : undefined
+                }
               >
                 <Button
                   block
@@ -542,9 +575,8 @@ export function MatchDetailsPage() {
                   Ver Formação
                 </Button>
               </Tooltip>
-            )}
-          </div>
-
+            </div>
+          )}
         </div>
       </div>
 
@@ -594,18 +626,31 @@ export function MatchDetailsPage() {
 
         {isActiveSeason && isAdmin && (
           <div style={{ padding: '0 20px 12px' }}>
-            <Button
-              type="dashed"
-              block
-              onClick={() => {
-                posthog.capture('add_goal_modal_opened', { match_id: id })
-                setGoalModalOpen(true)
-              }}
-              disabled={presentPlayersOptions.length === 0}
-              icon={<EditOutlined />}
-            >
-              Adicionar gol
-            </Button>
+            {hasScore && goals.length >= match.ourScore! ? (
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: '8px 0 4px',
+                  color: token.colorTextQuaternary,
+                  fontSize: 13,
+                }}
+              >
+                ✅ Todos os gols registrados
+              </div>
+            ) : (
+              <Button
+                type="dashed"
+                block
+                onClick={() => {
+                  posthog.capture('add_goal_modal_opened', { match_id: id })
+                  setGoalModalOpen(true)
+                }}
+                disabled={presentPlayersOptions.length === 0}
+                icon={<PlusOutlined />}
+              >
+                Adicionar gol
+              </Button>
+            )}
           </div>
         )}
 
@@ -644,15 +689,6 @@ export function MatchDetailsPage() {
               return (
                 <div
                   key={g.id}
-                  onClick={() => {
-                    if (isActiveSeason && isAdmin) {
-                      setEditingGoal({
-                        ...g,
-                        scorerName: playerName,
-                        scorerId: g.playerId || (g.loanedPlayerName ? `loaned:${g.loanedPlayerName}` : null),
-                      })
-                    }
-                  }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -663,7 +699,6 @@ export function MatchDetailsPage() {
                         ? `1px solid ${token.colorFillQuaternary}`
                         : 'none',
                     borderLeft: `3px solid ${accent}`,
-                    cursor: isActiveSeason && isAdmin ? 'pointer' : 'default',
                   }}
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -671,7 +706,14 @@ export function MatchDetailsPage() {
                       {playerName}
                     </Text>
                     {assistantName && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          marginTop: 2,
+                        }}
+                      >
                         <span style={{ fontSize: 10 }}>👟</span>
                         <Text type="secondary" style={{ fontSize: 11 }}>
                           {assistantName}
@@ -711,32 +753,49 @@ export function MatchDetailsPage() {
                         Pênalti
                       </Tag>
                     )}
-                    <Tag style={{ margin: 0, borderRadius: 999, fontWeight: 600 }}>
-                      {g.minute !== null ? `${g.minute}'` : '—'}
-                    </Tag>
+                    {g.minute !== null && (
+                      <Tag style={{ margin: 0, borderRadius: 999, fontWeight: 600 }}>
+                        {`${g.minute}'`}
+                      </Tag>
+                    )}
                     {isActiveSeason && isAdmin && (
-                      <Button
-                        danger
-                        type="text"
-                        size="small"
-                        onClick={async (e) => {
-                          e.stopPropagation()
-                          posthog.capture('delete_goal_clicked', { goal_id: g.id })
-                          try {
-                            await deleteGoal(g.id)
-                            message.success('Gol removido')
-                            const goalsData = await listMatchGoals(id)
-                            setGoals(goalsData)
-                            const matchData = await getMatchById(id)
-                            setMatch(matchData)
-                          } catch (err) {
-                            console.error(err)
-                            message.error('Erro ao remover gol')
-                          }
-                        }}
-                      >
-                        Remover
-                      </Button>
+                      <div style={{ display: 'flex', gap: 10 }}>
+                        <Button
+                          icon={<EditOutlined />}
+                          style={{ width: 36, height: 36 }}
+                          onClick={() => {
+                            setEditingGoal({
+                              ...g,
+                              scorerName: playerName,
+                              scorerId:
+                                g.playerId ||
+                                (g.loanedPlayerName
+                                  ? `loaned:${g.loanedPlayerName}`
+                                  : null),
+                            })
+                          }}
+                        />
+                        <Button
+                          danger
+                          icon={<DeleteOutlined />}
+                          style={{ width: 36, height: 36 }}
+                          onClick={async (e) => {
+                            e.stopPropagation()
+                            posthog.capture('delete_goal_clicked', { goal_id: g.id })
+                            try {
+                              await deleteGoal(g.id)
+                              message.success('Gol removido')
+                              const goalsData = await listMatchGoals(id)
+                              setGoals(goalsData)
+                              const matchData = await getMatchById(id)
+                              setMatch(matchData)
+                            } catch (err) {
+                              console.error(err)
+                              message.error('Erro ao remover gol')
+                            }
+                          }}
+                        />
+                      </div>
                     )}
                   </div>
                 </div>
@@ -803,74 +862,98 @@ export function MatchDetailsPage() {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {Object.entries(groupPlayersByPosition(filteredPresences)).map(([groupName, groupPresences]) => (
-                  <div key={groupName}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, padding: '0 20px' }}>
-                      <Text type="secondary" style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        {groupName}
-                      </Text>
-                      <div style={{ flex: 1, height: 1, background: token.colorBorderSecondary }} />
-                    </div>
-                    {groupPresences.map((p, i) => (
+                {Object.entries(groupPlayersByPosition(filteredPresences)).map(
+                  ([groupName, groupPresences]) => (
+                    <div key={groupName}>
                       <div
-                        key={p.playerId}
-                        onClick={() => {
-                          if (!isActiveSeason || !isAdmin) return
-                          posthog.capture('toggle_presence_clicked', {
-                            player_id: p.playerId,
-                            present: !p.present,
-                          })
-                          togglePresence(p.playerId, !p.present)
-                        }}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
                           gap: 12,
-                          padding: '12px 20px',
-                          borderBottom:
-                            i < groupPresences.length - 1
-                              ? `1px solid ${token.colorFillQuaternary}`
-                              : 'none',
-                          opacity: p.present ? 1 : 0.6,
-                          cursor: isActiveSeason && isAdmin ? 'pointer' : 'default',
-                          transition: 'opacity 0.2s',
+                          marginBottom: 8,
+                          padding: '0 20px',
                         }}
                       >
-                        <div
+                        <Text
+                          type="secondary"
                           style={{
-                            minWidth: 0,
-                            flex: 1,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 10,
+                            fontSize: 12,
+                            fontWeight: 600,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em',
                           }}
                         >
-                          <PlayerAvatar
-                            playerId={p.player.id}
-                            name={p.player.nickname || p.player.name}
-                            size={34}
-                          />
-                          <div style={{ minWidth: 0 }}>
-                            <Text strong style={{ display: 'block' }}>
-                              {p.player.nickname || p.player.name}
-                            </Text>
-                            {p.player.nickname && (
-                              <Text type="secondary" style={{ fontSize: 12 }}>
-                                {p.player.name}
-                              </Text>
-                            )}
-                          </div>
-                        </div>
-                        <Switch
-                          checked={p.present}
-                          disabled={!isActiveSeason || !isAdmin}
-                          onClick={(_, event) => event.stopPropagation()}
-                          onChange={(val) => togglePresence(p.playerId, val)}
+                          {groupName}
+                        </Text>
+                        <div
+                          style={{
+                            flex: 1,
+                            height: 1,
+                            background: token.colorBorderSecondary,
+                          }}
                         />
                       </div>
-                    ))}
-                  </div>
-                ))}
+                      {groupPresences.map((p, i) => (
+                        <div
+                          key={p.playerId}
+                          onClick={() => {
+                            if (!isActiveSeason || !isAdmin) return
+                            posthog.capture('toggle_presence_clicked', {
+                              player_id: p.playerId,
+                              present: !p.present,
+                            })
+                            togglePresence(p.playerId, !p.present)
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            padding: '12px 20px',
+                            borderBottom:
+                              i < groupPresences.length - 1
+                                ? `1px solid ${token.colorFillQuaternary}`
+                                : 'none',
+                            opacity: p.present ? 1 : 0.6,
+                            cursor: isActiveSeason && isAdmin ? 'pointer' : 'default',
+                            transition: 'opacity 0.2s',
+                          }}
+                        >
+                          <div
+                            style={{
+                              minWidth: 0,
+                              flex: 1,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 10,
+                            }}
+                          >
+                            <PlayerAvatar
+                              playerId={p.player.id}
+                              name={p.player.nickname || p.player.name}
+                              size={34}
+                            />
+                            <div style={{ minWidth: 0 }}>
+                              <Text strong style={{ display: 'block' }}>
+                                {p.player.nickname || p.player.name}
+                              </Text>
+                              {p.player.nickname && (
+                                <Text type="secondary" style={{ fontSize: 12 }}>
+                                  {p.player.name}
+                                </Text>
+                              )}
+                            </div>
+                          </div>
+                          <Switch
+                            checked={p.present}
+                            disabled={!isActiveSeason || !isAdmin}
+                            onClick={(_, event) => event.stopPropagation()}
+                            onChange={(val) => togglePresence(p.playerId, val)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ),
+                )}
               </div>
             )}
           </div>
@@ -1018,17 +1101,80 @@ export function MatchDetailsPage() {
           setEditMatchModalOpen(false)
           load()
         }}
-        onDelete={async () => {
-          try {
-            await deleteMatch(match.id)
-            message.success('Jogo removido!')
-            navigate('/app/matches')
-          } catch (err) {
-            console.error(err)
-            message.error('Erro ao remover jogo')
-          }
-        }}
       />
+
+      {/* Modal de confirmação de exclusão */}
+      <Modal
+        open={deleteMatchModalOpen}
+        onCancel={() => setDeleteMatchModalOpen(false)}
+        footer={null}
+        centered
+        width={400}
+      >
+        <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
+          <ExclamationCircleOutlined
+            style={{ fontSize: 48, color: '#ff4d4f', marginBottom: 16, display: 'block' }}
+          />
+          <Typography.Title level={4} style={{ margin: '0 0 8px' }}>
+            Excluir este jogo?
+          </Typography.Title>
+          <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>
+            Esta ação <Typography.Text strong>não poderá ser desfeita</Typography.Text>.
+            Ao excluir o jogo, todos os dados relacionados serão permanentemente
+            removidos, incluindo:
+          </Typography.Text>
+          <div
+            style={{
+              textAlign: 'left',
+              background: token.colorFillQuaternary,
+              borderRadius: 8,
+              padding: '10px 14px',
+              margin: '12px 0 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 4,
+            }}
+          >
+            {[
+              '⚽  Gols e assistências registrados',
+              '✅  Presenças dos jogadores',
+              '📋  Formação tática salva',
+              '📝  Observações e informações do jogo',
+            ].map((item) => (
+              <Typography.Text key={item} style={{ fontSize: 13 }}>
+                {item}
+              </Typography.Text>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Button block onClick={() => setDeleteMatchModalOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              block
+              danger
+              type="primary"
+              loading={deletingMatch}
+              icon={<DeleteOutlined />}
+              onClick={async () => {
+                try {
+                  setDeletingMatch(true)
+                  await deleteMatch(match.id)
+                  message.success('Jogo removido!')
+                  navigate('/app/matches')
+                } catch (err) {
+                  console.error(err)
+                  message.error('Erro ao remover jogo')
+                  setDeletingMatch(false)
+                  setDeleteMatchModalOpen(false)
+                }
+              }}
+            >
+              Sim, excluir jogo
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       <EditGoalModal
         open={!!editingGoal}

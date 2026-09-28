@@ -10,6 +10,8 @@ import { FootballPitch } from './lineup/FootballPitch'
 import { PlayerAvatar } from '../components/PlayerAvatar'
 import { useTeam } from '../contexts/TeamContext'
 import { groupPlayersByPosition } from '../../utils/playerSort'
+import { PlayerInfoDrawer } from './lineup/PlayerInfoDrawer'
+import { type SlotDef } from './lineup/formations'
 
 const { Text } = Typography
 
@@ -25,6 +27,9 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
   const [presences, setPresences] = React.useState<PresenceDTO[]>([])
   const [goals, setGoals] = React.useState<GoalDTO[]>([])
 
+  // Player info drawer
+  const [infoPlayerId, setInfoPlayerId] = React.useState<string | null>(null)
+
   const { isAdmin, team } = useTeam()
   const { token } = theme.useToken()
   const navigate = useNavigate()
@@ -38,6 +43,7 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
       setLineup(null)
       setPresences([])
       setGoals([])
+      setInfoPlayerId(null)
     }
   }, [matchId])
 
@@ -69,6 +75,29 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
   const unassignedLoaned = loanedPlayers.filter(name => !lineupLoanedNames.includes(name))
 
   const hasBench = unassignedPresences.length > 0 || unassignedLoaned.length > 0
+
+  function handleSlotClick(slot: SlotDef) {
+    const entry = lineup?.slots[slot.key]
+    if (entry?.playerId) {
+      setInfoPlayerId(entry.playerId)
+    }
+  }
+
+  // Dados do jogador para o drawer
+  const infoPresence = presences.find((p) => p.playerId === infoPlayerId)
+  const infoMatchGoals = goals.filter((g) => g.playerId === infoPlayerId && !g.ownGoal).length
+  const infoMatchAssists = goals.filter((g) => g.assistantId === infoPlayerId).length
+  const infoPlayer = infoPresence
+    ? {
+        id: infoPresence.playerId,
+        name: infoPresence.player?.name ?? '',
+        nickname: infoPresence.player?.nickname,
+        positions: infoPresence.player?.positions,
+        number: infoPresence.player?.number,
+        matchGoals: infoMatchGoals,
+        matchAssists: infoMatchAssists,
+      }
+    : null
 
   return (
     <Modal
@@ -212,6 +241,7 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
                 presences={presentPlayers}
                 matchGoals={goals}
                 isEditing={false}
+                onSlotClick={handleSlotClick}
               />
             ) : (
               <div style={{ textAlign: 'center', padding: '24px 0', background: token.colorFillQuaternary, borderRadius: 12 }}>
@@ -239,7 +269,11 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
                           const assistsCount = goals.filter((g) => g.assistantId === p.player.id).length
 
                           return (
-                            <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div 
+                              key={p.playerId} 
+                              style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}
+                              onClick={() => setInfoPlayerId(p.playerId)}
+                            >
                               <div style={{ position: 'relative' }}>
                                 <PlayerAvatar playerId={p.player.id} name={p.player.nickname || p.player.name} size={32} />
                                 {goalsCount > 0 && (
@@ -314,6 +348,12 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
           )}
         </div>
       )}
+
+      <PlayerInfoDrawer
+        open={!!infoPlayerId}
+        player={infoPlayer}
+        onClose={() => setInfoPlayerId(null)}
+      />
     </Modal>
   )
 }

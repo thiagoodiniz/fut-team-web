@@ -5,14 +5,13 @@ import {
   Input,
   message,
   Button,
-  Popconfirm,
   Typography,
   theme,
   AutoComplete,
 } from 'antd'
 import { updateMatch, listMatches, type MatchDTO } from '../../services/matches.service'
 import { useSeason } from '../contexts/SeasonContext'
-import { DeleteOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons'
+import { MinusOutlined, PlusOutlined } from '@ant-design/icons'
 
 const { Text } = Typography
 
@@ -65,7 +64,6 @@ interface EditMatchModalProps {
   match: MatchDTO
   onCancel: () => void
   onSuccess: () => void
-  onDelete?: () => void
 }
 
 export function EditMatchModal({
@@ -73,7 +71,6 @@ export function EditMatchModal({
   match,
   onCancel,
   onSuccess,
-  onDelete,
 }: EditMatchModalProps) {
   const [form] = Form.useForm()
   const [loading, setLoading] = React.useState(false)
@@ -278,36 +275,11 @@ export function EditMatchModal({
         </Form.Item>
 
         {/* Footer */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 8,
-          }}
-        >
-          {onDelete ? (
-            <Popconfirm
-              title="Excluir este jogo?"
-              description="Todos os gols e presenças também serão removidos."
-              onConfirm={onDelete}
-              okText="Sim, excluir"
-              cancelText="Cancelar"
-              okButtonProps={{ danger: true }}
-            >
-              <Button danger icon={<DeleteOutlined />} type="text">
-                Excluir jogo
-              </Button>
-            </Popconfirm>
-          ) : (
-            <span />
-          )}
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Button onClick={onCancel}>Cancelar</Button>
-            <Button type="primary" loading={loading} onClick={form.submit}>
-              Salvar
-            </Button>
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+          <Button onClick={onCancel}>Cancelar</Button>
+          <Button type="primary" loading={loading} onClick={form.submit}>
+            Salvar
+          </Button>
         </div>
       </Form>
     </Modal>

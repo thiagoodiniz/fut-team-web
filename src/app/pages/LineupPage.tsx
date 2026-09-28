@@ -10,6 +10,7 @@ import {
   type LineupData,
 } from '../../services/lineup.service'
 import { listMatchPresences, type PresenceDTO } from '../../services/presences.service'
+import { listMatchGoals, type GoalDTO } from '../../services/goals.service'
 import { useTeam } from '../contexts/TeamContext'
 import { useIsPWA } from '../hooks/useIsPWA'
 import { FootballPitch } from '../components/lineup/FootballPitch'
@@ -21,6 +22,7 @@ import {
   type FormationId,
   type SlotDef,
 } from '../components/lineup/formations'
+import { PlayerAvatar } from '../components/PlayerAvatar'
 
 const { Text } = Typography
 const { Option } = Select
@@ -36,6 +38,7 @@ export function LineupPage() {
   const [saving, setSaving] = React.useState(false)
   const [match, setMatch] = React.useState<MatchDTO | null>(null)
   const [presences, setPresences] = React.useState<PresenceDTO[]>([])
+  const [goals, setGoals] = React.useState<GoalDTO[]>([])
   const [formation, setFormation] = React.useState<FormationId>('4-3-3')
   const [slots, setSlots] = React.useState<LineupData['slots']>({})
 
@@ -51,14 +54,15 @@ export function LineupPage() {
     if (!id) return
     try {
       setLoading(true)
-      const [matchData, presencesData, lineupData] = await Promise.all([
+      const [matchData, presencesData, lineupData, goalsData] = await Promise.all([
         getMatchById(id),
-        // presences só carrega se logado (rotas autenticadas), senão retorna vazio
         listMatchPresences(id).catch(() => [] as PresenceDTO[]),
         slug ? getPublicMatchLineup(slug, id) : getMatchLineup(id),
+        listMatchGoals(id).catch(() => [] as GoalDTO[]),
       ])
       setMatch(matchData)
       setPresences(presencesData)
+      setGoals(goalsData)
       if (lineupData) {
         setFormation(lineupData.formation as FormationId)
         setSlots(lineupData.slots)
@@ -92,7 +96,7 @@ export function LineupPage() {
   }
 
   function handleSlotClick(slot: SlotDef) {
-    if (!isAdmin) return // view-only
+    if (!isAdmin) return
     setActiveSlot(slot)
     setPickerOpen(true)
   }
@@ -111,6 +115,15 @@ export function LineupPage() {
     (s) => slots[s.key]?.playerId || slots[s.key]?.loanedPlayerName,
   ).length ?? 0
   const totalSlots = FORMATION_SLOTS[formation]?.length ?? 11
+
+  // Reservas: presentes que não estão escalados na formação
+  const scaledPlayerIds = new Set(
+    Object.values(slots)
+      .filter(Boolean)
+      .map((s) => s!.playerId)
+      .filter(Boolean) as string[],
+  )
+  const benchPlayers = presentPlayers.filter((p) => !scaledPlayerIds.has(p.playerId))
 
   if (loading) {
     return (
@@ -211,10 +224,78 @@ export function LineupPage() {
           formation={formation}
           lineup={slots}
           presences={presences}
+          matchGoals={goals}
           isEditing={isAdmin}
           onSlotClick={isAdmin ? handleSlotClick : undefined}
         />
       </div>
+
+      {/* Reservas */}
+      {benchPlayers.length > 0 && (
+        <div
+          style={{
+            background: token.colorBgContainer,
+            border: `1px solid ${token.colorBorderSecondary}`,
+            borderRadius: 12,
+            overflow: 'hidden',
+          }}
+        >
+          <div style={{ padding: '12px 16px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.07em',
+                color: token.colorTextSecondary,
+              }}
+            >
+              Reservas
+            </Text>
+            <Tag style={{ borderRadius: 20, fontWeight: 600 }}>{benchPlayers.length}</Tag>
+          </div>
+          {benchPlayers.map((p, i) => {
+            const matchGoalsCount = goals.filter((g) => g.playerId === p.playerId && !g.ownGoal).length
+            const matchAssistsCount = goals.filter((g) => g.assistantId === p.playerId).length
+            return (
+              <div
+                key={p.playerId}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  padding: '11px 16px',
+                  borderBottom: i < benchPlayers.length - 1 ? `1px solid ${token.colorFillQuaternary}` : 'none',
+                }}
+              >
+                <PlayerAvatar playerId={p.playerId} name={p.player?.nickname || p.player?.name || ''} size={38} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text strong style={{ display: 'block', fontSize: 14 }}>
+                    {p.player?.nickname || p.player?.name}
+                  </Text>
+                  {p.player?.nickname && (
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {p.player?.name}
+                    </Text>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  {matchGoalsCount > 0 && (
+                    <Tag style={{ margin: 0, borderRadius: 20, fontSize: 11 }}>
+                      ⚽ {matchGoalsCount}
+                    </Tag>
+                  )}
+                  {matchAssistsCount > 0 && (
+                    <Tag style={{ margin: 0, borderRadius: 20, fontSize: 11 }}>
+                      👟 {matchAssistsCount}
+                    </Tag>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* Legenda de posições */}
       <div
@@ -269,12 +350,7 @@ export function LineupPage() {
 
       {/* Aviso de view-only para usuário comum */}
       {!isAdmin && (
-        <div
-          style={{
-            textAlign: 'center',
-            padding: '4px 0',
-          }}
-        >
+        <div style={{ textAlign: 'center', padding: '4px 0' }}>
           <Text type="secondary" style={{ fontSize: 12 }}>
             Apenas administradores podem editar a formação
           </Text>

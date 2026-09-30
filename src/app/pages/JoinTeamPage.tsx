@@ -1,15 +1,5 @@
 import { useState, useEffect } from 'react'
-import {
-  Card,
-  Input,
-  List,
-  Button,
-  Typography,
-  Space,
-  theme,
-  message,
-  Empty,
-} from 'antd'
+import { Card, Input, List, Button, Typography, Space, theme, message, Empty } from 'antd'
 import {
   SearchOutlined,
   PlusCircleOutlined,
@@ -33,7 +23,6 @@ export function JoinTeamPage() {
   const navigate = useNavigate()
   const { token } = theme.useToken()
 
-
   const [auth, setAuth] = useState(() => {
     const authData = localStorage.getItem('auth')
     try {
@@ -46,7 +35,7 @@ export function JoinTeamPage() {
   const tokenStr = localStorage.getItem('token')
   const isManager = auth?.isManager === true
   const isLoggedIn = Boolean(tokenStr && auth?.userId)
-  
+
   const pendingRequest = location.state?.pendingRequest || auth?.pendingRequest
 
   useEffect(() => {
@@ -71,8 +60,6 @@ export function JoinTeamPage() {
       setLoading(false)
     }
   }
-
-
 
   if (pendingRequest) {
     return (
@@ -194,7 +181,14 @@ export function JoinTeamPage() {
                     gap: 16,
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0 }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 16,
+                      minWidth: 0,
+                    }}
+                  >
                     <TeamLogo
                       teamId={team.id}
                       name={team.name}
@@ -202,22 +196,80 @@ export function JoinTeamPage() {
                       style={{ backgroundColor: token.colorPrimary, flexShrink: 0 }}
                     />
                     <div style={{ minWidth: 0, flex: 1 }}>
-                      <Text strong style={{ fontSize: 17, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <Text
+                        strong
+                        style={{
+                          fontSize: 17,
+                          display: 'block',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
                         {team.name}
                       </Text>
-                      <Text type="secondary" style={{ display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <Text
+                        type="secondary"
+                        style={{
+                          display: 'block',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
                         @{team.slug}
                       </Text>
                     </div>
                   </div>
-                  <Button
-                    type="primary"
-                    block
-                    onClick={() => navigate(`/${team.slug}`)}
-                    style={{ borderRadius: 8, height: 40 }}
-                  >
-                    Acessar Time
-                  </Button>
+                  {(() => {
+                    const isMember = auth?.teams?.some((t: any) => t.id === team.id)
+                    if (team.visibility === 'MEMBERS' && !isMember) {
+                      return (
+                        <Button
+                          type="primary"
+                          block
+                          onClick={async () => {
+                            if (!isLoggedIn) {
+                              navigate('/login')
+                              return
+                            }
+                            try {
+                              await api.post('/teams/join', { teamId: team.id })
+                              message.success('Solicitação enviada com sucesso!')
+
+                              // Atualiza o auth para refletir a nova solicitação pendente
+                              const newAuth = await syncAuth()
+                              if (newAuth) {
+                                setAuth(newAuth)
+                              }
+                            } catch (error: any) {
+                              const err = error.response?.data?.error
+                              if (err === 'REQUEST_ALREADY_PENDING') {
+                                message.info(
+                                  'Você já enviou uma solicitação para este time',
+                                )
+                              } else {
+                                message.error('Erro ao solicitar acesso')
+                              }
+                            }
+                          }}
+                          style={{ borderRadius: 8, height: 40 }}
+                        >
+                          Solicitar Acesso
+                        </Button>
+                      )
+                    }
+                    return (
+                      <Button
+                        type="primary"
+                        block
+                        onClick={() => navigate(`/${team.slug}`)}
+                        style={{ borderRadius: 8, height: 40 }}
+                      >
+                        Acessar Time
+                      </Button>
+                    )
+                  })()}
                 </List.Item>
               )}
             />

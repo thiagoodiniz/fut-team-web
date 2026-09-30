@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Card, Typography, Row, Col, Table, Button, Space, Modal, Form, Input, message, Popconfirm } from 'antd'
+import { Card, Typography, Row, Col, Button, Space, Modal, Form, Input, message, Popconfirm, Select, Tabs, List, Tag } from 'antd'
 import { getAdminDashboardStats, listAdminTeams, updateAdminTeam, deleteAdminTeam, type AdminDashboardStats, type AdminTeamDTO } from '../../services/admin.service'
 import { TeamRequestsListModal } from '../components/TeamRequestsListModal'
-import { TeamOutlined, UserOutlined, FileTextOutlined } from '@ant-design/icons'
+import { TeamOutlined, UserOutlined, FileTextOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 
 const { Title, Text } = Typography
 
@@ -34,7 +34,7 @@ export function AdminDashboardPage() {
     loadData()
   }, [])
 
-  async function handleUpdateTeam(values: { name: string; slug: string }) {
+  async function handleUpdateTeam(values: { name: string; slug: string; visibility: string }) {
     if (!editingTeam) return
     try {
       await updateAdminTeam(editingTeam.id, values)
@@ -60,63 +60,116 @@ export function AdminDashboardPage() {
     }
   }
 
-  const columns = [
+  const items = [
     {
-      title: 'Nome',
-      dataIndex: 'name',
-      key: 'name',
-      render: (text: string, record: AdminTeamDTO) => (
-        <div>
-          <Text strong>{text}</Text>
-          <br />
-          <Text type="secondary">@{record.slug}</Text>
-        </div>
-      )
+      key: 'teams',
+      label: 'Gestão de Times',
+      children: (
+        <List
+          grid={{ gutter: 16, xs: 1, sm: 2, md: 2, lg: 3, xl: 3, xxl: 4 }}
+          dataSource={teams}
+          loading={loading}
+          pagination={{ pageSize: 12 }}
+          renderItem={(record) => (
+            <List.Item>
+              <Card
+                hoverable
+                actions={[
+                  <Button
+                    type="text"
+                    icon={<EditOutlined />}
+                    onClick={() => {
+                      setEditingTeam(record)
+                      form.setFieldsValue({ name: record.name, slug: record.slug, visibility: record.visibility || 'PUBLIC' })
+                    }}
+                  >
+                    Editar
+                  </Button>,
+                  <Popconfirm
+                    title="Remover Time"
+                    description="Tem certeza que deseja remover este time?"
+                    onConfirm={() => handleDeleteTeam(record.id)}
+                    okText="Sim, remover"
+                    cancelText="Cancelar"
+                  >
+                    <Button type="text" danger icon={<DeleteOutlined />}>
+                      Remover
+                    </Button>
+                  </Popconfirm>
+                ]}
+              >
+                <div style={{ marginBottom: 12 }}>
+                  <Text strong style={{ fontSize: 16 }}>{record.name}</Text>
+                  <br />
+                  <Text type="secondary">@{record.slug}</Text>
+                </div>
+                
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Text type="secondary">Visibilidade:</Text>
+                    <Tag color={record.visibility === 'PUBLIC' ? 'green' : record.visibility === 'MEMBERS' ? 'blue' : 'red'}>
+                      {record.visibility === 'PUBLIC' ? 'Público' : record.visibility === 'MEMBERS' ? 'Membros' : 'Admin'}
+                    </Tag>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Text type="secondary">Usuários:</Text>
+                    <Text strong>{record._count?.users || 0}</Text>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Text type="secondary">Jogos:</Text>
+                    <Text strong>{record._count?.matches || 0}</Text>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Text type="secondary">Criado em:</Text>
+                    <Text>{new Date(record.lastAccessedAt || record.createdAt).toLocaleDateString()}</Text>
+                  </div>
+                </Space>
+              </Card>
+            </List.Item>
+          )}
+        />
+      ),
     },
     {
-      title: 'Usuários',
-      dataIndex: '_count',
-      key: 'usersCount',
-      render: (count: any) => count?.users || 0
+      key: 'access',
+      label: 'Últimos acessos de usuários',
+      children: (
+        <List
+          grid={{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 4, xl: 4 }}
+          dataSource={stats?.recentAccesses || []}
+          loading={loading}
+          pagination={{ pageSize: 12 }}
+          renderItem={(record: any) => (
+            <List.Item>
+              <Card size="small">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <UserOutlined style={{ fontSize: 24, color: '#1890ff', padding: 8, background: '#e6f7ff', borderRadius: '50%' }} />
+                  <div style={{ flex: 1, overflow: 'hidden' }}>
+                    <Text strong ellipsis style={{ display: 'block' }}>{record.user.name}</Text>
+                    <Text type="secondary" ellipsis style={{ fontSize: 12, display: 'block' }}>{record.user.email}</Text>
+                  </div>
+                </div>
+                
+                <Space direction="vertical" style={{ width: '100%', borderTop: '1px solid #f0f0f0', paddingTop: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Text type="secondary">Time:</Text>
+                    <Text strong ellipsis style={{ maxWidth: 120 }}>{record.team.name}</Text>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Text type="secondary">Slug:</Text>
+                    <Text type="secondary">@{record.team.slug}</Text>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Text type="secondary">Acesso em:</Text>
+                    <Text>{new Date(record.lastAccessedAt || record.createdAt).toLocaleDateString()} {new Date(record.lastAccessedAt || record.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                  </div>
+                </Space>
+              </Card>
+            </List.Item>
+          )}
+        />
+      ),
     },
-    {
-      title: 'Jogos',
-      dataIndex: '_count',
-      key: 'matchesCount',
-      render: (count: any) => count?.matches || 0
-    },
-    {
-      title: 'Data Criação',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (date: string) => new Date(date).toLocaleDateString()
-    },
-    {
-      title: 'Ações',
-      key: 'actions',
-      render: (_: any, record: AdminTeamDTO) => (
-        <Space>
-          <Button
-            type="primary"
-            onClick={() => {
-              setEditingTeam(record)
-              form.setFieldsValue({ name: record.name, slug: record.slug })
-            }}
-          >
-            Editar
-          </Button>
-          <Popconfirm
-            title="Remover Time"
-            description="Tem certeza que deseja remover este time?"
-            onConfirm={() => handleDeleteTeam(record.id)}
-            okText="Sim, remover"
-            cancelText="Cancelar"
-          >
-            <Button danger>Remover</Button>
-          </Popconfirm>
-        </Space>
-      )
-    }
   ]
 
   return (
@@ -168,54 +221,9 @@ export function AdminDashboardPage() {
         </Col>
       </Row>
 
-      <Row gutter={[16, 16]} style={{ marginBottom: 32 }}>
-        <Col xs={24} md={12}>
-          <Card title="Últimos Acessos de Usuários" bodyStyle={{ padding: 0 }}>
-            <Table
-              dataSource={stats?.recentAccesses || []}
-              rowKey={(record: any) => `${record.user.email}-${record.team.slug}-${Math.random()}`}
-              pagination={false}
-              size="small"
-              columns={[
-                {
-                  title: 'Usuário',
-                  dataIndex: ['user', 'name'],
-                  key: 'user',
-                  render: (name: string, record: any) => (
-                    <div>
-                      <Text strong>{name}</Text><br />
-                      <Text type="secondary" style={{ fontSize: 12 }}>{record.user.email}</Text>
-                    </div>
-                  )
-                },
-                {
-                  title: 'Time',
-                  dataIndex: ['team', 'name'],
-                  key: 'team',
-                  render: (name: string, record: any) => (
-                    <div>
-                      <Text>{name}</Text><br />
-                      <Text type="secondary" style={{ fontSize: 12 }}>@{record.team.slug}</Text>
-                    </div>
-                  )
-                }
-              ]}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} md={12}>
-          <Card title="Gestão de Times">
-            <Table
-              dataSource={teams}
-              columns={columns}
-              rowKey="id"
-              loading={loading}
-              pagination={{ pageSize: 20 }}
-              size="small"
-            />
-          </Card>
-        </Col>
-      </Row>
+      <Card styles={{ body: { padding: '0 24px' } }}>
+        <Tabs defaultActiveKey="teams" items={items} />
+      </Card>
 
       <TeamRequestsListModal
         open={requestsModalOpen}
@@ -242,6 +250,13 @@ export function AdminDashboardPage() {
           </Form.Item>
           <Form.Item name="slug" label="Slug" rules={[{ required: true }]}>
             <Input />
+          </Form.Item>
+          <Form.Item name="visibility" label="Visualização">
+            <Select>
+              <Select.Option value="PUBLIC">Público</Select.Option>
+              <Select.Option value="MEMBERS">Membros</Select.Option>
+              <Select.Option value="ADMIN">Admin</Select.Option>
+            </Select>
           </Form.Item>
         </Form>
       </Modal>

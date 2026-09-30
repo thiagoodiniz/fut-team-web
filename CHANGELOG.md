@@ -5,6 +5,14 @@ O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [2.8.0] - 2026-09-30
+
+### Adicionado
+- **Visibilidade de Times:** Adicionado controle de visibilidade (P�blico, Membros, Admin) para times no painel de administra��o.
+- **Painel de Admin Melhorado:** Reestrutura��o do painel de administra��o para usar abas e cards (melhor responsividade mobile), incluindo uma aba dedicada para acompanhar os �ltimos acessos dos usu�rios em tempo real.
+
+
+
 ### Adicionado
 - **Rastreamento de Eventos (PostHog):** Inclusão de rastreamento (tracking) em ações importantes no frontend. Agora são capturados cliques nos botões de salvar escalação, limpar escalação, confirmação de exclusão de jogo, envio de formulário de jogador, alteração de status ativo/inativo, resumo mensal de jogos, ações do cabeçalho público e do modal de detalhes da partida. Adicionado também o pageview tracker nas páginas públicas.
 
@@ -147,3 +155,4 @@ O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 - **Medalhas de Ranking:** Bronze atualizado para `#b45309` com texto branco `#ffffff` (4.9:1) e Ouro com tipografia escura `#1a1a1a`.
 - **Fundo do Layout no Modo Noturno:** Refatoração da hierarquia do `AppShellLayout` dentro do `ThemeProvider`, assegurando que `token.colorBgLayout` (`#0a0e17`) preencha toda a tela sem deixar o fundo claro remanescente.
 - **Erro ao realizar Logout:** Resolução de erro `useAppTheme deve ser usado dentro de um ThemeProvider` ao desconectar e redirecionar para a tela de login.
+

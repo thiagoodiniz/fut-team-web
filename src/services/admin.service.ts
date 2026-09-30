@@ -6,6 +6,8 @@ export type AdminDashboardStats = {
   pendingRequests: number
   totalAccesses: number
   recentAccesses: {
+    lastAccessedAt: string
+    createdAt: string
     user: { name: string; email: string }
     team: { name: string; slug: string }
   }[]
@@ -15,7 +17,9 @@ export type AdminTeamDTO = {
   id: string
   name: string
   slug: string
-  createdAt: string
+  visibility: 'PUBLIC' | 'MEMBERS' | 'ADMIN'
+  lastAccessedAt: string
+    createdAt: string
   _count: {
     users: number
     matches: number
@@ -32,7 +36,7 @@ export async function listAdminTeams(): Promise<AdminTeamDTO[]> {
   return response.data.teams
 }
 
-export async function updateAdminTeam(id: string, data: { name: string; slug: string }): Promise<AdminTeamDTO> {
+export async function updateAdminTeam(id: string, data: { name: string; slug: string; visibility: string }): Promise<AdminTeamDTO> {
   const response = await api.patch(`/admin/teams/${id}`, data)
   return response.data
 }
@@ -40,3 +44,4 @@ export async function updateAdminTeam(id: string, data: { name: string; slug: st
 export async function deleteAdminTeam(id: string): Promise<void> {
   await api.delete(`/admin/teams/${id}`)
 }
+

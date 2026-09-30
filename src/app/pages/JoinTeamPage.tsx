@@ -15,6 +15,7 @@ const { Title, Text } = Typography
 
 export function JoinTeamPage() {
   const [query, setQuery] = useState('')
+  const [hidePending, setHidePending] = useState(false)
   const [teams, setTeams] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [teamRequestModalOpen, setTeamRequestModalOpen] = useState(false)
@@ -61,7 +62,7 @@ export function JoinTeamPage() {
     }
   }
 
-  if (pendingRequest) {
+  if (pendingRequest && !hidePending) {
     return (
       <div
         style={{
@@ -102,12 +103,9 @@ export function JoinTeamPage() {
             block
             size="large"
             style={{ height: 48, borderRadius: 12, fontWeight: 600 }}
-            onClick={() => {
-              localStorage.clear()
-              navigate('/login', { replace: true })
-            }}
+            onClick={() => setHidePending(true)}
           >
-            Entendi, voltar ao login
+            Voltar
           </Button>
         </Card>
       </div>
@@ -355,3 +353,5 @@ export function JoinTeamPage() {
     </div>
   )
 }
+
+

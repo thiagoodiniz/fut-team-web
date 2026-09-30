@@ -523,6 +523,7 @@ export function MatchesPage() {
                         gap: 3,
                       }}
                       onClick={() => {
+                        posthog.capture('month_summary_clicked', { month: group.month })
                         setSelectedMonthGroup(group)
                         requireAuth(() => setSummaryModalOpen(true))
                       }}

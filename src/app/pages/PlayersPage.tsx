@@ -61,6 +61,7 @@ export function PlayersPage() {
   }, [season])
 
   async function toggleActive(player: PlayerDTO) {
+    posthog.capture('toggle_player_active_clicked', { player_id: player.id, active: !player.active })
     try {
       setUpdatingPlayerId(player.id)
       await updatePlayer(player.id, { active: !player.active })

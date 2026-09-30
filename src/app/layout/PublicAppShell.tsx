@@ -14,6 +14,8 @@ import { useIsPWA } from '../hooks/useIsPWA'
 import { TeamLogo } from '../components/TeamLogo'
 import { useTeam } from '../contexts/TeamContext'
 import { syncAuth } from '../../services/authSync.service'
+import { PostHogPageviewTracker } from '../../components/PostHogPageviewTracker'
+import posthog from 'posthog-js'
 
 const { Header, Content } = Layout
 
@@ -52,12 +54,15 @@ export function PublicAppShell() {
   const activeTab = getActiveTab(location.pathname, slug || '')
 
   function onTabClick(key: TabKey) {
+    posthog.capture('public_bottom_tab_clicked', { tab: key, slug })
     if (key === 'home') navigate(`/${slug}`)
     else navigate(`/${slug}/${key}`)
   }
 
   return (
-    <Layout style={{ minHeight: '100dvh', background: token.colorBgLayout }}>
+    <>
+      <PostHogPageviewTracker />
+      <Layout style={{ minHeight: '100dvh', background: token.colorBgLayout }}>
       {isLoggedIn ? (
         <AppHeader title={title} showBack={showBack} />
       ) : (
@@ -87,7 +92,10 @@ export function PublicAppShell() {
             <Button
               size="small"
               icon={<SwapOutlined />}
-              onClick={() => navigate('/onboarding')}
+              onClick={() => {
+                posthog.capture('public_header_other_team_clicked', { slug })
+                navigate('/onboarding')
+              }}
               style={{ borderRadius: 8, fontSize: 12 }}
             >
               Outro time
@@ -95,7 +103,10 @@ export function PublicAppShell() {
             <Button
               type="primary"
               size="small"
-              onClick={() => navigate('/login')}
+              onClick={() => {
+                posthog.capture('public_header_login_clicked', { slug })
+                navigate('/login')
+              }}
               style={{ borderRadius: 8, fontSize: 12, fontWeight: 600 }}
             >
               Entrar
@@ -157,6 +168,7 @@ export function PublicAppShell() {
         />
       </nav>
     </Layout>
+    </>
   )
 }
 

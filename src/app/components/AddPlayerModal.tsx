@@ -17,6 +17,7 @@ import {
   TeamOutlined,
 } from '@ant-design/icons'
 import { Link, useParams } from 'react-router-dom'
+import posthog from 'posthog-js'
 import {
   createPlayer,
   updatePlayer,
@@ -137,10 +138,12 @@ export function AddPlayerModal({ open, onClose, onSaved, player }: Props) {
       }
 
       if (player) {
+        posthog.capture('edit_player_submitted', { player_id: player.id })
         await updatePlayer(player.id, payload)
         if (photoChanged) clearPlayerPhotoCache(player.id)
         message.success('Jogador atualizado!')
       } else {
+        posthog.capture('add_player_submitted')
         await createPlayer(payload)
         message.success('Jogador criado!')
       }

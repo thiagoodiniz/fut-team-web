@@ -12,6 +12,7 @@ import { useTeam } from '../contexts/TeamContext'
 import { groupPlayersByPosition } from '../../utils/playerSort'
 import { PlayerInfoDrawer } from './lineup/PlayerInfoDrawer'
 import { type SlotDef } from './lineup/formations'
+import posthog from 'posthog-js'
 
 const { Text } = Typography
 
@@ -79,6 +80,7 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
   function handleSlotClick(slot: SlotDef) {
     const entry = lineup?.slots[slot.key]
     if (entry?.playerId) {
+      posthog.capture('match_details_player_clicked', { match_id: matchId, player_id: entry.playerId, source: 'pitch' })
       setInfoPlayerId(entry.playerId)
     }
   }
@@ -106,12 +108,16 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
       style={{ top: 20 }}
       footer={
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <Button onClick={onClose}>Fechar</Button>
+          <Button onClick={() => {
+            posthog.capture('match_details_modal_close_clicked', { match_id: matchId })
+            onClose()
+          }}>Fechar</Button>
           {isAdmin && (
             <Button
               type="primary"
               icon={<EditOutlined />}
               onClick={() => {
+                posthog.capture('match_details_modal_edit_clicked', { match_id: matchId })
                 onClose()
                 navigate(`/${slug || 'app'}/matches/${matchId}`)
               }}
@@ -272,7 +278,10 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
                             <div 
                               key={p.playerId} 
                               style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}
-                              onClick={() => setInfoPlayerId(p.playerId)}
+                              onClick={() => {
+                                posthog.capture('match_details_player_clicked', { match_id: matchId, player_id: p.playerId, source: 'bench' })
+                                setInfoPlayerId(p.playerId)
+                              }}
                             >
                               <div style={{ position: 'relative' }}>
                                 <PlayerAvatar playerId={p.player.id} name={p.player.nickname || p.player.name} size={32} />

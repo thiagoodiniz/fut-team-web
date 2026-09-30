@@ -23,6 +23,7 @@ import {
   type SlotDef,
 } from '../components/lineup/formations'
 import { PlayerAvatar } from '../components/PlayerAvatar'
+import posthog from 'posthog-js'
 
 const { Text } = Typography
 const { Option } = Select
@@ -76,6 +77,7 @@ export function LineupPage() {
 
   async function handleSave() {
     if (!id) return
+    posthog.capture('save_lineup_clicked', { match_id: id, formation })
     try {
       setSaving(true)
       await saveMatchLineup(id, { formation, slots })
@@ -329,7 +331,10 @@ export function LineupPage() {
             block
             size="large"
             icon={<DeleteOutlined />}
-            onClick={() => setSlots({})}
+            onClick={() => {
+              posthog.capture('clear_lineup_clicked', { match_id: id })
+              setSlots({})
+            }}
             style={{ borderRadius: 12, height: 48, flex: 1 }}
           >
             Limpar

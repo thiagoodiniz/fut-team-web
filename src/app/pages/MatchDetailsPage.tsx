@@ -177,6 +177,7 @@ export function MatchDetailsPage() {
     if (!id || !match || !name.trim() || !isActiveSeason || !isAdmin) return
 
     const trimmedName = name.trim()
+    posthog.capture('add_loaned_player_clicked', { match_id: id })
     if (match.loanedPlayers?.includes(trimmedName)) {
       message.warning('Jogador já adicionado')
       return
@@ -200,6 +201,7 @@ export function MatchDetailsPage() {
   async function removeLoanedPlayer(name: string) {
     if (!id || !match || !isActiveSeason || !isAdmin) return
 
+    posthog.capture('remove_loaned_player_clicked', { match_id: id })
     try {
       const updatedLoaned = (match.loanedPlayers || []).filter((n) => n !== name)
       const updatedMatch = await updateMatch(id, { loanedPlayers: updatedLoaned })
@@ -1157,6 +1159,7 @@ export function MatchDetailsPage() {
               loading={deletingMatch}
               icon={<DeleteOutlined />}
               onClick={async () => {
+                posthog.capture('delete_match_confirmed', { match_id: match.id })
                 try {
                   setDeletingMatch(true)
                   await deleteMatch(match.id)

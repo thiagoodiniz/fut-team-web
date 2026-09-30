@@ -75,7 +75,10 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
       key: 'toggle-theme',
       label: isDark ? 'Modo Claro' : 'Modo Noturno',
       icon: isDark ? <SunOutlined /> : <MoonOutlined />,
-      onClick: toggleTheme,
+      onClick: () => {
+        posthog.capture('toggle_theme_clicked', { new_theme: isDark ? 'light' : 'dark' })
+        toggleTheme()
+      },
     },
     {
       key: 'switch-team',
@@ -91,7 +94,10 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
       label: 'Sair',
       icon: <LogoutOutlined />,
       danger: true,
-      onClick: handleLogout,
+      onClick: () => {
+        posthog.capture('logout_clicked')
+        handleLogout()
+      },
     },
   ]
 

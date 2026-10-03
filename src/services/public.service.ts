@@ -4,6 +4,8 @@ import type { TeamDTO } from './teams.service'
 import type { MatchDTO } from './matches.service'
 import type { PlayerDTO } from './players.service'
 import type { SeasonDTO } from './seasons.service'
+import type { GoalDTO } from './goals.service'
+import type { PresenceDTO } from './presences.service'
 
 export async function getPublicTeam(slug: string): Promise<TeamDTO> {
   const response = await api.get<{ team: TeamDTO }>(`/public/${slug}/team`)
@@ -103,11 +105,11 @@ export async function getPublicMatchById(slug: string, matchId: string): Promise
 }
 
 export async function getPublicMatchGoals(slug: string, matchId: string) {
-  const res = await api.get(`/public/${slug}/matches/${matchId}/goals`)
-  return res.data
+  const res = await api.get<{ goals: GoalDTO[] }>(`/public/${slug}/matches/${matchId}/goals`)
+  return res.data.goals || []
 }
 
 export async function getPublicMatchPresences(slug: string, matchId: string) {
-  const res = await api.get(`/public/${slug}/matches/${matchId}/presences`)
-  return res.data
+  const res = await api.get<{ presences: PresenceDTO[] }>(`/public/${slug}/matches/${matchId}/presences`)
+  return res.data.presences || []
 }

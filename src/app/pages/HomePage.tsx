@@ -20,7 +20,9 @@ import {
   AimOutlined,
   RightOutlined,
   TeamOutlined,
+  ShareAltOutlined,
 } from '@ant-design/icons'
+import { shareContent, teamUrl } from '../../utils/share'
 
 import { useSeason } from '../contexts/SeasonContext'
 import { useTeam } from '../contexts/TeamContext'
@@ -214,7 +216,28 @@ export function HomePage() {
             Temporada {season?.year}
           </Text>
         </div>
+        <Button
+          type="text"
+          shape="circle"
+          aria-label="Compartilhar"
+          icon={<ShareAltOutlined />}
+          style={{
+            marginLeft: 'auto',
+            flexShrink: 0,
+            border: `1px solid ${token.colorBorder}`,
+          }}
+          onClick={() => {
+            const teamSlug = slug || (team as any)?.slug
+            if (!teamSlug) return
+            posthog.capture('share_team_clicked')
+            shareContent({
+              text: `Acompanhe a temporada do ${team?.name}`,
+              url: teamUrl(teamSlug),
+            })
+          }}
+        />
       </div>
+
 
       {/* Next Match */}
       {!summaryData ? <Skeleton active /> : nextMatch && (

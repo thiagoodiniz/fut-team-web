@@ -1,14 +1,18 @@
 import React from 'react'
-import { Modal, Typography, theme } from 'antd'
+import { Modal, Typography, theme, Button } from 'antd'
+import { useParams } from 'react-router-dom'
 import {
   TrophyOutlined,
   UserOutlined,
   ArrowUpOutlined,
   ArrowDownOutlined,
+  ShareAltOutlined,
 } from '@ant-design/icons'
 import { PlayerAvatar } from './PlayerAvatar'
 import type { MatchDTO } from '../../services/matches.service'
 import { useAppTheme } from '../../theme/ThemeProvider'
+import { useTeam } from '../contexts/TeamContext'
+import { shareContent, teamMatchesUrl } from '../../utils/share'
 import { APP_COLORS } from '../../theme/theme'
 
 const { Text } = Typography
@@ -30,6 +34,8 @@ export function MonthSummaryModal({
 }: MonthSummaryModalProps) {
   const { token } = theme.useToken()
   const { isDark } = useAppTheme()
+  const { team } = useTeam()
+  const { slug } = useParams<{ slug: string }>()
 
   const stats = React.useMemo(() => {
     const scoredMatches = matches.filter((m) => m.ourScore !== null && m.theirScore !== null)
@@ -194,12 +200,75 @@ export function MonthSummaryModal({
     </div>
   )
 
+  const handleShare = () => {
+    const fmtDate = (d: string) => new Date(d).toLocaleDateString('pt-BR')
+    const teamName = team?.name || ''
+    const label = monthYear.replace(/\s+de\s+/i, '/').toUpperCase()
+    const lines: string[] = []
+    lines.push(`Resumo de ${label} ${teamName}`.trim(), '')
+    lines.push(`Número de jogos: ${stats.total}`)
+    lines.push(`Vitórias: ${stats.wins}`)
+    lines.push(`Empates: ${stats.draws}`)
+    lines.push(`Derrotas: ${stats.losses}`)
+    lines.push(`Gols feitos: ${stats.goalsFor}`)
+    lines.push(`Gols sofridos: ${stats.goalsAgainst}`, '')
+
+    const played = matches
+      .filter((m) => m.ourScore !== null && m.theirScore !== null)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    if (played.length) {
+      lines.push('Jogos:')
+      played.forEach((m) => {
+        const icon = m.ourScore! > m.theirScore! ? '✅' : m.ourScore! < m.theirScore! ? '❌' : '🟨'
+        lines.push(
+          `${fmtDate(m.date)} ${teamName} ${m.ourScore} x ${m.theirScore} ${m.opponent || 'Adversário'} ${icon}`,
+        )
+      })
+      lines.push('')
+    }
+
+    const pname = (p: { name: string; nickname: string | null }) => p.nickname || p.name
+
+    if (stats.scorerRanking.length) {
+      lines.push('Artilharia do mês: ⚽')
+      stats.scorerRanking.forEach((rank, i) => {
+        const suffix = rank.count === 1 ? 'gol' : 'gols'
+        rank.players.forEach((p, j) => {
+          lines.push(
+            j === 0
+              ? `${i + 1} - ${pname(p)} - ${rank.count} ${suffix}`
+              : `     ${pname(p)} - ${rank.count} ${suffix}`,
+          )
+        })
+      })
+      lines.push('')
+    }
+
+    if (stats.presenceRanking.length) {
+      lines.push('Maior número de jogos:')
+      stats.presenceRanking.forEach((rank) => {
+        rank.players.forEach((p) => {
+          lines.push(`${pname(p)} - ${rank.count} ${rank.count === 1 ? 'jogo' : 'jogos'}`)
+        })
+      })
+      lines.push('')
+    }
+
+    const teamSlug = slug || (team as any)?.slug
+    lines.push(`Veja os jogos no app: ${teamMatchesUrl(teamSlug)}`)
+    shareContent({ text: lines.join('\n') })
+  }
+
   return (
     <Modal
       title={<Text strong style={{ fontSize: 15 }}>{`Resumo de ${monthYear}`}</Text>}
       open={open}
       onCancel={onCancel}
-      footer={null}
+      footer={
+        <Button block icon={<ShareAltOutlined />} onClick={handleShare}>
+          Compartilhar resumo
+        </Button>
+      }
       centered
       width={450}
     >

@@ -1,8 +1,8 @@
 import React from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useAuthGate } from '../hooks/useAuthGate'
 import { AuthGateModal } from '../components/AuthGateModal'
-import { Typography, Input, Card, theme, FloatButton, Tag, Empty, Tabs } from 'antd'
+import { Typography, Input, Card, theme, FloatButton, Tag, Empty, Tabs, Dropdown } from 'antd'
 import posthog from 'posthog-js'
 import {
   CalendarOutlined,
@@ -14,8 +14,10 @@ import {
   TrophyOutlined,
   EditOutlined,
   ClockCircleOutlined,
+  ShareAltOutlined,
 } from '@ant-design/icons'
 import { Button } from 'antd'
+import { shareContent, teamMatchesUrl } from '../../utils/share'
 import { listMatches, type MatchDTO } from '../../services/matches.service'
 import { getPublicMatches } from '../../services/public.service'
 import { CreateMatchModal } from '../components/CreateMatchModal'
@@ -69,7 +71,7 @@ export function MatchesPage() {
   const { requireAuth, isModalOpen, setIsModalOpen } = useAuthGate()
   const { token } = theme.useToken()
   const { season, isActiveSeason } = useSeason()
-  const { isAdmin } = useTeam()
+  const { isAdmin, team } = useTeam()
   const { isDark, clubColors } = useAppTheme()
   const isPWA = useIsPWA()
 
@@ -78,12 +80,17 @@ export function MatchesPage() {
   const [filter, setFilter] = React.useState('')
   const [createModalOpen, setCreateModalOpen] = React.useState(false)
   const [summaryModalOpen, setSummaryModalOpen] = React.useState(false)
-  const [selectedMatchId, setSelectedMatchId] = React.useState<string | null>(null)
+  const [searchParams] = useSearchParams()
+  const [selectedMatchId, setSelectedMatchId] = React.useState<string | null>(
+    searchParams.get('match'),
+  )
   const [selectedMonthGroup, setSelectedMonthGroup] = React.useState<{
     monthYear: string
     data: MatchDTO[]
   } | null>(null)
-  const [activeTab, setActiveTab] = React.useState<'past' | 'future'>('past')
+  const [activeTab, setActiveTab] = React.useState<'past' | 'future'>(
+    searchParams.get('tab') === 'agenda' ? 'future' : 'past',
+  )
 
   async function load() {
     if (!season) return
@@ -134,6 +141,49 @@ export function MatchesPage() {
   }, [futureMatches])
   
   const nextMatch = sortedFutureMatches[0]
+
+  function shareAgenda(mode: 'month' | 'all') {
+    const now = new Date()
+    const list =
+      mode === 'month'
+        ? sortedFutureMatches.filter((m) => {
+            const d = new Date(m.date)
+            return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+          })
+        : sortedFutureMatches
+
+    const teamName = team?.name || ''
+    const monthLabel = now
+      .toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+      .replace(/\s+de\s+/i, '/')
+      .toUpperCase()
+    const lines: string[] = [
+      mode === 'month'
+        ? `Próximos jogos de ${monthLabel} ${teamName}`.trim()
+        : `Próximos jogos ${teamName}`.trim(),
+      '',
+    ]
+
+    if (list.length === 0) {
+      lines.push('Nenhum jogo agendado.', '')
+    }
+
+    list.forEach((m) => {
+      const d = new Date(m.date)
+      const date = d.toLocaleDateString('pt-BR')
+      const time = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      lines.push(`📅 ${date} às ${time}`)
+      lines.push(`🆚 ${m.opponent || 'Adversário não definido'}`)
+      if (m.location) lines.push(`📍 ${m.location}`)
+      const comp = [m.competition, m.competitionPhase].filter(Boolean).join(' - ')
+      if (comp) lines.push(`🏆 ${comp}`)
+      lines.push('')
+    })
+
+    lines.push(`Veja a agenda no app: ${teamMatchesUrl(slug || (team as any)?.slug, { tab: 'agenda' })}`)
+    posthog.capture('share_agenda_clicked', { mode })
+    shareContent({ text: lines.join('\n') })
+  }
 
   const filteredMatches = (activeTab === 'past' ? sortedPastMatches : sortedFutureMatches).filter((match) => {
     const search = filter.toLowerCase()
@@ -440,6 +490,26 @@ export function MatchesPage() {
         ]}
         style={{ marginBottom: 0 }}
       />
+
+      {activeTab === 'future' && (
+        <Dropdown
+          trigger={['click']}
+          disabled={sortedFutureMatches.length === 0}
+          menu={{
+            items: [
+              { key: 'month', label: 'Próximos jogos do mês' },
+              { key: 'all', label: 'Todos os próximos jogos' },
+            ],
+            onClick: ({ key }) => shareAgenda(key as 'month' | 'all'),
+          }}
+        >
+          <Button icon={<ShareAltOutlined />} disabled={sortedFutureMatches.length === 0}>
+            Compartilhar agenda
+          </Button>
+        </Dropdown>
+      )}
+
+
 
       <Input.Search
         placeholder={activeTab === 'past' ? "Filtrar resultados..." : "Filtrar agenda..."}

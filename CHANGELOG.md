@@ -1,158 +1,165 @@
 # Changelog - FutTeam Web
 
-Todas as modificações relevantes deste projeto são documentadas neste arquivo.
-O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/) e este projeto segue o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
+Todas as modificaÃ§Ãµes relevantes deste projeto sÃ£o documentadas neste arquivo.
+O formato Ã© baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/) e este projeto segue o [Versionamento SemÃ¢ntico](https://semver.org/lang/pt-BR/).
 
 ## [Unreleased]
+
+### Adicionado
+- **Compartilhar Time:** Botão de compartilhar na Home, ao lado do nome e escudo do time, enviando o link do time com a mensagem "Acompanhe a temporada do {time}".
+- **Compartilhar Resumo do Mês:** O modal de resumo do mês agora tem o botão "Compartilhar resumo", que gera um texto com totais, jogos, artilharia e maior número de jogos, além do link da aba de jogos.
+- **Compartilhar Agenda:** Na aba Agenda, o botão "Compartilhar agenda" oferece as opções "Próximos jogos do mês" e "Todos os próximos jogos", com data, horário, adversário, local, competição e fase. O link compartilhado abre a tela de jogos já na aba Agenda.
+- **Compartilhar Resultado do Jogo:** O modal de detalhes da partida tem o botão "Compartilhar resultado", acima de "Escalação". O link abre a tela de jogos com o modal da partida aberto (`?match={id}`).
+- **Links Diretos na Tela de Jogos:** A tela de jogos aceita os parâmetros `?tab=agenda` e `?match={id}`.
 
 ## [2.8.0] - 2026-09-30
 
 ### Adicionado
-- **Visibilidade de Times:** Adicionado controle de visibilidade (P�blico, Membros, Admin) para times no painel de administra��o.
-- **Painel de Admin Melhorado:** Reestrutura��o do painel de administra��o para usar abas e cards (melhor responsividade mobile), incluindo uma aba dedicada para acompanhar os �ltimos acessos dos usu�rios em tempo real.
+- **Visibilidade de Times:** Adicionado controle de visibilidade (Público, Membros, Admin) para times no painel de administração.
+- **Painel de Admin Melhorado:** Reestruturação do painel de administração para usar abas e cards (melhor responsividade mobile), incluindo uma aba dedicada para acompanhar os últimos acessos dos usuários em tempo real.
 
 
 
 ### Adicionado
-- **Rastreamento de Eventos (PostHog):** Inclusão de rastreamento (tracking) em ações importantes no frontend. Agora são capturados cliques nos botões de salvar escalação, limpar escalação, confirmação de exclusão de jogo, envio de formulário de jogador, alteração de status ativo/inativo, resumo mensal de jogos, ações do cabeçalho público e do modal de detalhes da partida. Adicionado também o pageview tracker nas páginas públicas.
+- **Rastreamento de Eventos (PostHog):** InclusÃ£o de rastreamento (tracking) em aÃ§Ãµes importantes no frontend. Agora sÃ£o capturados cliques nos botÃµes de salvar escalaÃ§Ã£o, limpar escalaÃ§Ã£o, confirmaÃ§Ã£o de exclusÃ£o de jogo, envio de formulÃ¡rio de jogador, alteraÃ§Ã£o de status ativo/inativo, resumo mensal de jogos, aÃ§Ãµes do cabeÃ§alho pÃºblico e do modal de detalhes da partida. Adicionado tambÃ©m o pageview tracker nas pÃ¡ginas pÃºblicas.
 
 ## [2.7.0] - 2026-09-24
 
 ### Adicionado
-- **Agenda de Jogos:** Nova tela de partidas reorganizada com Abas ("Últimos Jogos" e "Agenda"). O próximo jogo futuro agora possui um destaque especial no topo com contagem regressiva para a data da partida.
-- **Nome do Time no Placar:** O modal público de detalhes da partida agora inclui o nome do seu time ao lado do placar.
+- **Agenda de Jogos:** Nova tela de partidas reorganizada com Abas ("Ãšltimos Jogos" e "Agenda"). O prÃ³ximo jogo futuro agora possui um destaque especial no topo com contagem regressiva para a data da partida.
+- **Nome do Time no Placar:** O modal pÃºblico de detalhes da partida agora inclui o nome do seu time ao lado do placar.
 
 ### Corrigido
-- **Ranking de Assistências Público:** Corrigida a rota 404 da API que impedia o ranking de assistências de ser carregado para visitantes.
-- **Lista de Jogadores Inativos:** Jogadores inativos na página do elenco agora não são separados por posição, aparecendo de forma compacta no fim da lista.
-- **Cards de Partida do Jogador:** Corrigida a visualização incorreta de placares sem os gols do time adversário no histórico de partidas do jogador. Modais de detalhes da partida também foram ativados nestas telas.
+- **Ranking de AssistÃªncias PÃºblico:** Corrigida a rota 404 da API que impedia o ranking de assistÃªncias de ser carregado para visitantes.
+- **Lista de Jogadores Inativos:** Jogadores inativos na pÃ¡gina do elenco agora nÃ£o sÃ£o separados por posiÃ§Ã£o, aparecendo de forma compacta no fim da lista.
+- **Cards de Partida do Jogador:** Corrigida a visualizaÃ§Ã£o incorreta de placares sem os gols do time adversÃ¡rio no histÃ³rico de partidas do jogador. Modais de detalhes da partida tambÃ©m foram ativados nestas telas.
 
 ## [2.6.0] - 2026-09-23
 
 ### Adicionado
-- **Múltiplas Posições:** Jogadores agora podem atuar em mais de uma posição (seleção múltipla na criação e edição do jogador).
-- **Ordenação Inteligente:** Jogadores na listagem de Elenco e na aba de Presenças do jogo agora são agrupados taticamente (Goleiros, Zagueiros, Laterais, Meio-campo, Atacantes) e ordenados alfabeticamente.
-- **Badge de Gols e Assistências:** O campinho tático agora exibe bolinhas indicadoras (`⚽` e `👟`) em cima da foto do jogador caso ele tenha marcado gol ou dado assistência naquela partida específica.
+- **MÃºltiplas PosiÃ§Ãµes:** Jogadores agora podem atuar em mais de uma posiÃ§Ã£o (seleÃ§Ã£o mÃºltipla na criaÃ§Ã£o e ediÃ§Ã£o do jogador).
+- **OrdenaÃ§Ã£o Inteligente:** Jogadores na listagem de Elenco e na aba de PresenÃ§as do jogo agora sÃ£o agrupados taticamente (Goleiros, Zagueiros, Laterais, Meio-campo, Atacantes) e ordenados alfabeticamente.
+- **Badge de Gols e AssistÃªncias:** O campinho tÃ¡tico agora exibe bolinhas indicadoras (`âš½` e `ðŸ‘Ÿ`) em cima da foto do jogador caso ele tenha marcado gol ou dado assistÃªncia naquela partida especÃ­fica.
 - **Modal de Detalhes da Partida:** 
-  - Nova visualização compacta e moderna das partidas (aberta via listagem de Jogos ou cards da Home), acessível para todos os jogadores.
-  - Exibe o campinho da partida com a escalação.
-  - Lista os jogadores "no banco" (ausentes da escalação, mas com presença marcada) ou convidados/emprestados, devidamente organizados por posição.
-- **Gaveta Genérica (SelectionDrawer):** Novo componente base *bottom-sheet* criado para uniformizar seleções no mobile. Substituiu selects nativos complexos na escolha de posições, autor do gol e autor da assistência.
+  - Nova visualizaÃ§Ã£o compacta e moderna das partidas (aberta via listagem de Jogos ou cards da Home), acessÃ­vel para todos os jogadores.
+  - Exibe o campinho da partida com a escalaÃ§Ã£o.
+  - Lista os jogadores "no banco" (ausentes da escalaÃ§Ã£o, mas com presenÃ§a marcada) ou convidados/emprestados, devidamente organizados por posiÃ§Ã£o.
+- **Gaveta GenÃ©rica (SelectionDrawer):** Novo componente base *bottom-sheet* criado para uniformizar seleÃ§Ãµes no mobile. Substituiu selects nativos complexos na escolha de posiÃ§Ãµes, autor do gol e autor da assistÃªncia.
 
 ### Modificado
-- **Tela de Gerenciamento da Partida:** A antiga tela de detalhes do jogo (onde se registram presenças e gols) foi restrita exclusivamente para acesso de administradores.
-- **Cards de Últimos Jogos (Home):** Otimizados. Ao invés de navegar para a edição, agora eles abrem o novo Modal Público de Detalhes. A lista de artilheiros explícita foi substituída por um design mais fluído focado na abertura do modal.
-- **Limpar Escalação:** Botão "Limpar" inserido nativamente na tela da prancheta tática sem *prompt* obstrutivo de JavaScript.
-- Apelido do jogador agora é opcional na API.
+- **Tela de Gerenciamento da Partida:** A antiga tela de detalhes do jogo (onde se registram presenÃ§as e gols) foi restrita exclusivamente para acesso de administradores.
+- **Cards de Ãšltimos Jogos (Home):** Otimizados. Ao invÃ©s de navegar para a ediÃ§Ã£o, agora eles abrem o novo Modal PÃºblico de Detalhes. A lista de artilheiros explÃ­cita foi substituÃ­da por um design mais fluÃ­do focado na abertura do modal.
+- **Limpar EscalaÃ§Ã£o:** BotÃ£o "Limpar" inserido nativamente na tela da prancheta tÃ¡tica sem *prompt* obstrutivo de JavaScript.
+- Apelido do jogador agora Ã© opcional na API.
 
 ## [2.5.0] - 2026-09-22
 
 ### Adicionado
-- **Formação do Time:**
-  - Nova tela de edição de formação tática na partida (`/matches/:id/lineup`).
-  - Campo virtual interativo (*Football Pitch*) com suporte a 8 esquemas táticos (ex: 4-3-3, 4-4-2, 3-5-2).
-  - Gaveta de seleção inteligente que sugere jogadores que atuam na posição solicitada (ex: Zagueiros e Laterais na defesa).
-  - Acesso público para visualizar a escalação sem necessidade de login.
+- **FormaÃ§Ã£o do Time:**
+  - Nova tela de ediÃ§Ã£o de formaÃ§Ã£o tÃ¡tica na partida (`/matches/:id/lineup`).
+  - Campo virtual interativo (*Football Pitch*) com suporte a 8 esquemas tÃ¡ticos (ex: 4-3-3, 4-4-2, 3-5-2).
+  - Gaveta de seleÃ§Ã£o inteligente que sugere jogadores que atuam na posiÃ§Ã£o solicitada (ex: Zagueiros e Laterais na defesa).
+  - Acesso pÃºblico para visualizar a escalaÃ§Ã£o sem necessidade de login.
 
 ## [2.4.0] - 2026-09-22
 
 ### Adicionado
-- **Ranking de Assistências:** 
-  - Nova tela de ranking dedicada para assistências.
-  - Exibição das assistências no card dos últimos jogos da Home (ex: ⚽ Marcador (👟 Assistente)).
-  - Tela de detalhes dos jogos onde o jogador deu assistência.
-- **Competição e Fase na Artilharia:** Os jogos no histórico de gols do jogador agora mostram o ícone da competição.
-- **Painel de Administrador:** Acesso via cabeçalho do onboarding para gerenciamento e aprovação de novos times (Soft delete de times incluso).
+- **Ranking de AssistÃªncias:** 
+  - Nova tela de ranking dedicada para assistÃªncias.
+  - ExibiÃ§Ã£o das assistÃªncias no card dos Ãºltimos jogos da Home (ex: âš½ Marcador (ðŸ‘Ÿ Assistente)).
+  - Tela de detalhes dos jogos onde o jogador deu assistÃªncia.
+- **CompetiÃ§Ã£o e Fase na Artilharia:** Os jogos no histÃ³rico de gols do jogador agora mostram o Ã­cone da competiÃ§Ã£o.
+- **Painel de Administrador:** Acesso via cabeÃ§alho do onboarding para gerenciamento e aprovaÃ§Ã£o de novos times (Soft delete de times incluso).
 
 ### Corrigido
-- **Navegação de Times:** Corrigido redirecionamento forçado que impedia a troca de time ao tentar "ver outros times".
-- **Permissão de Administrador:** Criadores do time agora ganham cargo de administrador imediatamente, sem precisar relogar.
-- **Remoção de Gols e Edição:** Corrigido bug onde o clique para remover um gol acionava simultaneamente o modal de edição.
-- **Jogos sem Placar:** Partidas que voltam a ter o placar limpo (`null x null`) são retiradas dos últimos jogos e estastísticas corretamente.
+- **NavegaÃ§Ã£o de Times:** Corrigido redirecionamento forÃ§ado que impedia a troca de time ao tentar "ver outros times".
+- **PermissÃ£o de Administrador:** Criadores do time agora ganham cargo de administrador imediatamente, sem precisar relogar.
+- **RemoÃ§Ã£o de Gols e EdiÃ§Ã£o:** Corrigido bug onde o clique para remover um gol acionava simultaneamente o modal de ediÃ§Ã£o.
+- **Jogos sem Placar:** Partidas que voltam a ter o placar limpo (`null x null`) sÃ£o retiradas dos Ãºltimos jogos e estastÃ­sticas corretamente.
 
 ## [2.3.0] - 2026-09-22
 
 ### Adicionado
-- **Campos de Competição e Fase:** 
-  - Adicionado "Competição" e "Fase competição" na criação e edição de jogos.
-  - Campos de autocompletar baseados no histórico para facilitar digitação.
-  - Exibição da competição e fase nos cards de listagem de jogos (tela de Jogos, Início, Frequência e Artilharia).
-  - Adicionado suporte a filtro por competição na busca da tela de Jogos.
+- **Campos de CompetiÃ§Ã£o e Fase:** 
+  - Adicionado "CompetiÃ§Ã£o" e "Fase competiÃ§Ã£o" na criaÃ§Ã£o e ediÃ§Ã£o de jogos.
+  - Campos de autocompletar baseados no histÃ³rico para facilitar digitaÃ§Ã£o.
+  - ExibiÃ§Ã£o da competiÃ§Ã£o e fase nos cards de listagem de jogos (tela de Jogos, InÃ­cio, FrequÃªncia e Artilharia).
+  - Adicionado suporte a filtro por competiÃ§Ã£o na busca da tela de Jogos.
 
 ### Modificado
-- **Placares Não Definidos (Próximos Jogos):** 
-  - Jogos futuros agora são salvos com placar nulo ("-") ao invés de "0x0" para não poluir as estatísticas.
-  - Contadores de Vitórias, Empates, Derrotas e Gols pró/sofridos agora ignoram completamente os jogos com placares nulos.
-  - Os placares nulos exibem crachá informativo de "Próximo jogo" na listagem.
+- **Placares NÃ£o Definidos (PrÃ³ximos Jogos):** 
+  - Jogos futuros agora sÃ£o salvos com placar nulo ("-") ao invÃ©s de "0x0" para nÃ£o poluir as estatÃ­sticas.
+  - Contadores de VitÃ³rias, Empates, Derrotas e Gols prÃ³/sofridos agora ignoram completamente os jogos com placares nulos.
+  - Os placares nulos exibem crachÃ¡ informativo de "PrÃ³ximo jogo" na listagem.
 - **Responsividade do Onboarding:**
   - Ajustado o layout da tela "Junte-se ao time" para o celular, exibindo o escudo acima do nome em modo coluna, evitando quebra visual.
-- **Performance da Tela Início (Dashboard):**
-  - Implementação de chamadas paralelas para buscar informações do dashboard de forma segmentada (Resumo, Últimos Jogos, Artilharia, Frequência).
-  - Utilização de `Skeleton` loaders dinâmicos (efeito fantasma) para partes da tela que demoram mais para responder, eliminando o travamento completo inicial e dando uma resposta visual imediata ao usuário.
-- **Interface e Navegação:**
-  - Substituição do título "Home" no cabeçalho pelo nome do time atual.
-  - Substituição do quadrado com a letra inicial na área Hero pelo escudo do time (`TeamLogo`).
+- **Performance da Tela InÃ­cio (Dashboard):**
+  - ImplementaÃ§Ã£o de chamadas paralelas para buscar informaÃ§Ãµes do dashboard de forma segmentada (Resumo, Ãšltimos Jogos, Artilharia, FrequÃªncia).
+  - UtilizaÃ§Ã£o de `Skeleton` loaders dinÃ¢micos (efeito fantasma) para partes da tela que demoram mais para responder, eliminando o travamento completo inicial e dando uma resposta visual imediata ao usuÃ¡rio.
+- **Interface e NavegaÃ§Ã£o:**
+  - SubstituiÃ§Ã£o do tÃ­tulo "Home" no cabeÃ§alho pelo nome do time atual.
+  - SubstituiÃ§Ã£o do quadrado com a letra inicial na Ã¡rea Hero pelo escudo do time (`TeamLogo`).
 - **Loader Principal:**
-  - Remoção da mensagem e modal "Acordando o servidor", simplificando a inicialização com um spinner padrão.
+  - RemoÃ§Ã£o da mensagem e modal "Acordando o servidor", simplificando a inicializaÃ§Ã£o com um spinner padrÃ£o.
 
 ### Corrigido
 - **Contagem de Empates Incorreta:** 
-  - Correção do erro onde partidas sem placar (nulos) eram interpretadas como empates na soma do "Resumo do Mês" e "Estatísticas Gerais".
-- **Foto do Jogador:** Correção de bug onde a foto do jogador não era carregada no modal de Edição devido à omissão da imagem na listagem da API (otimização de banda). Agora a foto é carregada individualmente e cacheada ao abrir o modal.
+  - CorreÃ§Ã£o do erro onde partidas sem placar (nulos) eram interpretadas como empates na soma do "Resumo do MÃªs" e "EstatÃ­sticas Gerais".
+- **Foto do Jogador:** CorreÃ§Ã£o de bug onde a foto do jogador nÃ£o era carregada no modal de EdiÃ§Ã£o devido Ã  omissÃ£o da imagem na listagem da API (otimizaÃ§Ã£o de banda). Agora a foto Ã© carregada individualmente e cacheada ao abrir o modal.
 
 ## [2.2.0] - 2026-09-16
 
 ### Adicionado
-- **Acesso Público por URL Amigável (`/:teamSlug`):**
-  - Visualização completa de times sem necessidade de login prévio através de rotas públicas (`/:teamSlug`, `/:teamSlug/matches`, `/:teamSlug/players`, `/:teamSlug/team`).
-  - Layout público dedicado (`PublicAppShell`) exibindo escudo e nome do clube, botão "Outro time" para retorno fácil à busca e botão "Entrar".
-  - Wrapper de rota pública (`PublicRoute`) gerenciando resolução de slug, `TeamContext` e `SeasonProvider` sem necessidade de token de autenticação.
-  - Serviço de integração pública (`public.service.ts`) com extração segura de dados da API.
-- **Auth Gate em Ações de Detalhes (`AuthGateModal` & `useAuthGate`):**
-  - Modal suave "Entre ou cadastre-se" exibido ao visitante anônimo ao tentar acessar detalhes de jogos, resumo do mês, estatísticas completas e detalhes de jogadores.
+- **Acesso PÃºblico por URL AmigÃ¡vel (`/:teamSlug`):**
+  - VisualizaÃ§Ã£o completa de times sem necessidade de login prÃ©vio atravÃ©s de rotas pÃºblicas (`/:teamSlug`, `/:teamSlug/matches`, `/:teamSlug/players`, `/:teamSlug/team`).
+  - Layout pÃºblico dedicado (`PublicAppShell`) exibindo escudo e nome do clube, botÃ£o "Outro time" para retorno fÃ¡cil Ã  busca e botÃ£o "Entrar".
+  - Wrapper de rota pÃºblica (`PublicRoute`) gerenciando resoluÃ§Ã£o de slug, `TeamContext` e `SeasonProvider` sem necessidade de token de autenticaÃ§Ã£o.
+  - ServiÃ§o de integraÃ§Ã£o pÃºblica (`public.service.ts`) com extraÃ§Ã£o segura de dados da API.
+- **Auth Gate em AÃ§Ãµes de Detalhes (`AuthGateModal` & `useAuthGate`):**
+  - Modal suave "Entre ou cadastre-se" exibido ao visitante anÃ´nimo ao tentar acessar detalhes de jogos, resumo do mÃªs, estatÃ­sticas completas e detalhes de jogadores.
 - **Redirecionamento Inteligente na Raiz (`/`):**
   - Roteamento via `RootRedirect`: leva direto para a URL do time salvo no `localStorage` ou para a tela de Onboarding (`/onboarding`) caso seja um novo visitante.
 - **Campo de URL Personalizada do Clube:**
-  - Configuração do slug do time em "Configurações do Time" (`TeamSettingsPage.tsx`), com prefixo de domínio e validação de formato.
+  - ConfiguraÃ§Ã£o do slug do time em "ConfiguraÃ§Ãµes do Time" (`TeamSettingsPage.tsx`), com prefixo de domÃ­nio e validaÃ§Ã£o de formato.
 
 ### Modificado
-- **Página de Onboarding (`JoinTeamPage.tsx`):**
-  - Repaginada para atuar como página de descoberta e busca de clubes para visitantes anônimos, com botão "Acessar Time" que redireciona diretamente para a página pública do time.
+- **PÃ¡gina de Onboarding (`JoinTeamPage.tsx`):**
+  - Repaginada para atuar como pÃ¡gina de descoberta e busca de clubes para visitantes anÃ´nimos, com botÃ£o "Acessar Time" que redireciona diretamente para a pÃ¡gina pÃºblica do time.
 
 ### Corrigido
-- **Máscara Escura Duplicada na Tela de Jogos:** Removida instância redundante do `AuthGateModal` dentro do loop de partidas, restaurando a transparência padrão do modal.
-- **Desserialização de Listas Públicas:** Tratamento dos arrays em `getPublicSeasons`, `getPublicMatches` e `getPublicPlayers` para evitar falha no `sort` e garantir carregamento das partidas e elenco em modo visitante.
+- **MÃ¡scara Escura Duplicada na Tela de Jogos:** Removida instÃ¢ncia redundante do `AuthGateModal` dentro do loop de partidas, restaurando a transparÃªncia padrÃ£o do modal.
+- **DesserializaÃ§Ã£o de Listas PÃºblicas:** Tratamento dos arrays em `getPublicSeasons`, `getPublicMatches` e `getPublicPlayers` para evitar falha no `sort` e garantir carregamento das partidas e elenco em modo visitante.
 
 ## [2.1.0] - 2026-09-16
 
 ### Adicionado
 - **Motor de Modo Noturno (Dark Mode):**
-  - Paleta "Deep Slate" de três níveis de profundidade: `#0a0e17` (fundo do layout), `#121826` (containers e cards) e `#1a2235` (elementos elevados e modais).
-  - Alternador dinâmico de tema (☀️ / 🌙) no cabeçalho da aplicação (`AppHeader`), com persistência da preferência em `localStorage` (`fut_theme_mode`) e sincronização automática com o sistema operacional.
-  - Algoritmo de contraste WCAG 2.1 AA (`colorUtils.ts`) para cálculo matemático de luminância relativa e adaptação inteligente das cores do clube (`primaryColor` e `secondaryColor`).
-  - Provedor global de tema (`ThemeProvider.tsx`) posicionado no nível raiz da aplicação, garantindo suporte pleno a todas as rotas (incluindo autenticação e onboarding).
-  - Hook seguro `useOptionalTeam()` para desacoplamento de contexto em páginas públicas ou antes do carregamento do time.
+  - Paleta "Deep Slate" de trÃªs nÃ­veis de profundidade: `#0a0e17` (fundo do layout), `#121826` (containers e cards) e `#1a2235` (elementos elevados e modais).
+  - Alternador dinÃ¢mico de tema (â˜€ï¸� / ðŸŒ™) no cabeÃ§alho da aplicaÃ§Ã£o (`AppHeader`), com persistÃªncia da preferÃªncia em `localStorage` (`fut_theme_mode`) e sincronizaÃ§Ã£o automÃ¡tica com o sistema operacional.
+  - Algoritmo de contraste WCAG 2.1 AA (`colorUtils.ts`) para cÃ¡lculo matemÃ¡tico de luminÃ¢ncia relativa e adaptaÃ§Ã£o inteligente das cores do clube (`primaryColor` e `secondaryColor`).
+  - Provedor global de tema (`ThemeProvider.tsx`) posicionado no nÃ­vel raiz da aplicaÃ§Ã£o, garantindo suporte pleno a todas as rotas (incluindo autenticaÃ§Ã£o e onboarding).
+  - Hook seguro `useOptionalTeam()` para desacoplamento de contexto em pÃ¡ginas pÃºblicas ou antes do carregamento do time.
 
 ### Modificado
-- **Tela Início (`HomePage.tsx`):**
-  - Eliminação completa do "verde sobre verde" em *Últimos Jogos*, migrando para cards neutros com stripe lateral colorido de status (4px) e placar esportivo de alto contraste.
-  - Uniformização dos quatro cards de *Temporada* (Jogos, Vitórias, Gols e Aproveitamento) em containers com métricas destacadas em 28px bold, eliminando o padrão visual assimétrico.
-  - Redesenho do card *Próximo Jogo* com bloco estilo calendário esportivo.
+- **Tela InÃ­cio (`HomePage.tsx`):**
+  - EliminaÃ§Ã£o completa do "verde sobre verde" em *Ãšltimos Jogos*, migrando para cards neutros com stripe lateral colorido de status (4px) e placar esportivo de alto contraste.
+  - UniformizaÃ§Ã£o dos quatro cards de *Temporada* (Jogos, VitÃ³rias, Gols e Aproveitamento) em containers com mÃ©tricas destacadas em 28px bold, eliminando o padrÃ£o visual assimÃ©trico.
+  - Redesenho do card *PrÃ³ximo Jogo* com bloco estilo calendÃ¡rio esportivo.
 - **Tela Jogos (`MatchesPage.tsx` & `MatchDetailsPage.tsx`):**
-  - Substituição da repetição textual "ver detalhes" por placares esportivos estilizados acompanhados de chevron sutil.
-  - Tags de resumo mensal com cores semânticas de alto contraste.
-  - Placar central "Nós x Eles" com tokens dinâmicos de vitória, empate e derrota.
-- **Telas de Estatísticas (`ScorersTotalPage.tsx` & `ScorerGoalsMatchesPage.tsx`):**
-  - Pílulas de conquistas (*Doblete*, *Hat-trick*, *Falta*, *Pênalti* e *Sequência*) remodeladas com fundos translúcidos e tipografia contrastante, eliminando conflitos de cores em qualquer tema.
-  - Card de histórico de sequência e listagem de partidas do artilheiro alinhados ao novo design system esportivo.
-- **Telas de Gestão e Autenticação (`TeamMembersPage.tsx`, `JoinTeamPage.tsx`, `LoginPage.tsx`, `TeamPage.tsx`):**
-  - Remoção de estilos `#fff` e bordas `#f0f0f0` fixas nos cards de atletas e solicitações.
-  - Tela de login com gradientes, superfícies glassmorphism e inputs adaptativos para modo claro e escuro.
+  - SubstituiÃ§Ã£o da repetiÃ§Ã£o textual "ver detalhes" por placares esportivos estilizados acompanhados de chevron sutil.
+  - Tags de resumo mensal com cores semÃ¢nticas de alto contraste.
+  - Placar central "NÃ³s x Eles" com tokens dinÃ¢micos de vitÃ³ria, empate e derrota.
+- **Telas de EstatÃ­sticas (`ScorersTotalPage.tsx` & `ScorerGoalsMatchesPage.tsx`):**
+  - PÃ­lulas de conquistas (*Doblete*, *Hat-trick*, *Falta*, *PÃªnalti* e *SequÃªncia*) remodeladas com fundos translÃºcidos e tipografia contrastante, eliminando conflitos de cores em qualquer tema.
+  - Card de histÃ³rico de sequÃªncia e listagem de partidas do artilheiro alinhados ao novo design system esportivo.
+- **Telas de GestÃ£o e AutenticaÃ§Ã£o (`TeamMembersPage.tsx`, `JoinTeamPage.tsx`, `LoginPage.tsx`, `TeamPage.tsx`):**
+  - RemoÃ§Ã£o de estilos `#fff` e bordas `#f0f0f0` fixas nos cards de atletas e solicitaÃ§Ãµes.
+  - Tela de login com gradientes, superfÃ­cies glassmorphism e inputs adaptativos para modo claro e escuro.
   - Adicionado gradiente protetor no Hero do clube com text-shadow nas tipografias, garantindo legibilidade do nome e escudo mesmo se forem escolhidas cores claras como amarelo ou branco.
 
 ### Corrigido
-- **Contraste de Empates (WCAG AA):** Substituição do tom amarelo `#eab308` (contraste de 1.96:1) pelo tom âmbar certificado `#b45309` no modo claro (5.2:1) e `#facc15` no modo escuro (10.5:1).
+- **Contraste de Empates (WCAG AA):** SubstituiÃ§Ã£o do tom amarelo `#eab308` (contraste de 1.96:1) pelo tom Ã¢mbar certificado `#b45309` no modo claro (5.2:1) e `#facc15` no modo escuro (10.5:1).
 - **Medalhas de Ranking:** Bronze atualizado para `#b45309` com texto branco `#ffffff` (4.9:1) e Ouro com tipografia escura `#1a1a1a`.
-- **Fundo do Layout no Modo Noturno:** Refatoração da hierarquia do `AppShellLayout` dentro do `ThemeProvider`, assegurando que `token.colorBgLayout` (`#0a0e17`) preencha toda a tela sem deixar o fundo claro remanescente.
-- **Erro ao realizar Logout:** Resolução de erro `useAppTheme deve ser usado dentro de um ThemeProvider` ao desconectar e redirecionar para a tela de login.
+- **Fundo do Layout no Modo Noturno:** RefatoraÃ§Ã£o da hierarquia do `AppShellLayout` dentro do `ThemeProvider`, assegurando que `token.colorBgLayout` (`#0a0e17`) preencha toda a tela sem deixar o fundo claro remanescente.
+- **Erro ao realizar Logout:** ResoluÃ§Ã£o de erro `useAppTheme deve ser usado dentro de um ThemeProvider` ao desconectar e redirecionar para a tela de login.
 

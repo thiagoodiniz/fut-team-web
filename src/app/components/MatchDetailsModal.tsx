@@ -1,6 +1,6 @@
 import React from 'react'
 import { Modal, Typography, theme, Spin, Button } from 'antd'
-import { EditOutlined } from '@ant-design/icons'
+import { EditOutlined, ShareAltOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getMatchById, type MatchDTO } from '../../services/matches.service'
 import { getMatchLineup, type LineupData } from '../../services/lineup.service'
@@ -13,6 +13,7 @@ import { groupPlayersByPosition } from '../../utils/playerSort'
 import { PlayerInfoDrawer } from './lineup/PlayerInfoDrawer'
 import { type SlotDef } from './lineup/formations'
 import posthog from 'posthog-js'
+import { shareContent, teamMatchesUrl } from '../../utils/share'
 
 const { Text } = Typography
 
@@ -83,6 +84,25 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
       posthog.capture('match_details_player_clicked', { match_id: matchId, player_id: entry.playerId, source: 'pitch' })
       setInfoPlayerId(entry.playerId)
     }
+  }
+
+  function handleShareResult() {
+    if (!match) return
+    const teamName = team?.name || 'Nosso Time'
+    const date = new Date(match.date).toLocaleDateString('pt-BR')
+    const hasScore = match.ourScore !== null && match.theirScore !== null
+    const lines: string[] = ['Resultado do jogo', '']
+    lines.push(
+      hasScore
+        ? `${teamName} ${match.ourScore} x ${match.theirScore} ${match.opponent || 'Adversário'}`
+        : `${teamName} x ${match.opponent || 'Adversário'}`,
+    )
+    const meta = [date, match.location, match.competition, match.competitionPhase].filter(Boolean)
+    lines.push(meta.join(' • '))
+    lines.push('')
+    lines.push(`Veja a escalação no app: ${teamMatchesUrl(slug || (team as any)?.slug, { match: match.id })}`)
+    posthog.capture('share_match_result_clicked', { match_id: match.id })
+    shareContent({ text: lines.join('\n') })
   }
 
   // Dados do jogador para o drawer
@@ -237,6 +257,11 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
 
           {/* Escalação */}
           <div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+              <Button size="small" icon={<ShareAltOutlined />} onClick={handleShareResult}>
+                Compartilhar resultado
+              </Button>
+            </div>
             <Text strong style={{ display: 'block', marginBottom: 16, fontSize: 16 }}>
               Escalação
             </Text>

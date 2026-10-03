@@ -5,13 +5,6 @@ O formato Ã© baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.
 
 ## [Unreleased]
 
-### Adicionado
-- **Compartilhar Time:** Botão de compartilhar na Home, ao lado do nome e escudo do time, enviando o link do time com a mensagem "Acompanhe a temporada do {time}".
-- **Compartilhar Resumo do Mês:** O modal de resumo do mês agora tem o botão "Compartilhar resumo", que gera um texto com totais, jogos, artilharia e maior número de jogos, além do link da aba de jogos.
-- **Compartilhar Agenda:** Na aba Agenda, o botão "Compartilhar agenda" oferece as opções "Próximos jogos do mês" e "Todos os próximos jogos", com data, horário, adversário, local, competição e fase. O link compartilhado abre a tela de jogos já na aba Agenda.
-- **Compartilhar Resultado do Jogo:** O modal de detalhes da partida tem o botão "Compartilhar resultado", acima de "Escalação". O link abre a tela de jogos com o modal da partida aberto (`?match={id}`).
-- **Links Diretos na Tela de Jogos:** A tela de jogos aceita os parâmetros `?tab=agenda` e `?match={id}`.
-
 ## [2.8.0] - 2026-09-30
 
 ### Adicionado

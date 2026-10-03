@@ -96,3 +96,18 @@ export async function getPublicTeamStats(slug: string) {
   const res = await api.get(`/public/${slug}/stats`)
   return res.data
 }
+
+export async function getPublicMatchById(slug: string, matchId: string): Promise<MatchDTO> {
+  const res = await api.get<{ match: MatchDTO } | MatchDTO>(`/public/${slug}/matches/${matchId}`)
+  return ('match' in res.data) ? res.data.match : res.data
+}
+
+export async function getPublicMatchGoals(slug: string, matchId: string) {
+  const res = await api.get(`/public/${slug}/matches/${matchId}/goals`)
+  return res.data
+}
+
+export async function getPublicMatchPresences(slug: string, matchId: string) {
+  const res = await api.get(`/public/${slug}/matches/${matchId}/presences`)
+  return res.data
+}

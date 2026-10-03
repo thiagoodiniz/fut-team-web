@@ -3,9 +3,10 @@ import { Modal, Typography, theme, Spin, Button } from 'antd'
 import { EditOutlined, ShareAltOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getMatchById, type MatchDTO } from '../../services/matches.service'
-import { getMatchLineup, type LineupData } from '../../services/lineup.service'
+import { getMatchLineup, getPublicMatchLineup, type LineupData } from '../../services/lineup.service'
 import { listMatchPresences, type PresenceDTO } from '../../services/presences.service'
 import { listMatchGoals, type GoalDTO } from '../../services/goals.service'
+import { getPublicMatchById, getPublicMatchPresences, getPublicMatchGoals } from '../../services/public.service'
 import { FootballPitch } from './lineup/FootballPitch'
 import { PlayerAvatar } from '../components/PlayerAvatar'
 import { useTeam } from '../contexts/TeamContext'
@@ -52,12 +53,24 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
   async function load(id: string) {
     setLoading(true)
     try {
-      const [matchData, lineupData, presencesData, goalsData] = await Promise.all([
-        getMatchById(id),
-        getMatchLineup(id).catch(() => null),
-        listMatchPresences(id),
-        listMatchGoals(id),
-      ])
+      let matchData, lineupData, presencesData, goalsData
+
+      if (slug) {
+        [matchData, lineupData, presencesData, goalsData] = await Promise.all([
+          getPublicMatchById(slug, id),
+          getPublicMatchLineup(slug, id).catch(() => null),
+          getPublicMatchPresences(slug, id),
+          getPublicMatchGoals(slug, id),
+        ])
+      } else {
+        [matchData, lineupData, presencesData, goalsData] = await Promise.all([
+          getMatchById(id),
+          getMatchLineup(id).catch(() => null),
+          listMatchPresences(id),
+          listMatchGoals(id),
+        ])
+      }
+
       setMatch(matchData)
       setLineup(lineupData)
       setPresences(presencesData)
@@ -99,10 +112,31 @@ export function MatchDetailsModal({ matchId, onClose }: MatchDetailsModalProps) 
     )
     const meta = [date, match.location, match.competition, match.competitionPhase].filter(Boolean)
     lines.push(meta.join(' • '))
-    lines.push('')
-    lines.push(`Veja a escalação no app: ${teamMatchesUrl(slug || (team as any)?.slug, { match: match.id })}`)
+
+    if (goals.length > 0) {
+      lines.push('', 'Gols:')
+      goals
+        .slice()
+        .sort((a, b) => (a.minute ?? 999) - (b.minute ?? 999))
+        .forEach((g) => {
+          const scorer = g.ownGoal
+            ? 'Gol contra'
+            : g.player?.nickname || g.player?.name || g.loanedPlayerName || 'Sem jogador'
+          const assistant = !g.ownGoal
+            ? g.assistant?.nickname || g.assistant?.name || g.loanedAssistantName
+            : null
+          const minute = g.minute !== null && g.minute !== undefined ? `${g.minute}' ` : ''
+          lines.push(`⚽ ${minute}${scorer}${assistant ? ` - 👟 ${assistant}` : ''}`)
+        })
+    }
+
+    lines.push('', 'Veja mais detalhes da partida no app:')
+
     posthog.capture('share_match_result_clicked', { match_id: match.id })
-    shareContent({ text: lines.join('\n') })
+    shareContent({
+      text: lines.join('\n'),
+      url: teamMatchesUrl(slug || (team as any)?.slug, { match: match.id }),
+    })
   }
 
   // Dados do jogador para o drawer

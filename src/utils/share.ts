@@ -15,12 +15,14 @@ export function teamMatchesUrl(slug?: string | null, query?: Record<string, stri
 /** Uses native share sheet when available, otherwise copies to clipboard. */
 export async function shareContent(opts: { text: string; url?: string }) {
   const { text, url } = opts
+  // Texto + 2 quebras de linha + link (o link vai dentro do texto para manter o espaçamento)
+  const fullText = url ? `${text.trimEnd()}\n\n${url}` : text
   try {
     if (navigator.share) {
-      await navigator.share(url ? { text, url } : { text })
+      await navigator.share({ text: fullText })
       return
     }
-    await navigator.clipboard.writeText(url ? `${text}\n${url}` : text)
+    await navigator.clipboard.writeText(fullText)
     message.success('Copiado para a área de transferência')
   } catch (err: any) {
     if (err?.name === 'AbortError') return

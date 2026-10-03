@@ -92,6 +92,16 @@ export function MatchesPage() {
     searchParams.get('tab') === 'agenda' ? 'future' : 'past',
   )
 
+  // Mantém aba e modal sincronizados com a URL (ex.: link compartilhado aberto com a página já montada)
+  const tabParam = searchParams.get('tab')
+  const matchParam = searchParams.get('match')
+  React.useEffect(() => {
+    if (tabParam === 'agenda') setActiveTab('future')
+  }, [tabParam])
+  React.useEffect(() => {
+    if (matchParam) setSelectedMatchId(matchParam)
+  }, [matchParam])
+
   async function load() {
     if (!season) return
 

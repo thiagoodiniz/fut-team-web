@@ -980,7 +980,10 @@ export function MatchDetailsPage() {
             <Button
               size="small"
               icon={<DollarOutlined />}
-              onClick={() => setBulkAmountModalOpen(true)}
+              onClick={() => {
+                posthog.capture('match_bulk_payment_modal_opened', { match_id: id })
+                setBulkAmountModalOpen(true)
+              }}
             >
               Valor padrão p/ presentes
             </Button>
@@ -1008,11 +1011,15 @@ export function MatchDetailsPage() {
                   size="small"
                   block
                   value={presenceStatusFilter}
-                  onChange={(val) =>
+                  onChange={(val) => {
+                    posthog.capture('match_presence_status_filter_changed', {
+                      match_id: id,
+                      filter: val,
+                    })
                     setPresenceStatusFilter(
                       val as 'ALL' | 'PRESENT' | 'PAID' | 'UNPAID_PRESENT',
                     )
-                  }
+                  }}
                   options={[
                     { label: 'Todos', value: 'ALL' },
                     { label: 'Presentes', value: 'PRESENT' },

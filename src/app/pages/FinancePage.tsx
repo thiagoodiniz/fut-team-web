@@ -92,7 +92,10 @@ export function FinancePage() {
   }
 
   function handleEdit(transaction: TransactionDTO) {
-    posthog.capture('finance_edit_transaction_clicked', { type: transaction.type })
+    posthog.capture('finance_edit_transaction_clicked', {
+      transaction_id: transaction.id,
+      type: transaction.type,
+    })
     setEditingTransaction(transaction)
     setModalType(transaction.type)
     setModalOpen(true)
@@ -102,7 +105,7 @@ export function FinancePage() {
     try {
       await deleteTransaction(id)
       message.success('Lançamento removido')
-      posthog.capture('finance_delete_transaction_clicked')
+      posthog.capture('finance_delete_transaction_clicked', { transaction_id: id })
       loadData()
     } catch {
       message.error('Erro ao remover lançamento')
@@ -296,7 +299,10 @@ export function FinancePage() {
           <Segmented
             block
             value={typeFilter}
-            onChange={(val) => setTypeFilter(val as 'ALL' | 'INCOME' | 'EXPENSE')}
+            onChange={(val) => {
+              posthog.capture('finance_type_filter_changed', { filter: val })
+              setTypeFilter(val as 'ALL' | 'INCOME' | 'EXPENSE')
+            }}
             options={[
               { label: `Todas (${textFiltered.length})`, value: 'ALL' },
               { label: `Entradas (${incomeList.length})`, value: 'INCOME' },

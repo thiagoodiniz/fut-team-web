@@ -3,6 +3,7 @@ import { Card, Typography, Row, Col, Button, Space, Modal, Form, Input, message,
 import { getAdminDashboardStats, listAdminTeams, updateAdminTeam, deleteAdminTeam, type AdminDashboardStats, type AdminTeamDTO } from '../../services/admin.service'
 import { TeamRequestsListModal } from '../components/TeamRequestsListModal'
 import { TeamOutlined, UserOutlined, FileTextOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import posthog from 'posthog-js'
 
 const { Title, Text } = Typography
 
@@ -38,6 +39,11 @@ export function AdminDashboardPage() {
     if (!editingTeam) return
     try {
       await updateAdminTeam(editingTeam.id, values)
+      posthog.capture('admin_team_updated', {
+        team_id: editingTeam.id,
+        finance_enabled: !!values.financeEnabled,
+        visibility: values.visibility,
+      })
       message.success('Time atualizado com sucesso!')
       setEditingTeam(null)
       loadData()

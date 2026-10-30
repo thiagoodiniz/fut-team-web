@@ -17,6 +17,7 @@ import {
   TagOutlined,
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
+import posthog from 'posthog-js'
 import type { TransactionDTO } from '../../../services/finance.service'
 import { formatCents } from '../../../utils/money'
 
@@ -133,6 +134,10 @@ export function TransactionList({
                       }}
                       onClick={() => {
                         if (showMatchLink && item.match) {
+                          posthog.capture('finance_transaction_match_clicked', {
+                            transaction_id: item.id,
+                            match_id: item.match.id,
+                          })
                           navigate(`/app/matches/${item.match.id}`)
                         }
                       }}

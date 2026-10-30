@@ -62,7 +62,11 @@ export function MatchFinanceCard({
   }
 
   function handleEdit(tx: TransactionDTO) {
-    posthog.capture('match_finance_edit_clicked', { match_id: match.id, type: tx.type })
+    posthog.capture('match_finance_edit_clicked', {
+      match_id: match.id,
+      transaction_id: tx.id,
+      type: tx.type,
+    })
     setEditingTx(tx)
     setModalType(tx.type)
     setModalOpen(true)
@@ -72,7 +76,10 @@ export function MatchFinanceCard({
     try {
       await deleteTransaction(id)
       message.success('Lançamento removido')
-      posthog.capture('match_finance_delete_clicked', { match_id: match.id })
+      posthog.capture('match_finance_delete_clicked', {
+        match_id: match.id,
+        transaction_id: id,
+      })
       onRefresh()
     } catch {
       message.error('Erro ao remover lançamento')
@@ -216,7 +223,10 @@ export function MatchFinanceCard({
         <Tabs
           size="small"
           activeKey={activeTab}
-          onChange={(k) => setActiveTab(k as 'EXPENSE' | 'INCOME')}
+          onChange={(k) => {
+            posthog.capture('match_finance_tab_changed', { match_id: match.id, tab: k })
+            setActiveTab(k as 'EXPENSE' | 'INCOME')
+          }}
           items={[
             {
               key: 'EXPENSE',

@@ -18,6 +18,7 @@ export type AdminTeamDTO = {
   name: string
   slug: string
   visibility: 'PUBLIC' | 'MEMBERS' | 'ADMIN'
+  financeEnabled: boolean
   lastAccessedAt: string
     createdAt: string
   _count: {
@@ -36,7 +37,7 @@ export async function listAdminTeams(): Promise<AdminTeamDTO[]> {
   return response.data.teams
 }
 
-export async function updateAdminTeam(id: string, data: { name: string; slug: string; visibility: string }): Promise<AdminTeamDTO> {
+export async function updateAdminTeam(id: string, data: { name: string; slug: string; visibility: string; financeEnabled?: boolean }): Promise<AdminTeamDTO> {
   const response = await api.patch(`/admin/teams/${id}`, data)
   return response.data
 }

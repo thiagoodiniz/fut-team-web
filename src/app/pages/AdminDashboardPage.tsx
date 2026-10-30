@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Card, Typography, Row, Col, Button, Space, Modal, Form, Input, message, Popconfirm, Select, Tabs, List, Tag } from 'antd'
+import { Card, Typography, Row, Col, Button, Space, Modal, Form, Input, message, Popconfirm, Select, Switch, Tabs, List, Tag } from 'antd'
 import { getAdminDashboardStats, listAdminTeams, updateAdminTeam, deleteAdminTeam, type AdminDashboardStats, type AdminTeamDTO } from '../../services/admin.service'
 import { TeamRequestsListModal } from '../components/TeamRequestsListModal'
 import { TeamOutlined, UserOutlined, FileTextOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
@@ -34,7 +34,7 @@ export function AdminDashboardPage() {
     loadData()
   }, [])
 
-  async function handleUpdateTeam(values: { name: string; slug: string; visibility: string }) {
+  async function handleUpdateTeam(values: { name: string; slug: string; visibility: string; financeEnabled?: boolean }) {
     if (!editingTeam) return
     try {
       await updateAdminTeam(editingTeam.id, values)
@@ -80,7 +80,7 @@ export function AdminDashboardPage() {
                     icon={<EditOutlined />}
                     onClick={() => {
                       setEditingTeam(record)
-                      form.setFieldsValue({ name: record.name, slug: record.slug, visibility: record.visibility || 'PUBLIC' })
+                      form.setFieldsValue({ name: record.name, slug: record.slug, visibility: record.visibility || 'PUBLIC', financeEnabled: !!record.financeEnabled })
                     }}
                   >
                     Editar
@@ -109,6 +109,12 @@ export function AdminDashboardPage() {
                     <Text type="secondary">Visibilidade:</Text>
                     <Tag color={record.visibility === 'PUBLIC' ? 'green' : record.visibility === 'MEMBERS' ? 'blue' : 'red'}>
                       {record.visibility === 'PUBLIC' ? 'Público' : record.visibility === 'MEMBERS' ? 'Membros' : 'Admin'}
+                    </Tag>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Text type="secondary">Gestão financeira:</Text>
+                    <Tag color={record.financeEnabled ? 'green' : 'default'}>
+                      {record.financeEnabled ? 'Habilitada' : 'Desabilitada'}
                     </Tag>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -257,6 +263,14 @@ export function AdminDashboardPage() {
               <Select.Option value="MEMBERS">Membros</Select.Option>
               <Select.Option value="ADMIN">Admin</Select.Option>
             </Select>
+          </Form.Item>
+          <Form.Item
+            name="financeEnabled"
+            label="Gestão financeira"
+            valuePropName="checked"
+            extra="Quando habilitada, os admins do time passam a ter acesso ao módulo financeiro."
+          >
+            <Switch checkedChildren="Ligada" unCheckedChildren="Desligada" />
           </Form.Item>
         </Form>
       </Modal>

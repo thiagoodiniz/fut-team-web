@@ -7,6 +7,7 @@ export type TeamDTO = {
   logo: string | null
   primaryColor: string | null
   secondaryColor: string | null
+  financeEnabled?: boolean
 }
 
 export async function getMyTeam(): Promise<TeamDTO> {

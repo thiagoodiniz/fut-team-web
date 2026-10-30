@@ -5,6 +5,8 @@ O formato Ã© baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-10-30
+
 ### Adicionado
 - **Gestão Financeira do Time (Admin):**
   - Controle de ativação da Gestão Financeira por time no painel `/admin` (exclusivo para usuário MASTER).

@@ -103,6 +103,7 @@ export const router = createBrowserRouter([
           { path: 'matches/:id/lineup', element: <LineupPage /> },
           { path: 'players', element: <PlayersPage /> },
           { path: 'team', element: <TeamPage /> },
+          { path: 'finance', element: <FinancePage /> },
           { path: 'team/settings', element: <TeamSettingsPage /> },
           { path: 'team/members', element: <TeamMembersPage /> },
           { path: 'ranking/scorers', element: <ScorersTotalPage /> },

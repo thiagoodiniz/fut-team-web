@@ -16,7 +16,7 @@ import {
   ArrowDownOutlined,
   WalletOutlined,
 } from '@ant-design/icons'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useParams } from 'react-router-dom'
 import posthog from 'posthog-js'
 import { useTeam } from '../contexts/TeamContext'
 import { useSeason } from '../contexts/SeasonContext'
@@ -37,6 +37,7 @@ const { Title, Text } = Typography
 
 export function FinancePage() {
   const { token } = theme.useToken()
+  const { slug } = useParams<{ slug: string }>()
   const { isAdmin, team, loading: teamLoading } = useTeam()
   const { season, loading: seasonLoading } = useSeason()
 
@@ -145,7 +146,7 @@ export function FinancePage() {
 
   // Proteção: apenas admin e com financeEnabled ativo
   if (!teamLoading && (!isAdmin || !team?.financeEnabled)) {
-    return <Navigate to="/app/home" replace />
+    return <Navigate to={slug ? `/${slug}` : '/app/home'} replace />
   }
 
   const displayedTransactions =

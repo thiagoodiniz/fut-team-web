@@ -6,6 +6,7 @@ import {
   CalendarOutlined,
   TeamOutlined,
   TrophyOutlined,
+  DollarOutlined,
   SwapOutlined,
 } from '@ant-design/icons'
 import { AppHeader } from './AppHeader'
@@ -19,12 +20,13 @@ import posthog from 'posthog-js'
 
 const { Header, Content } = Layout
 
-type TabKey = 'home' | 'matches' | 'players' | 'team'
+type TabKey = 'home' | 'matches' | 'players' | 'team' | 'finance'
 
 function getActiveTab(pathname: string, slug: string): TabKey {
   if (pathname.startsWith(`/${slug}/matches`)) return 'matches'
   if (pathname.startsWith(`/${slug}/players`)) return 'players'
   if (pathname.startsWith(`/${slug}/team`)) return 'team'
+  if (pathname.startsWith(`/${slug}/finance`)) return 'finance'
   return 'home'
 }
 
@@ -32,18 +34,21 @@ export function PublicAppShell() {
   const navigate = useNavigate()
   const location = useLocation()
   const { slug } = useParams<{ slug: string }>()
-  const { team } = useTeam()
+  const { team, isAdmin } = useTeam()
   const { token } = theme.useToken()
   const isPWA = useIsPWA()
   const { title, showBack } = useAppHeader()
 
   const tokenStr = localStorage.getItem('token')
   const authData = localStorage.getItem('auth')
-  let auth: any = null
+  let auth: { userId?: string } | null = null
   try {
     auth = authData ? JSON.parse(authData) : null
-  } catch {}
+  } catch {
+    auth = null
+  }
   const isLoggedIn = Boolean(tokenStr && auth?.userId)
+  const showFinance = isLoggedIn && isAdmin && !!team?.financeEnabled
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -63,111 +68,119 @@ export function PublicAppShell() {
     <>
       <PostHogPageviewTracker />
       <Layout style={{ minHeight: '100dvh', background: token.colorBgLayout }}>
-      {isLoggedIn ? (
-        <AppHeader title={title} showBack={showBack} />
-      ) : (
-        <Header
+        {isLoggedIn ? (
+          <AppHeader title={title} showBack={showBack} />
+        ) : (
+          <Header
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 1000,
+              padding: '0 16px',
+              height: 60,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: token.colorBgElevated,
+              borderBottom: `1px solid ${token.colorBorderSecondary}`,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {team && <TeamLogo teamId={team.id} name={team.name} size={32} />}
+              <span style={{ fontSize: 18, fontWeight: 600 }}>
+                {title === 'Home' ? team?.name || 'Time' : title}
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Button
+                size="small"
+                icon={<SwapOutlined />}
+                onClick={() => {
+                  posthog.capture('public_header_other_team_clicked', { slug })
+                  navigate('/onboarding')
+                }}
+                style={{ borderRadius: 8, fontSize: 12 }}
+              >
+                Outro time
+              </Button>
+              <Button
+                type="primary"
+                size="small"
+                onClick={() => {
+                  posthog.capture('public_header_login_clicked', { slug })
+                  navigate('/login')
+                }}
+                style={{ borderRadius: 8, fontSize: 12, fontWeight: 600 }}
+              >
+                Entrar
+              </Button>
+            </div>
+          </Header>
+        )}
+
+        <Content
           style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 1000,
-            padding: '0 16px',
-            height: 60,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            background: token.colorBgElevated,
-            borderBottom: `1px solid ${token.colorBorderSecondary}`,
+            padding: `74px 14px calc(${isPWA ? 108 : 76}px + env(safe-area-inset-bottom)) 14px`,
+            background: token.colorBgLayout,
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            {team && <TeamLogo teamId={team.id} name={team.name} size={32} />}
-            <span style={{ fontSize: 18, fontWeight: 600 }}>
-              {title === 'Home' ? team?.name || 'Time' : title}
-            </span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Button
-              size="small"
-              icon={<SwapOutlined />}
-              onClick={() => {
-                posthog.capture('public_header_other_team_clicked', { slug })
-                navigate('/onboarding')
-              }}
-              style={{ borderRadius: 8, fontSize: 12 }}
-            >
-              Outro time
-            </Button>
-            <Button
-              type="primary"
-              size="small"
-              onClick={() => {
-                posthog.capture('public_header_login_clicked', { slug })
-                navigate('/login')
-              }}
-              style={{ borderRadius: 8, fontSize: 12, fontWeight: 600 }}
-            >
-              Entrar
-            </Button>
-          </div>
-        </Header>
-      )}
+          <Outlet />
+        </Content>
 
-      <Content
-        style={{
-          padding: `74px 14px calc(${isPWA ? 108 : 76}px + env(safe-area-inset-bottom)) 14px`,
-          background: token.colorBgLayout,
-        }}
-      >
-        <Outlet />
-      </Content>
-
-      <nav
-        style={{
-          position: 'fixed',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: `calc(${isPWA ? 92 : 60}px + env(safe-area-inset-bottom))`,
-          paddingBottom: isPWA
-            ? 'calc(32px + env(safe-area-inset-bottom))'
-            : 'env(safe-area-inset-bottom)',
-          zIndex: 1000,
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          background: token.colorBgElevated,
-          borderTop: `1px solid ${token.colorBorderSecondary}`,
-          backdropFilter: 'blur(12px)',
-        }}
-      >
-        <TabButton
-          active={activeTab === 'home'}
-          icon={<HomeOutlined />}
-          label="Início"
-          onClick={() => onTabClick('home')}
-        />
-        <TabButton
-          active={activeTab === 'matches'}
-          icon={<CalendarOutlined />}
-          label="Jogos"
-          onClick={() => onTabClick('matches')}
-        />
-        <TabButton
-          active={activeTab === 'players'}
-          icon={<TeamOutlined />}
-          label="Elenco"
-          onClick={() => onTabClick('players')}
-        />
-        <TabButton
-          active={activeTab === 'team'}
-          icon={<TrophyOutlined />}
-          label="Clube"
-          onClick={() => onTabClick('team')}
-        />
-      </nav>
-    </Layout>
+        <nav
+          style={{
+            position: 'fixed',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: `calc(${isPWA ? 92 : 60}px + env(safe-area-inset-bottom))`,
+            paddingBottom: isPWA
+              ? 'calc(32px + env(safe-area-inset-bottom))'
+              : 'env(safe-area-inset-bottom)',
+            zIndex: 1000,
+            display: 'grid',
+            gridTemplateColumns: `repeat(${showFinance ? 5 : 4}, 1fr)`,
+            background: token.colorBgElevated,
+            borderTop: `1px solid ${token.colorBorderSecondary}`,
+            backdropFilter: 'blur(12px)',
+          }}
+        >
+          <TabButton
+            active={activeTab === 'home'}
+            icon={<HomeOutlined />}
+            label="Início"
+            onClick={() => onTabClick('home')}
+          />
+          <TabButton
+            active={activeTab === 'matches'}
+            icon={<CalendarOutlined />}
+            label="Jogos"
+            onClick={() => onTabClick('matches')}
+          />
+          <TabButton
+            active={activeTab === 'players'}
+            icon={<TeamOutlined />}
+            label="Elenco"
+            onClick={() => onTabClick('players')}
+          />
+          <TabButton
+            active={activeTab === 'team'}
+            icon={<TrophyOutlined />}
+            label="Clube"
+            onClick={() => onTabClick('team')}
+          />
+          {showFinance && (
+            <TabButton
+              active={activeTab === 'finance'}
+              icon={<DollarOutlined />}
+              label="Financeiro"
+              onClick={() => onTabClick('finance')}
+            />
+          )}
+        </nav>
+      </Layout>
     </>
   )
 }

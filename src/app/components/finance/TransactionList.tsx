@@ -16,7 +16,7 @@ import {
   UserOutlined,
   TagOutlined,
 } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import posthog from 'posthog-js'
 import type { TransactionDTO } from '../../../services/finance.service'
 import { formatCents } from '../../../utils/money'
@@ -42,6 +42,7 @@ export function TransactionList({
 }: TransactionListProps) {
   const { token } = theme.useToken()
   const navigate = useNavigate()
+  const { slug } = useParams<{ slug: string }>()
 
   if (!loading && transactions.length === 0) {
     return (
@@ -138,7 +139,7 @@ export function TransactionList({
                             transaction_id: item.id,
                             match_id: item.match.id,
                           })
-                          navigate(`/app/matches/${item.match.id}`)
+                          navigate(`/${slug || 'app'}/matches/${item.match.id}`)
                         }
                       }}
                     >

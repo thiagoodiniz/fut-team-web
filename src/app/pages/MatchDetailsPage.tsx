@@ -9,6 +9,8 @@ import {
   message,
   theme,
   Input,
+  InputNumber,
+  Segmented,
   Avatar,
   FloatButton,
   Skeleton,
@@ -29,6 +31,7 @@ import {
   ProfileOutlined,
   DeleteOutlined,
   ExclamationCircleOutlined,
+  DollarOutlined,
 } from '@ant-design/icons'
 
 import {
@@ -51,6 +54,13 @@ import {
   type PresenceDTO,
 } from '../../services/presences.service'
 import { getMatchLineup } from '../../services/lineup.service'
+import {
+  getMatchFinance,
+  saveMatchPlayerPayments,
+  type MatchFinanceDTO,
+} from '../../services/finance.service'
+import { centsToReais, reaisToCents } from '../../utils/money'
+import { MatchFinanceCard } from '../components/finance/MatchFinanceCard'
 import { groupPlayersByPosition } from '../../utils/playerSort'
 import { AddGoalModal } from '../components/AddGoalModal'
 import { PlayerAvatar } from '../components/PlayerAvatar'
@@ -82,7 +92,8 @@ export function MatchDetailsPage() {
   const navigate = useNavigate()
   const { token } = theme.useToken()
   const { isActiveSeason } = useSeason()
-  const { isAdmin } = useTeam()
+  const { isAdmin, team } = useTeam()
+  const showFinance = isAdmin && !!team?.financeEnabled
   const { isDark } = useAppTheme()
   const isPWA = useIsPWA()
 
@@ -106,6 +117,105 @@ export function MatchDetailsPage() {
   const [newLoanedPlayer, setNewLoanedPlayer] = React.useState('')
   const [addingLoanedPlayer, setAddingLoanedPlayer] = React.useState(false)
   const [hasLineup, setHasLineup] = React.useState(false)
+
+  // Estados financeiros do jogo
+  const [matchFinance, setMatchFinance] = React.useState<MatchFinanceDTO | null>(null)
+  const [loadingFinance, setLoadingFinance] = React.useState(false)
+  const [playerAmounts, setPlayerAmounts] = React.useState<Record<string, number | null>>({})
+  const [presenceStatusFilter, setPresenceStatusFilter] = React.useState<
+    'ALL' | 'PRESENT' | 'PAID' | 'UNPAID_PRESENT'
+  >('ALL')
+  const [bulkAmountModalOpen, setBulkAmountModalOpen] = React.useState(false)
+  const [bulkAmount, setBulkAmount] = React.useState<number | null>(null)
+  const [savingBulkPayment, setSavingBulkPayment] = React.useState(false)
+
+  const syncPlayerAmountsFromFinance = React.useCallback((data: MatchFinanceDTO) => {
+    const amounts: Record<string, number | null> = {}
+    data.transactions.forEach((t) => {
+      if (t.type === 'INCOME' && t.playerId) {
+        amounts[t.playerId] = centsToReais(t.amountCents)
+      }
+    })
+    setPlayerAmounts(amounts)
+  }, [])
+
+  const loadMatchFinance = React.useCallback(async () => {
+    if (!id || !showFinance) return
+    try {
+      setLoadingFinance(true)
+      const data = await getMatchFinance(id)
+      setMatchFinance(data)
+      syncPlayerAmountsFromFinance(data)
+    } catch {
+      // Silencioso caso desabilitado
+    } finally {
+      setLoadingFinance(false)
+    }
+  }, [id, showFinance, syncPlayerAmountsFromFinance])
+
+  React.useEffect(() => {
+    if (showFinance && id) {
+      loadMatchFinance()
+    }
+  }, [showFinance, id, loadMatchFinance])
+
+  async function handlePlayerPaymentSave(playerId: string, valueInReais: number | null) {
+    if (!id || !showFinance) return
+    const savedTx = matchFinance?.transactions.find(
+      (t) => t.type === 'INCOME' && t.playerId === playerId,
+    )
+    const savedCents = savedTx?.amountCents ?? 0
+    const newCents = reaisToCents(valueInReais)
+    if (savedCents === newCents) return
+
+    try {
+      const updated = await saveMatchPlayerPayments(id, [{ playerId, amountCents: newCents }])
+      setMatchFinance(updated)
+      syncPlayerAmountsFromFinance(updated)
+      posthog.capture('match_player_payment_saved', {
+        match_id: id,
+        player_id: playerId,
+        removed: newCents === 0,
+      })
+      message.success(newCents > 0 ? 'Contribuição salva' : 'Contribuição removida')
+    } catch {
+      message.error('Erro ao salvar contribuição do jogador')
+      if (matchFinance) syncPlayerAmountsFromFinance(matchFinance)
+    }
+  }
+
+  async function handleApplyBulkPayment() {
+    if (!id || !showFinance) return
+    const presentList = presences.filter((p) => p.present)
+    if (presentList.length === 0) {
+      message.warning('Marque ao menos um jogador presente antes de aplicar')
+      return
+    }
+    const cents = reaisToCents(bulkAmount)
+    try {
+      setSavingBulkPayment(true)
+      const updated = await saveMatchPlayerPayments(
+        id,
+        presentList.map((p) => ({ playerId: p.playerId, amountCents: cents })),
+      )
+      setMatchFinance(updated)
+      syncPlayerAmountsFromFinance(updated)
+      setBulkAmountModalOpen(false)
+      posthog.capture('match_bulk_player_payment_applied', {
+        match_id: id,
+        players_count: presentList.length,
+      })
+      message.success(
+        cents > 0
+          ? `Valor aplicado para ${presentList.length} jogadores presentes`
+          : 'Valores dos presentes removidos',
+      )
+    } catch {
+      message.error('Erro ao aplicar valor aos presentes')
+    } finally {
+      setSavingBulkPayment(false)
+    }
+  }
 
   async function load() {
     if (!id) return
@@ -223,12 +333,31 @@ export function MatchDetailsPage() {
     return nameA.localeCompare(nameB, 'pt-BR')
   })
 
+  const paidPlayerIds = React.useMemo(() => {
+    const ids = new Set<string>()
+    matchFinance?.transactions.forEach((t) => {
+      if (t.type === 'INCOME' && t.playerId && t.amountCents > 0) {
+        ids.add(t.playerId)
+      }
+    })
+    return ids
+  }, [matchFinance])
+
   const filteredPresences = sortedPresences.filter((p) => {
     const search = presenceFilter.toLowerCase()
-    return (
+    const matchesSearch =
       p.player?.name.toLowerCase().includes(search) ||
       (p.player?.nickname?.toLowerCase().includes(search) ?? false)
-    )
+    if (!matchesSearch) return false
+
+    if (showFinance) {
+      const hasPaid = paidPlayerIds.has(p.playerId)
+      if (presenceStatusFilter === 'PRESENT') return p.present
+      if (presenceStatusFilter === 'PAID') return hasPaid
+      if (presenceStatusFilter === 'UNPAID_PRESENT') return p.present && !hasPaid
+    }
+
+    return true
   })
 
   const presentPlayersOptions = [
@@ -822,22 +951,40 @@ export function MatchDetailsPage() {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            gap: 8,
+            flexWrap: 'wrap',
           }}
         >
-          <Text
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.07em',
-              color: token.colorTextSecondary,
-            }}
-          >
-            Presenças
-          </Text>
-          <Text type="secondary" style={{ fontSize: 13 }}>
-            {presentCount}/{totalPlayers}
-          </Text>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Text
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.07em',
+                color: token.colorTextSecondary,
+              }}
+            >
+              Presenças
+            </Text>
+            <Text type="secondary" style={{ fontSize: 13 }}>
+              {presentCount}/{totalPlayers}
+            </Text>
+            {showFinance && (
+              <Tag color="green" style={{ margin: 0, fontSize: 11, borderRadius: 10 }}>
+                {paidPlayerIds.size} {paidPlayerIds.size === 1 ? 'pago' : 'pagos'}
+              </Tag>
+            )}
+          </div>
+          {showFinance && (
+            <Button
+              size="small"
+              icon={<DollarOutlined />}
+              onClick={() => setBulkAmountModalOpen(true)}
+            >
+              Valor padrão p/ presentes
+            </Button>
+          )}
         </div>
 
         {presences.length === 0 ? (
@@ -849,13 +996,31 @@ export function MatchDetailsPage() {
           </div>
         ) : (
           <div>
-            <div style={{ padding: '0 16px 12px' }}>
+            <div style={{ padding: '0 16px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
               <Input.Search
                 placeholder="Filtrar por nome ou apelido"
                 allowClear
                 onChange={(e) => setPresenceFilter(e.target.value)}
                 style={{ width: '100%' }}
               />
+              {showFinance && (
+                <Segmented
+                  size="small"
+                  block
+                  value={presenceStatusFilter}
+                  onChange={(val) =>
+                    setPresenceStatusFilter(
+                      val as 'ALL' | 'PRESENT' | 'PAID' | 'UNPAID_PRESENT',
+                    )
+                  }
+                  options={[
+                    { label: 'Todos', value: 'ALL' },
+                    { label: 'Presentes', value: 'PRESENT' },
+                    { label: 'Pagos', value: 'PAID' },
+                    { label: 'Pendentes', value: 'UNPAID_PRESENT' },
+                  ]}
+                />
+              )}
             </div>
 
             {filteredPresences.length === 0 ? (
@@ -895,64 +1060,112 @@ export function MatchDetailsPage() {
                           }}
                         />
                       </div>
-                      {groupPresences.map((p, i) => (
-                        <div
-                          key={p.playerId}
-                          onClick={() => {
-                            if (!isActiveSeason || !isAdmin) return
-                            posthog.capture('toggle_presence_clicked', {
-                              player_id: p.playerId,
-                              present: !p.present,
-                            })
-                            togglePresence(p.playerId, !p.present)
-                          }}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 12,
-                            padding: '12px 20px',
-                            borderBottom:
-                              i < groupPresences.length - 1
-                                ? `1px solid ${token.colorFillQuaternary}`
-                                : 'none',
-                            opacity: p.present ? 1 : 0.6,
-                            cursor: isActiveSeason && isAdmin ? 'pointer' : 'default',
-                            transition: 'opacity 0.2s',
-                          }}
-                        >
+                      {groupPresences.map((p, i) => {
+                        const hasPaid = paidPlayerIds.has(p.playerId)
+                        return (
                           <div
+                            key={p.playerId}
+                            onClick={() => {
+                              if (!isActiveSeason || !isAdmin) return
+                              posthog.capture('toggle_presence_clicked', {
+                                player_id: p.playerId,
+                                present: !p.present,
+                              })
+                              togglePresence(p.playerId, !p.present)
+                            }}
                             style={{
-                              minWidth: 0,
-                              flex: 1,
                               display: 'flex',
                               alignItems: 'center',
                               gap: 10,
+                              padding: '12px 20px',
+                              borderBottom:
+                                i < groupPresences.length - 1
+                                  ? `1px solid ${token.colorFillQuaternary}`
+                                  : 'none',
+                              opacity: p.present || (showFinance && hasPaid) ? 1 : 0.6,
+                              cursor: isActiveSeason && isAdmin ? 'pointer' : 'default',
+                              transition: 'opacity 0.2s',
                             }}
                           >
-                            <PlayerAvatar
-                              playerId={p.player.id}
-                              name={p.player.nickname || p.player.name}
-                              size={34}
-                            />
-                            <div style={{ minWidth: 0 }}>
-                              <Text strong style={{ display: 'block' }}>
-                                {p.player.nickname || p.player.name}
-                              </Text>
-                              {p.player.nickname && (
-                                <Text type="secondary" style={{ fontSize: 12 }}>
-                                  {p.player.name}
-                                </Text>
-                              )}
+                            <div
+                              style={{
+                                minWidth: 0,
+                                flex: 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 10,
+                              }}
+                            >
+                              <PlayerAvatar
+                                playerId={p.player.id}
+                                name={p.player.nickname || p.player.name}
+                                size={34}
+                              />
+                              <div style={{ minWidth: 0 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                                  <Text strong style={{ display: 'block' }}>
+                                    {p.player.nickname || p.player.name}
+                                  </Text>
+                                  {showFinance && hasPaid && (
+                                    <Tag
+                                      color={p.present ? 'green' : 'gold'}
+                                      style={{
+                                        margin: 0,
+                                        fontSize: 10,
+                                        lineHeight: '14px',
+                                        height: 16,
+                                        borderRadius: 8,
+                                      }}
+                                    >
+                                      {p.present ? 'Pago' : 'Pagou (ausente)'}
+                                    </Tag>
+                                  )}
+                                </div>
+                                {p.player.nickname && (
+                                  <Text type="secondary" style={{ fontSize: 12 }}>
+                                    {p.player.name}
+                                  </Text>
+                                )}
+                              </div>
                             </div>
+                            {showFinance && (
+                              <div onClick={(e) => e.stopPropagation()}>
+                                <InputNumber<number>
+                                  size="small"
+                                  prefix="R$"
+                                  min={0}
+                                  step={1}
+                                  precision={2}
+                                  decimalSeparator=","
+                                  inputMode="decimal"
+                                  placeholder="0,00"
+                                  style={{ width: 96 }}
+                                  value={playerAmounts[p.playerId] ?? null}
+                                  onChange={(val) =>
+                                    setPlayerAmounts((prev) => ({
+                                      ...prev,
+                                      [p.playerId]: val,
+                                    }))
+                                  }
+                                  onBlur={() =>
+                                    handlePlayerPaymentSave(
+                                      p.playerId,
+                                      playerAmounts[p.playerId] ?? null,
+                                    )
+                                  }
+                                  onPressEnter={(e) => (e.target as HTMLInputElement).blur()}
+                                />
+                              </div>
+                            )}
+                            <Switch
+                              checked={p.present}
+                              disabled={!isActiveSeason || !isAdmin}
+                              onClick={(_, event) => event.stopPropagation()}
+                              onChange={(val) => togglePresence(p.playerId, val)}
+                            />
                           </div>
-                          <Switch
-                            checked={p.present}
-                            disabled={!isActiveSeason || !isAdmin}
-                            onClick={(_, event) => event.stopPropagation()}
-                            onChange={(val) => togglePresence(p.playerId, val)}
-                          />
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   ),
                 )}
@@ -961,6 +1174,16 @@ export function MatchDetailsPage() {
           </div>
         )}
       </div>
+
+      {/* Match Finance Section (admin + financeEnabled) */}
+      {showFinance && (
+        <MatchFinanceCard
+          match={match}
+          finance={matchFinance}
+          loading={loadingFinance}
+          onRefresh={loadMatchFinance}
+        />
+      )}
 
       {/* Loaned Players Section */}
       <div
@@ -1186,6 +1409,38 @@ export function MatchDetailsPage() {
         onCancel={() => setEditingGoal(null)}
         onSubmit={handleEditGoalSubmit}
       />
+
+      <Modal
+        open={bulkAmountModalOpen}
+        title="Valor padrão para presentes"
+        onCancel={() => setBulkAmountModalOpen(false)}
+        onOk={handleApplyBulkPayment}
+        okText="Aplicar aos presentes"
+        cancelText="Cancelar"
+        confirmLoading={savingBulkPayment}
+        centered
+        width={380}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 4 }}>
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            Define o mesmo valor de contribuição para todos os{' '}
+            <Text strong>{presentCount}</Text> jogadores marcados como presentes neste jogo
+            (informe 0 para limpar os valores dos presentes).
+          </Text>
+          <InputNumber<number>
+            prefix="R$"
+            min={0}
+            step={1}
+            precision={2}
+            decimalSeparator=","
+            inputMode="decimal"
+            placeholder="0,00"
+            style={{ width: '100%', fontSize: 16 }}
+            value={bulkAmount}
+            onChange={(val) => setBulkAmount(val)}
+          />
+        </div>
+      </Modal>
 
       <FloatButton.BackTop
         style={{

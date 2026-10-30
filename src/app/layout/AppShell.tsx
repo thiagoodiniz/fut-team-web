@@ -6,6 +6,7 @@ import {
   CalendarOutlined,
   TeamOutlined,
   TrophyOutlined,
+  DollarOutlined,
 } from '@ant-design/icons'
 import posthog from 'posthog-js'
 import { syncAuth } from '../../services/authSync.service'
@@ -15,17 +16,18 @@ import { AppHeader } from './AppHeader'
 import { useAppHeader } from '../hooks/useAppHeader'
 import { useIsPWA } from '../hooks/useIsPWA'
 import { SeasonProvider } from '../contexts/SeasonContext'
-import { TeamProvider } from '../contexts/TeamContext'
+import { TeamProvider, useTeam } from '../contexts/TeamContext'
 import { ThemeProvider } from '../../theme/ThemeProvider'
 
 const { Content } = Layout
 
-type TabKey = 'home' | 'matches' | 'players' | 'team'
+type TabKey = 'home' | 'matches' | 'players' | 'team' | 'finance'
 
 function getActiveTab(pathname: string): TabKey {
   if (pathname.startsWith('/app/matches')) return 'matches'
   if (pathname.startsWith('/app/players')) return 'players'
   if (pathname.startsWith('/app/team')) return 'team'
+  if (pathname.startsWith('/app/finance')) return 'finance'
   return 'home'
 }
 
@@ -38,17 +40,21 @@ export function AppShell() {
     auth = null
   }
 
-  if (!auth?.userId) return <Navigate to="/login" replace />
-  if (!auth?.teamId) return <Navigate to="/onboarding" replace />
+  const hasAccess = Boolean(auth?.userId && auth?.teamId)
 
   useEffect(() => {
-    syncAuth().then((updatedAuth) => {
-      if (updatedAuth && !updatedAuth.teamId) {
-        // Just in case they lost access to all teams
-        window.location.href = '/onboarding'
-      }
-    })
-  }, [])
+    if (hasAccess) {
+      syncAuth().then((updatedAuth) => {
+        if (updatedAuth && !updatedAuth.teamId) {
+          // Just in case they lost access to all teams
+          window.location.href = '/onboarding'
+        }
+      })
+    }
+  }, [hasAccess])
+
+  if (!auth?.userId) return <Navigate to="/login" replace />
+  if (!auth?.teamId) return <Navigate to="/onboarding" replace />
 
   return (
     <TeamProvider>
@@ -102,6 +108,8 @@ function BottomTabs({
 }) {
   const { token } = theme.useToken()
   const isPWA = useIsPWA()
+  const { isAdmin, team } = useTeam()
+  const showFinance = isAdmin && !!team?.financeEnabled
 
   return (
     <nav
@@ -116,7 +124,7 @@ function BottomTabs({
           : 'env(safe-area-inset-bottom)',
         zIndex: 1000,
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: `repeat(${showFinance ? 5 : 4}, 1fr)`,
         background: token.colorBgElevated,
         borderTop: `1px solid ${token.colorBorderSecondary}`,
         backdropFilter: 'blur(12px)',
@@ -146,6 +154,14 @@ function BottomTabs({
         label="Clube"
         onClick={() => onTabClick('team')}
       />
+      {showFinance && (
+        <TabButton
+          active={activeTab === 'finance'}
+          icon={<DollarOutlined />}
+          label="Financeiro"
+          onClick={() => onTabClick('finance')}
+        />
+      )}
     </nav>
   )
 }

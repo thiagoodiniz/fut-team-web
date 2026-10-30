@@ -24,6 +24,7 @@ import { ProtectedRoute } from './routes/ProtectedRoute'
 import { PublicRoute } from './routes/PublicRoute'
 import { RootRedirect } from './routes/RootRedirect'
 import { AdminDashboardPage } from './app/pages/AdminDashboardPage'
+import { FinancePage } from './app/pages/FinancePage'
 
 export const router = createBrowserRouter([
   {
@@ -47,9 +48,7 @@ export const router = createBrowserRouter([
   {
     path: '/admin',
     element: <ProtectedRoute />,
-    children: [
-      { index: true, element: <AdminDashboardPage /> }
-    ]
+    children: [{ index: true, element: <AdminDashboardPage /> }],
   },
 
   // 🔒 rota protegida
@@ -67,6 +66,7 @@ export const router = createBrowserRouter([
           { path: 'matches/:id/lineup', element: <LineupPage /> },
           { path: 'players', element: <PlayersPage /> },
           { path: 'team', element: <TeamPage /> },
+          { path: 'finance', element: <FinancePage /> },
           { path: 'team/settings', element: <TeamSettingsPage /> },
           { path: 'team/members', element: <TeamMembersPage /> },
           { path: 'ranking/scorers', element: <ScorersTotalPage /> },

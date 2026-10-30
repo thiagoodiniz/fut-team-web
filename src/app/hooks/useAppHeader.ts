@@ -20,6 +20,7 @@ function getHeaderTitle(pathname: string) {
   if (/\/team\/members/.test(pathname)) return 'Gerenciar Membros'
   if (/\/team\/settings/.test(pathname)) return 'Configurações do Time'
   if (/\/team/.test(pathname)) return 'Meu Clube'
+  if (/\/finance/.test(pathname)) return 'Financeiro'
   return 'Home'
 }
 

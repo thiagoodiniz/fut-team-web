@@ -1371,6 +1371,19 @@ export function MatchDetailsPage() {
               </Typography.Text>
             ))}
           </div>
+          {showFinance && (matchFinance?.transactions.length ?? 0) > 0 && (
+            <Alert
+              type="warning"
+              showIcon
+              style={{ textAlign: 'left', marginBottom: 16 }}
+              message={`Este jogo possui ${matchFinance!.transactions.length} ${
+                matchFinance!.transactions.length === 1
+                  ? 'lançamento financeiro'
+                  : 'lançamentos financeiros'
+              }`}
+              description="Os valores continuarão no caixa do time, mas ficarão desvinculados deste jogo."
+            />
+          )}
           <div style={{ display: 'flex', gap: 8 }}>
             <Button block onClick={() => setDeleteMatchModalOpen(false)}>
               Cancelar

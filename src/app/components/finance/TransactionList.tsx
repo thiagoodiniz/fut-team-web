@@ -16,6 +16,7 @@ import {
   UserOutlined,
   TagOutlined,
 } from '@ant-design/icons'
+import { useNavigate } from 'react-router-dom'
 import type { TransactionDTO } from '../../../services/finance.service'
 import { formatCents } from '../../../utils/money'
 
@@ -27,6 +28,7 @@ interface TransactionListProps {
   onEdit: (transaction: TransactionDTO) => void
   onDelete: (id: string) => void
   emptyText?: string
+  showMatchLink?: boolean
 }
 
 export function TransactionList({
@@ -35,8 +37,10 @@ export function TransactionList({
   onEdit,
   onDelete,
   emptyText = 'Nenhum lançamento encontrado',
+  showMatchLink = false,
 }: TransactionListProps) {
   const { token } = theme.useToken()
+  const navigate = useNavigate()
 
   if (!loading && transactions.length === 0) {
     return (
@@ -120,7 +124,19 @@ export function TransactionList({
                   )}
 
                   {item.match && (
-                    <Text type="secondary" style={{ fontSize: 12 }}>
+                    <Text
+                      type="secondary"
+                      style={{
+                        fontSize: 12,
+                        cursor: showMatchLink ? 'pointer' : 'default',
+                        color: showMatchLink ? token.colorPrimary : undefined,
+                      }}
+                      onClick={() => {
+                        if (showMatchLink && item.match) {
+                          navigate(`/app/matches/${item.match.id}`)
+                        }
+                      }}
+                    >
                       ⚽ Jogo: {new Date(item.match.date).toLocaleDateString('pt-BR')}{' '}
                       {item.match.opponent ? `vs ${item.match.opponent}` : ''}
                     </Text>

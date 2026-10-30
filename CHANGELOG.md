@@ -5,6 +5,15 @@ O formato Ã© baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.
 
 ## [Unreleased]
 
+### Adicionado
+- **Gestão Financeira do Time (Admin):**
+  - Controle de ativação da Gestão Financeira por time no painel `/admin` (exclusivo para usuário MASTER).
+  - Nova aba **Financeiro** no menu inferior (visível somente para administradores quando habilitada para o time), com destaque para o saldo em caixa da temporada, total de entradas e total de saídas.
+  - Listagem unificada de lançamentos com filtro rápido (**Todas**, **Entradas**, **Saídas**) e busca textual por descrição, categoria, jogador, data ou adversário.
+  - Registro e edição de entradas e saídas com sugestões de categorias e vínculo opcional com jogo e jogador.
+  - Nos **Detalhes do Jogo**, atribuição de valor de contribuição por jogador diretamente na lista de presença (cobrindo jogadores presentes ou ausentes, com filtro rápido e atalho de valor padrão para presentes) e card **Financeiro do Jogo** com resumo e lançamentos da partida.
+  - Aviso ao excluir jogo que possua lançamentos financeiros vinculados, informando que os valores permanecem no caixa do time.
+
 ## [2.8.0] - 2026-09-30
 
 ### Adicionado

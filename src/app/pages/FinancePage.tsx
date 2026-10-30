@@ -1,5 +1,15 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Typography, Card, Row, Col, Tabs, Button, message, theme } from 'antd'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import {
+  Typography,
+  Card,
+  Row,
+  Col,
+  Segmented,
+  Input,
+  Button,
+  message,
+  theme,
+} from 'antd'
 import {
   PlusOutlined,
   ArrowUpOutlined,
@@ -33,7 +43,8 @@ export function FinancePage() {
   const [summary, setSummary] = useState<FinanceSummaryDTO | null>(null)
   const [transactions, setTransactions] = useState<TransactionDTO[]>([])
   const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<'INCOME' | 'EXPENSE'>('INCOME')
+  const [typeFilter, setTypeFilter] = useState<'ALL' | 'INCOME' | 'EXPENSE'>('ALL')
+  const [searchQuery, setSearchQuery] = useState('')
 
   // Modal de criação / edição
   const [modalOpen, setModalOpen] = useState(false)
@@ -73,11 +84,6 @@ export function FinancePage() {
     }
   }, [season?.id, loadData])
 
-  // Proteção: apenas admin e com financeEnabled ativo
-  if (!teamLoading && (!isAdmin || !team?.financeEnabled)) {
-    return <Navigate to="/app/home" replace />
-  }
-
   function handleOpenNew(type: TransactionType) {
     posthog.capture('finance_open_new_clicked', { type })
     setEditingTransaction(null)
@@ -103,8 +109,48 @@ export function FinancePage() {
     }
   }
 
-  const incomeList = transactions.filter((t) => t.type === 'INCOME')
-  const expenseList = transactions.filter((t) => t.type === 'EXPENSE')
+  const textFiltered = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return transactions
+
+    return transactions.filter((t) => {
+      const txDate = new Date(t.date).toLocaleDateString('pt-BR').toLowerCase()
+      const matchDate = t.match
+        ? new Date(t.match.date).toLocaleDateString('pt-BR').toLowerCase()
+        : ''
+      const haystacks = [
+        t.description,
+        t.category || '',
+        t.player?.name || '',
+        t.player?.nickname || '',
+        t.match?.opponent || '',
+        txDate,
+        matchDate,
+      ]
+      return haystacks.some((h) => h.toLowerCase().includes(q))
+    })
+  }, [transactions, searchQuery])
+
+  const incomeList = useMemo(
+    () => textFiltered.filter((t) => t.type === 'INCOME'),
+    [textFiltered],
+  )
+  const expenseList = useMemo(
+    () => textFiltered.filter((t) => t.type === 'EXPENSE'),
+    [textFiltered],
+  )
+
+  // Proteção: apenas admin e com financeEnabled ativo
+  if (!teamLoading && (!isAdmin || !team?.financeEnabled)) {
+    return <Navigate to="/app/home" replace />
+  }
+
+  const displayedTransactions =
+    typeFilter === 'INCOME'
+      ? incomeList
+      : typeFilter === 'EXPENSE'
+        ? expenseList
+        : textFiltered
 
   const balanceCents = summary?.balanceCents ?? 0
   const incomeCents = summary?.incomeCents ?? 0
@@ -230,39 +276,50 @@ export function FinancePage() {
         </Button>
       </div>
 
-      {/* Abas de Entradas e Saídas */}
-      <Card style={{ borderRadius: 14 }} styles={{ body: { padding: '12px 16px' } }}>
-        <Tabs
-          activeKey={activeTab}
-          onChange={(k) => setActiveTab(k as 'INCOME' | 'EXPENSE')}
-          items={[
-            {
-              key: 'INCOME',
-              label: `Entradas (${incomeList.length})`,
-              children: (
-                <TransactionList
-                  transactions={incomeList}
-                  loading={loading || seasonLoading}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  emptyText="Nenhuma entrada registrada nesta temporada"
-                />
-              ),
-            },
-            {
-              key: 'EXPENSE',
-              label: `Saídas (${expenseList.length})`,
-              children: (
-                <TransactionList
-                  transactions={expenseList}
-                  loading={loading || seasonLoading}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  emptyText="Nenhuma saída registrada nesta temporada"
-                />
-              ),
-            },
-          ]}
+      {/* Filtros e Listagem de Lançamentos */}
+      <Card style={{ borderRadius: 14 }} styles={{ body: { padding: '14px 16px' } }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 10,
+            marginBottom: 14,
+          }}
+        >
+          <Input.Search
+            placeholder="Pesquisar por descrição, jogador, data ou adversário"
+            allowClear
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ width: '100%' }}
+          />
+          <Segmented
+            block
+            value={typeFilter}
+            onChange={(val) => setTypeFilter(val as 'ALL' | 'INCOME' | 'EXPENSE')}
+            options={[
+              { label: `Todas (${textFiltered.length})`, value: 'ALL' },
+              { label: `Entradas (${incomeList.length})`, value: 'INCOME' },
+              { label: `Saídas (${expenseList.length})`, value: 'EXPENSE' },
+            ]}
+          />
+        </div>
+
+        <TransactionList
+          transactions={displayedTransactions}
+          loading={loading || seasonLoading}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          showMatchLink
+          emptyText={
+            searchQuery.trim()
+              ? 'Nenhum lançamento corresponde à pesquisa'
+              : typeFilter === 'INCOME'
+                ? 'Nenhuma entrada registrada nesta temporada'
+                : typeFilter === 'EXPENSE'
+                  ? 'Nenhuma saída registrada nesta temporada'
+                  : 'Nenhum lançamento registrado nesta temporada'
+          }
         />
       </Card>
 

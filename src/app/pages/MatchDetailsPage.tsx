@@ -9,7 +9,6 @@ import {
   message,
   theme,
   Input,
-  InputNumber,
   Segmented,
   Avatar,
   FloatButton,
@@ -61,6 +60,7 @@ import {
 } from '../../services/finance.service'
 import { centsToReais, reaisToCents } from '../../utils/money'
 import { MatchFinanceCard } from '../components/finance/MatchFinanceCard'
+import { MoneyInput } from '../components/finance/MoneyInput'
 import { groupPlayersByPosition } from '../../utils/playerSort'
 import { AddGoalModal } from '../components/AddGoalModal'
 import { PlayerAvatar } from '../components/PlayerAvatar'
@@ -1137,14 +1137,8 @@ export function MatchDetailsPage() {
                             </div>
                             {showFinance && (
                               <div onClick={(e) => e.stopPropagation()}>
-                                <InputNumber<number>
+                                <MoneyInput
                                   size="small"
-                                  prefix="R$"
-                                  min={0}
-                                  step={1}
-                                  precision={2}
-                                  decimalSeparator=","
-                                  inputMode="decimal"
                                   placeholder="0,00"
                                   style={{ width: 96 }}
                                   value={playerAmounts[p.playerId] ?? null}
@@ -1447,13 +1441,7 @@ export function MatchDetailsPage() {
             <Text strong>{presentCount}</Text> jogadores marcados como presentes neste jogo
             (informe 0 para limpar os valores dos presentes).
           </Text>
-          <InputNumber<number>
-            prefix="R$"
-            min={0}
-            step={1}
-            precision={2}
-            decimalSeparator=","
-            inputMode="decimal"
+          <MoneyInput
             placeholder="0,00"
             style={{ width: '100%', fontSize: 16 }}
             value={bulkAmount}

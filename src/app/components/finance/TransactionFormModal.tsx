@@ -1,7 +1,8 @@
 import React from 'react'
-import { AutoComplete, Form, Input, InputNumber, Modal, Segmented, message } from 'antd'
+import { AutoComplete, Form, Input, Modal, Segmented, message } from 'antd'
 import posthog from 'posthog-js'
 import { DrawerSelect } from '../DrawerSelect'
+import { MoneyInput } from './MoneyInput'
 import { listMatches, type MatchDTO } from '../../../services/matches.service'
 import { listPlayers, type PlayerDTO } from '../../../services/players.service'
 import {
@@ -208,16 +209,7 @@ export function TransactionFormModal({
             { type: 'number', min: 0.01, message: 'O valor deve ser maior que zero' },
           ]}
         >
-          <InputNumber<number>
-            prefix="R$"
-            min={0}
-            step={1}
-            precision={2}
-            decimalSeparator=","
-            inputMode="decimal"
-            style={{ width: '100%', fontSize: 16 }}
-            placeholder="0,00"
-          />
+          <MoneyInput style={{ width: '100%', fontSize: 16 }} placeholder="0,00" />
         </Form.Item>
 
         <Form.Item

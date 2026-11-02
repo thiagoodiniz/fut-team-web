@@ -6,6 +6,7 @@ O formato Ã© baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.
 ## [Unreleased]
 
 ### Corrigido
+- **Últimos Acessos no Painel Admin:** Ignora acessos do usuário MASTER (`isManager: true`) na aba de últimos acessos de usuários.
 - **Bloqueio de Adição de Gols sem Placar:** Na tela de detalhes da partida, o botão de adicionar gol agora permanece desabilitado com aviso caso o jogo não possua placar definido ou tenha placar zerado, impedindo a inserção de gols mesmo após o registro de presenças.
 
 ### Adicionado

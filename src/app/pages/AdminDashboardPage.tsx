@@ -148,7 +148,7 @@ export function AdminDashboardPage() {
       children: (
         <List
           grid={{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 4, xl: 4 }}
-          dataSource={stats?.recentAccesses || []}
+          dataSource={(stats?.recentAccesses || []).filter((record: any) => !record.user?.isManager)}
           loading={loading}
           pagination={{ pageSize: 12 }}
           renderItem={(record: any) => (

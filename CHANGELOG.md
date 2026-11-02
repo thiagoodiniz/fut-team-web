@@ -5,6 +5,9 @@ O formato Ã© baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.
 
 ## [Unreleased]
 
+### Corrigido
+- **Bloqueio de Adição de Gols sem Placar:** Na tela de detalhes da partida, o botão de adicionar gol agora permanece desabilitado com aviso caso o jogo não possua placar definido ou tenha placar zerado, impedindo a inserção de gols mesmo após o registro de presenças.
+
 ### Adicionado
 - **Tipagens de Auditoria de Usuários:**
   - Atualizados os DTOs de partidas (`MatchDTO`), presenças (`PresenceDTO`), gols (`GoalDTO`) e transações financeiras (`TransactionDTO`) com os campos de auditoria (`createdById`, `updatedById`, `createdBy`, `updatedBy`).

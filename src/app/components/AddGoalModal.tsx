@@ -54,10 +54,12 @@ export function AddGoalModal({
 
   const selectedPlayerId = Form.useWatch('playerId', form)
 
-  const remainingGoals = maxGoals !== undefined ? maxGoals - currentGoalsCount : 10
+  const remainingGoals =
+    maxGoals !== undefined && maxGoals !== null ? Math.max(0, maxGoals - currentGoalsCount) : 0
   const hasNonOwnGoals = !isOwnGoalChecked
 
   function handleOk() {
+    if (remainingGoals <= 0) return
     form.submit()
   }
 
@@ -206,7 +208,7 @@ export function AddGoalModal({
           </Text>
           {remainingGoals <= 0 ? (
             <Tag color="error" style={{ margin: 0, fontSize: 11 }}>
-              Placar já atribuído
+              {maxGoals !== undefined && maxGoals !== null ? 'Placar já atribuído' : 'Sem placar definido'}
             </Tag>
           ) : maxGoals !== undefined ? (
             <Text type="secondary" style={{ fontSize: 12 }}>
@@ -353,7 +355,7 @@ export function AddGoalModal({
           style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}
         >
           <Button onClick={onCancel}>Cancelar</Button>
-          <Button type="primary" loading={loading} onClick={handleOk}>
+          <Button type="primary" loading={loading} onClick={handleOk} disabled={remainingGoals <= 0}>
             Salvar
           </Button>
         </div>

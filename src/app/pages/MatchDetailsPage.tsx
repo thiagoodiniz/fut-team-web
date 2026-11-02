@@ -744,7 +744,16 @@ export function MatchDetailsPage() {
           </Text>
         </div>
 
-        {hasScore && match.ourScore! > goals.length && (
+        {!hasScore || match.ourScore === null ? (
+          <div style={{ padding: '0 20px 12px' }}>
+            <Alert
+              message="Placar não definido"
+              description="Defina o placar da partida nas opções para poder associar os gols."
+              type="info"
+              showIcon
+            />
+          </div>
+        ) : match.ourScore > goals.length ? (
           <div style={{ padding: '0 20px 12px' }}>
             <Alert
               message="Gols não atribuídos"
@@ -753,11 +762,31 @@ export function MatchDetailsPage() {
               showIcon
             />
           </div>
-        )}
+        ) : null}
 
         {isActiveSeason && isAdmin && (
           <div style={{ padding: '0 20px 12px' }}>
-            {hasScore && goals.length >= match.ourScore! ? (
+            {!hasScore || match.ourScore === null ? (
+              <Button
+                type="dashed"
+                block
+                disabled
+                icon={<PlusOutlined />}
+              >
+                Defina o placar para adicionar gols
+              </Button>
+            ) : match.ourScore === 0 ? (
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: '8px 0 4px',
+                  color: token.colorTextQuaternary,
+                  fontSize: 13,
+                }}
+              >
+                Nenhum gol marcado pelo time (placar 0)
+              </div>
+            ) : goals.length >= match.ourScore ? (
               <div
                 style={{
                   textAlign: 'center',
@@ -1314,7 +1343,7 @@ export function MatchDetailsPage() {
         loading={creatingGoal}
         players={presentPlayersOptions}
         maxGoals={match.ourScore ?? undefined}
-        currentGoalsCount={goals.filter((g) => !g.ownGoal).length}
+        currentGoalsCount={goals.length}
         onCancel={() => setGoalModalOpen(false)}
         onSubmit={onCreateGoal}
       />

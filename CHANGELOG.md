@@ -6,6 +6,8 @@ O formato Ã© baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.
 ## [Unreleased]
 
 ### Corrigido
+- **Ocultar Usuário Master na Tela de Gerenciar Membros:** A listagem de membros do time na tela "Gerenciar membros" não exibe usuários com `isManager: true`.
+- **Redirecionamento ao Fazer Login via Link Compartilhado:** Ao clicar para fazer login em um link de resultado/time compartilhado, os parâmetros de redirecionamento (`redirect` e `team`) são mantidos e enviados à API, garantindo que após a autenticação o usuário seja direcionado exatamente para o time e página em que estava.
 - **Últimos Acessos no Painel Admin:** Ignora acessos do usuário MASTER (`isManager: true`) na aba de últimos acessos de usuários.
 - **Bloqueio de Adição de Gols sem Placar:** Na tela de detalhes da partida, o botão de adicionar gol agora permanece desabilitado com aviso caso o jogo não possua placar definido ou tenha placar zerado, impedindo a inserção de gols mesmo após o registro de presenças.
 

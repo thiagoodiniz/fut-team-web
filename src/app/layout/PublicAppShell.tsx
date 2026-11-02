@@ -110,7 +110,9 @@ export function PublicAppShell() {
                 size="small"
                 onClick={() => {
                   posthog.capture('public_header_login_clicked', { slug })
-                  navigate('/login')
+                  const currentPath = location.pathname + location.search
+                  const loginUrl = `/login?redirect=${encodeURIComponent(currentPath)}${slug ? `&team=${encodeURIComponent(slug)}` : ''}`
+                  navigate(loginUrl)
                 }}
                 style={{ borderRadius: 8, fontSize: 12, fontWeight: 600 }}
               >

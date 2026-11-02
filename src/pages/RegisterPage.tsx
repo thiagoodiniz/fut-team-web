@@ -10,7 +10,7 @@ import {
   theme,
 } from 'antd'
 import { useState } from 'react'
-import { useNavigate, Navigate, Link } from 'react-router-dom'
+import { useNavigate, Navigate, Link, useSearchParams, useLocation } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import posthog from 'posthog-js'
 import { api } from '../services/api'
@@ -42,11 +42,19 @@ type LoginResponse = {
 
 export function RegisterPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
+  const redirectParam = searchParams.get('redirect')
+  const teamParam = searchParams.get('team') || localStorage.getItem('teamSlug')
+
   const [loading, setLoading] = useState(false)
   const { token: antdToken } = theme.useToken()
 
   const token = localStorage.getItem('token')
-  if (token) return <Navigate to="/app/home" replace />
+  if (token) {
+    const dest = redirectParam && redirectParam.startsWith('/') ? redirectParam : '/app/home'
+    return <Navigate to={dest} replace />
+  }
 
   async function handleLoginSuccess(data: LoginResponse) {
     localStorage.setItem('token', data.token)
@@ -62,6 +70,9 @@ export function RegisterPage() {
         isManager: data.isManager ?? false,
       }),
     )
+    if (data.team?.slug) {
+      localStorage.setItem('teamSlug', data.team.slug)
+    }
 
     const isBlocked = applyAnalyticsPreferenceByEmail(data.user.email)
     if (!isBlocked) {
@@ -80,7 +91,8 @@ export function RegisterPage() {
     }
 
     message.success(`Bem-vindo, ${data.user.name}!`)
-    navigate('/app/home', { replace: true })
+    const dest = redirectParam && redirectParam.startsWith('/') ? redirectParam : '/app/home'
+    navigate(dest, { replace: true })
   }
 
   async function onGoogleSuccess(credentialResponse: any) {
@@ -88,6 +100,7 @@ export function RegisterPage() {
       setLoading(true)
       const { data } = await api.post<LoginResponse>('/auth/google', {
         idToken: credentialResponse.credential,
+        teamSlug: teamParam || undefined,
       })
       await handleLoginSuccess(data)
     } catch (err: any) {
@@ -105,6 +118,7 @@ export function RegisterPage() {
         name: values.name,
         email: values.email,
         password: values.password,
+        teamSlug: teamParam || undefined,
       })
       await handleLoginSuccess(data)
     } catch (err: any) {
@@ -284,7 +298,7 @@ export function RegisterPage() {
             <div style={{ textAlign: 'center', marginTop: 16 }}>
               <Text style={{ color: 'rgba(255,255,255,0.45)' }}>
                 Já tem uma conta?{' '}
-                <Link to="/login" style={{ fontWeight: 600 }}>
+                <Link to={`/login${location.search}`} style={{ fontWeight: 600 }}>
                   Faça login
                 </Link>
               </Text>

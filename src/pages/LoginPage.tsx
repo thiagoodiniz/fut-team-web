@@ -11,7 +11,7 @@ import {
 } from 'antd'
 import { MailOutlined, LockOutlined } from '@ant-design/icons'
 import { useEffect, useState } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import { useNavigate, Navigate, useSearchParams, useLocation } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import posthog from 'posthog-js'
 import { api } from '../services/api'
@@ -50,6 +50,11 @@ type LoginResponse = {
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
+  const redirectParam = searchParams.get('redirect')
+  const teamParam = searchParams.get('team') || localStorage.getItem('teamSlug')
+
   const [loading, setLoading] = useState(false)
   const { token: antdToken } = theme.useToken()
   const { isDark } = useAppTheme()
@@ -66,7 +71,10 @@ export function LoginPage() {
   }, [])
 
   const token = localStorage.getItem('token')
-  if (token) return <Navigate to="/app/home" replace />
+  if (token) {
+    const dest = redirectParam && redirectParam.startsWith('/') ? redirectParam : '/app/home'
+    return <Navigate to={dest} replace />
+  }
 
   async function handleLoginSuccess(data: LoginResponse) {
     localStorage.setItem('token', data.token)
@@ -112,7 +120,8 @@ export function LoginPage() {
     }
 
     message.success(`Bem-vindo, ${data.user.name}!`)
-    navigate('/app/home', { replace: true })
+    const dest = redirectParam && redirectParam.startsWith('/') ? redirectParam : '/app/home'
+    navigate(dest, { replace: true })
   }
 
   async function onGoogleSuccess(credentialResponse: any) {
@@ -120,6 +129,7 @@ export function LoginPage() {
       setLoading(true)
       const { data } = await api.post<LoginResponse>('/auth/google', {
         idToken: credentialResponse.credential,
+        teamSlug: teamParam || undefined,
       })
       await handleLoginSuccess(data)
     } catch (err: any) {
@@ -136,6 +146,7 @@ export function LoginPage() {
       const { data } = await api.post<LoginResponse>('/auth/login', {
         email: values.email,
         password: values.password,
+        teamSlug: teamParam || undefined,
       })
       await handleLoginSuccess(data)
     } catch (err: any) {
@@ -381,7 +392,7 @@ export function LoginPage() {
                     fontWeight: 700,
                     color: antdToken.colorSuccess,
                   }}
-                  onClick={() => navigate('/register')}
+                  onClick={() => navigate(`/register${location.search}`)}
                 >
                   Cadastre-se grátis
                 </Button>

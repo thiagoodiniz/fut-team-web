@@ -1,5 +1,5 @@
 import { Modal, Typography, Button, Space } from 'antd'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { LockOutlined } from '@ant-design/icons'
 import { useAppTheme } from '../../theme/ThemeProvider'
 
@@ -12,7 +12,12 @@ interface AuthGateModalProps {
 
 export function AuthGateModal({ open, onClose }: AuthGateModalProps) {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { slug } = useParams<{ slug: string }>()
   const { isDark } = useAppTheme()
+
+  const currentPath = location.pathname + location.search
+  const query = `?redirect=${encodeURIComponent(currentPath)}${slug ? `&team=${encodeURIComponent(slug)}` : ''}`
 
   return (
     <Modal
@@ -50,10 +55,10 @@ export function AuthGateModal({ open, onClose }: AuthGateModalProps) {
       </div>
 
       <Space direction="vertical" style={{ width: '100%' }} size={12}>
-        <Button type="primary" block size="large" onClick={() => navigate('/login')}>
+        <Button type="primary" block size="large" onClick={() => navigate(`/login${query}`)}>
           Entrar
         </Button>
-        <Button block size="large" onClick={() => navigate('/register')}>
+        <Button block size="large" onClick={() => navigate(`/register${query}`)}>
           Cadastre-se
         </Button>
       </Space>

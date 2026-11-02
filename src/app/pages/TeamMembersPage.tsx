@@ -44,7 +44,9 @@ export function TeamMembersPage() {
         api.get('/teams/active/members'),
         api.get('/teams/active/requests'),
       ])
-      setMembers(membersRes.data.members)
+      setMembers(
+        (membersRes.data.members || []).filter((m: any) => !m.user?.isManager),
+      )
       setRequests(requestsRes.data.requests)
     } catch (err) {
       message.error('Erro ao carregar dados')
@@ -94,7 +96,7 @@ export function TeamMembersPage() {
   const membersTab = (
     <List
       loading={loading}
-      dataSource={members.filter((m: any) => m.role !== 'OWNER')}
+      dataSource={members.filter((m: any) => m.role !== 'OWNER' && !m.user?.isManager)}
       renderItem={(member) => (
         <div
           style={{

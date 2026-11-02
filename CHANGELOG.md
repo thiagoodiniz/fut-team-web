@@ -5,6 +5,10 @@ O formato Ã© baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.
 
 ## [Unreleased]
 
+### Adicionado
+- **Tipagens de Auditoria de Usuários:**
+  - Atualizados os DTOs de partidas (`MatchDTO`), presenças (`PresenceDTO`), gols (`GoalDTO`) e transações financeiras (`TransactionDTO`) com os campos de auditoria (`createdById`, `updatedById`, `createdBy`, `updatedBy`).
+
 ## [3.0.0] - 2026-10-30
 
 ### Adicionado

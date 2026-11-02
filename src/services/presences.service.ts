@@ -14,7 +14,12 @@ export type PresenceDTO = {
   matchId: string
   playerId: string
   present: boolean
+  createdById?: string | null
+  updatedById?: string | null
+  createdBy?: { id: string; name: string; email?: string } | null
+  updatedBy?: { id: string; name: string; email?: string } | null
   createdAt?: string
+  updatedAt?: string
   player: PlayerDTO
 }
 

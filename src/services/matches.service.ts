@@ -1,5 +1,11 @@
 import { api } from './api'
 
+export type UserSummaryDTO = {
+  id: string
+  name: string
+  email?: string
+}
+
 export type MatchDTO = {
   id: string
   teamId: string
@@ -14,11 +20,19 @@ export type MatchDTO = {
   ourScore: number | null
   theirScore: number | null
   loanedPlayers: string[]
+  createdById?: string | null
+  updatedById?: string | null
+  createdBy?: UserSummaryDTO | null
+  updatedBy?: UserSummaryDTO | null
   createdAt: string
   updatedAt: string
   goals?: {
     id: string
     playerId: string
+    createdById?: string | null
+    updatedById?: string | null
+    createdBy?: UserSummaryDTO | null
+    updatedBy?: UserSummaryDTO | null
     player?: {
       name: string
       nickname: string | null
@@ -27,6 +41,10 @@ export type MatchDTO = {
   presences?: {
     id: string
     playerId: string
+    createdById?: string | null
+    updatedById?: string | null
+    createdBy?: UserSummaryDTO | null
+    updatedBy?: UserSummaryDTO | null
     player?: {
       name: string
       nickname: string | null

@@ -11,7 +11,12 @@ export type GoalDTO = {
   ownGoal: boolean
   freeKick: boolean
   penalty: boolean
+  createdById?: string | null
+  updatedById?: string | null
+  createdBy?: { id: string; name: string; email?: string } | null
+  updatedBy?: { id: string; name: string; email?: string } | null
   createdAt: string
+  updatedAt?: string
   player: {
     id: string
     name: string

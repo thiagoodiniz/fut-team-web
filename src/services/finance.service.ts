@@ -13,6 +13,10 @@ export type TransactionDTO = {
   category: string | null
   matchId: string | null
   playerId: string | null
+  createdById?: string | null
+  updatedById?: string | null
+  createdBy?: { id: string; name: string; email?: string } | null
+  updatedBy?: { id: string; name: string; email?: string } | null
   createdAt: string
   updatedAt: string
   match: { id: string; opponent: string | null; date: string } | null
